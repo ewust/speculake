@@ -20,7 +20,7 @@ void target_fn(void) __attribute__((section(".targetfn")));
 void target_fn(void) {
 }
 
-void (*fn_ptr)(void); // we'll set this = target_fn, and cflush it
+void __attribute__((section (".fnptr"))) (*fn_ptr)(void); // we'll set this = target_fn, and cflush it
 uint64_t jmp_ptr;
 
 // Place this at the address of the function that will be doing an indirect call
@@ -128,9 +128,7 @@ void indirect(void) {
             "jmpq *%%rax\n"
             "add $6, %%rax\n"
             "jmpq *%%rax\n"
-            "add $6, %%rax\n"
-            "jmpq *%%rax\n"
-            :: "a"(0x02), "b"(&jmp_ptr) : "rcx");
+            :: "a"(0x03), "b"(&jmp_ptr) : "rcx");
 
 
     // Do indirect jump
@@ -164,6 +162,7 @@ int main()
     printf("&x = %p\n", &x);
 
     fn_ptr = target_fn;
+    printf("&fn_ptr = %p\n", &fn_ptr);
     printf("indirect jump ptr = %p\n", fn_ptr);
     printf("indirect fn = %p\n", indirect);
     printf("target_fn = %p\n", target_fn);

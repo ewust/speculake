@@ -52,7 +52,7 @@ void test() {
     }
 }
 
-void (*fn_ptr)(void); // we'll set this = test, and cflush it
+void __attribute__((section(".fnptr"))) (*fn_ptr)(void); // we'll set this = test, and cflush it
 uint64_t jmp_ptr;
 
 // Place this at the address of the function that will be doing an indirect call

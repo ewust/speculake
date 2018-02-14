@@ -68,6 +68,7 @@ SECTIONS
   }
   .indirect 0x400a00: { *indirect.* }
   .targetfn 0x400c00: { *targetfn.* }
+  .fnptr  0x400d00: { KEEP(*(.fnptr)) }
 
 
   .fini           :
