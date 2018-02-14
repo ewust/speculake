@@ -180,7 +180,7 @@ void measure() {
             _mm_clflush(&jmp_ptr);
             indirect();
         }
-        printf("%lu / %lu = %0.5f%% hits\n", cache_hits, tot_runs, 100*((float)cache_hits)/tot_runs);
+        printf("%lu / %lu = %0.5f%% hits\n", cache_hits, tot_runs, 100*((float)cache_hits)/((float)tot_runs));
         cache_hits = 0;
         tot_runs = 0;
         usleep(10);

