@@ -67,7 +67,7 @@ SECTIONS
     /*__test_end__ = .;*/
   }
   .indirect 0x400a00: { *indirect.* }
-  .targetfn 0x400b00: { *targetfn.* }
+  .targetfn 0x400c00: { *targetfn.* }
 
 
   .fini           :

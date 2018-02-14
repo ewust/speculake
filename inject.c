@@ -3,7 +3,7 @@
 #include <stdint.h>
 #include <signal.h>
 #include <x86intrin.h>
-
+#include <unistd.h>
 
 //void funcfoo(void) __attribute__((section(".funcfoo")));
 //void funcbar(void) __attribute__((section(".funcbar")));
@@ -21,6 +21,7 @@ void target_fn(void) {
 }
 
 void (*fn_ptr)(void); // we'll set this = target_fn, and cflush it
+uint64_t jmp_ptr;
 
 // Place this at the address of the function that will be doing an indirect call
 // (measure)
@@ -32,7 +33,7 @@ void indirect(void) {
     // If you want these to all be taken, set rax=0x11
     // otherwise there will be 16 not-taken branches
     asm volatile (
-            "cmpb  $0x11, %%al\n"
+            "cmpb  $0x02, %%al\n"
             "je .+2\n"
             "je .+2\n"
             "je .+2\n"
@@ -65,7 +66,72 @@ void indirect(void) {
             "je .+2\n"
             "je .+2\n"
             "je .+2\n"
-            :: "a"(0x11) : "rbx");
+            "mov (%%rbx), %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            :: "a"(0x02), "b"(&jmp_ptr) : "rcx");
+
 
     // Do indirect jump
     (*fn_ptr)();
@@ -75,9 +141,12 @@ void indirect(void) {
 void train()
 {
     fn_ptr = target_fn;
+    jmp_ptr = 0x400a5d;
     while (1) {
         _mm_clflush(fn_ptr);
+        _mm_clflush(&jmp_ptr);
         indirect();
+        //usleep(10);
     }
 }
 

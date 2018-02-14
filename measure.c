@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include <signal.h>
 #include <x86intrin.h>
+#include <unistd.h>
 
 
 
@@ -38,9 +39,9 @@ void test() {
     asm volatile( "movb (%%rbx), %%al\n"
             :: "b"(addr) : "rax");
     t1 = _rdtscp(&junk);
-    if (t1-t0 < 150) {
+    if (t1-t0 < 140) {
         cache_hits++;
-        printf("%lu\n", t1-t0);
+        //printf("# %lu\n", t1-t0);
     }
     tot_runs++;
 
@@ -52,6 +53,7 @@ void test() {
 }
 
 void (*fn_ptr)(void); // we'll set this = test, and cflush it
+uint64_t jmp_ptr;
 
 // Place this at the address of the function that will be doing an indirect call
 // (measure)
@@ -63,7 +65,7 @@ void indirect(void) {
     // If you want these to all be taken, set rax=0x11
     // otherwise there will be 16 not-taken branches
     asm volatile (
-            "cmpb  $0x11, %%al\n"
+            "cmpb  $0x02, %%al\n"
             "je .+2\n"
             "je .+2\n"
             "je .+2\n"
@@ -96,7 +98,73 @@ void indirect(void) {
             "je .+2\n"
             "je .+2\n"
             "je .+2\n"
-            :: "a"(0x11) : "rbx");
+            "mov (%%rbx), %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            :: "a"(0x02), "b"(&jmp_ptr) : "rcx");
+
+
     // Do indirect jump
     (*fn_ptr)();
 }
@@ -104,15 +172,18 @@ void indirect(void) {
 
 void measure() {
     fn_ptr = test;
+    jmp_ptr = 0x400a5d;
     int i;
     while (1) {
         for (i=0; i<100000; i++) {
             _mm_clflush(fn_ptr);
+            _mm_clflush(&jmp_ptr);
             indirect();
         }
-        printf("%lu / %lu = %0.2f hits\n", cache_hits, tot_runs, 100*((float)cache_hits)/tot_runs);
+        printf("%lu / %lu = %0.5f%% hits\n", cache_hits, tot_runs, 100*((float)cache_hits)/tot_runs);
         cache_hits = 0;
         tot_runs = 0;
+        usleep(10);
     }
 
 
