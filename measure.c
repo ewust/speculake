@@ -65,6 +65,7 @@ void indirect(void) {
     // If you want these to all be taken, set rax=0x11
     // otherwise there will be 16 not-taken branches
     asm volatile (
+            /*
             "cmpb  $0x02, %%al\n"
             "je .+2\n"
             "je .+2\n"
@@ -98,6 +99,7 @@ void indirect(void) {
             "je .+2\n"
             "je .+2\n"
             "je .+2\n"
+            */
             "mov (%%rbx), %%rax\n"
             "jmpq *%%rax\n"
             "add $6, %%rax\n"
@@ -172,18 +174,19 @@ void indirect(void) {
 
 void measure() {
     fn_ptr = test;
-    jmp_ptr = 0x400a5d;
+    //jmp_ptr = 0x400a5d;   // With je +2's
+    jmp_ptr = 0x400a1b;
     int i;
     while (1) {
-        for (i=0; i<100000; i++) {
+        for (i=0; i<10000; i++) {
             _mm_clflush(fn_ptr);
             _mm_clflush(&jmp_ptr);
             indirect();
+            usleep(1);
         }
         printf("%lu / %lu = %0.5f%% hits\n", cache_hits, tot_runs, 100*((float)cache_hits)/((float)tot_runs));
         cache_hits = 0;
         tot_runs = 0;
-        usleep(10);
     }
 
 
