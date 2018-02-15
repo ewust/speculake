@@ -59,13 +59,6 @@ SECTIONS
     *(.gnu.warning)
   }
   /* Define custom addresses here... */
-  .funcfoo 0x400777:
-  {
-    /*. = ALIGN(4);*/
-    /*__test_start__ = .; */
-    *.funcfoo.*
-    /*__test_end__ = .;*/
-  }
   .fnptr        0x01400000: { KEEP(*(.fnptr)) }
   .aliasfnptr   0x01002e00: { KEEP(*(.aliasfnptr)) }
 
