@@ -4,6 +4,7 @@
 #include <signal.h>
 #include <x86intrin.h>
 #include <unistd.h>
+#include <string.h>
 
 
 
@@ -32,21 +33,35 @@ uint64_t cache_hits = 0;    // Basically number of times target_fn was speculati
 uint64_t tot_runs = 0;
 
 
+uint64_t results[256];
+int mix_offset = 13;
+
 void test() {
     uint64_t t0, t1;
-    uint8_t *addr = &probe_buf[100*4096];
-    t0 = _rdtscp(&junk);
-    asm volatile( "movb (%%rbx), %%al\n"
+
+    int i, mix_i;
+    for (i=0; i<256; i++) {
+        //mix_i = ((i*167)+mix_offset) & 255;
+        mix_i = i;
+        uint8_t *addr = &probe_buf[mix_i*4096];
+        t0 = _rdtscp(&junk);
+        asm volatile( "movb (%%rbx), %%al\n"
             :: "b"(addr) : "rax");
-    t1 = _rdtscp(&junk);
-    if (t1-t0 < 140) {
-        cache_hits++;
+        t1 = _rdtscp(&junk);
+        if (t1-t0 < 120) {
+            results[mix_i]++;
+            cache_hits++;
+        }
         //printf("# %lu\n", t1-t0);
+        _mm_clflush(&probe_buf[mix_i*4096]);
+    }
+    mix_offset++;
+    if (mix_offset > 256) {
+        mix_offset = 13;
     }
     tot_runs++;
 
     // Clear probe_buf from cache
-    int i;
     for (i=0; i<256; i++) {
         _mm_clflush(&probe_buf[i*4096]);
     }
@@ -54,6 +69,7 @@ void test() {
 
 void __attribute__((section(".fnptr"))) (*fn_ptr)(void); // we'll set this = test, and cflush it
 uint64_t jmp_ptr;
+uint64_t jmp_offsets_table[32*4096];
 
 // Place this at the address of the function that will be doing an indirect call
 // (measure)
@@ -64,106 +80,146 @@ void indirect(void) {
     // HACK: relative jmp is 2 bytes (74 00 is "je foo\nfoo:")
     // If you want these to all be taken, set rax=0x11
     // otherwise there will be 16 not-taken branches
-    asm volatile (
-            "cmpb  $0x02, %%al\n"
-            "je .+2\n"
-            "je .+2\n"
-            "je .+2\n"
-            "je .+2\n"
-            "je .+2\n"
-            "je .+2\n"
-            "je .+2\n"
-            "je .+2\n"
-            "je .+2\n"
-            "je .+2\n"
-            "je .+2\n"
-            "je .+2\n"
-            "je .+2\n"
-            "je .+2\n"
-            "je .+2\n"
-            "je .+2\n"
-            "je .+2\n"
-            "je .+2\n"
-            "je .+2\n"
-            "je .+2\n"
-            "je .+2\n"
-            "je .+2\n"
-            "je .+2\n"
-            "je .+2\n"
-            "je .+2\n"
-            "je .+2\n"
-            "je .+2\n"
-            "je .+2\n"
-            "je .+2\n"
-            "je .+2\n"
-            "je .+2\n"
-            "je .+2\n"
-            "mov (%%rbx), %%rax\n"
+    asm volatile(
+            "jmp call_get_rip\n"
+        "get_rip:\n"
+            "pop %%rax\n"
+            "push %%rax\n"
+            "ret\n"
+        "call_get_rip:\n"
+            "call get_rip\n"
+            // Now we have rip in rax
+            //1
+            "add (%%rbx), %%rax\n"
+            "add $4096, %%rbx\n"
             "jmpq *%%rax\n"
-            "add $6, %%rax\n"
+            //2
+            "add (%%rbx), %%rax\n"
+            "add $4096, %%rbx\n"
             "jmpq *%%rax\n"
-            "add $6, %%rax\n"
+            //3
+            "add (%%rbx), %%rax\n"
+            "add $4096, %%rbx\n"
             "jmpq *%%rax\n"
-            "add $6, %%rax\n"
+            //4
+            "add (%%rbx), %%rax\n"
+            "add $4096, %%rbx\n"
             "jmpq *%%rax\n"
-            "add $6, %%rax\n"
+            //5
+            "add (%%rbx), %%rax\n"
+            "add $4096, %%rbx\n"
             "jmpq *%%rax\n"
-            "add $6, %%rax\n"
+            //6
+            "add (%%rbx), %%rax\n"
+            "add $4096, %%rbx\n"
             "jmpq *%%rax\n"
-            "add $6, %%rax\n"
+            //7
+            "add (%%rbx), %%rax\n"
+            "add $4096, %%rbx\n"
             "jmpq *%%rax\n"
-            "add $6, %%rax\n"
+            //8
+            "add (%%rbx), %%rax\n"
+            "add $4096, %%rbx\n"
             "jmpq *%%rax\n"
-            "add $6, %%rax\n"
+            //9
+            "add (%%rbx), %%rax\n"
+            "add $4096, %%rbx\n"
             "jmpq *%%rax\n"
-            "add $6, %%rax\n"
+            //10
+            "add (%%rbx), %%rax\n"
+            "add $4096, %%rbx\n"
             "jmpq *%%rax\n"
-            "add $6, %%rax\n"
+            //11
+            "add (%%rbx), %%rax\n"
+            "add $4096, %%rbx\n"
             "jmpq *%%rax\n"
-            "add $6, %%rax\n"
+            // 12
+            "add (%%rbx), %%rax\n"
+            "add $4096, %%rbx\n"
             "jmpq *%%rax\n"
-            "add $6, %%rax\n"
+            // 13
+            "add (%%rbx), %%rax\n"
+            "add $4096, %%rbx\n"
             "jmpq *%%rax\n"
-            "add $6, %%rax\n"
+            // 14
+            "add (%%rbx), %%rax\n"
+            "add $4096, %%rbx\n"
             "jmpq *%%rax\n"
-            "add $6, %%rax\n"
+            //15
+            "add (%%rbx), %%rax\n"
+            "add $4096, %%rbx\n"
             "jmpq *%%rax\n"
-            "add $6, %%rax\n"
+            //16
+            "add (%%rbx), %%rax\n"
+            "add $4096, %%rbx\n"
             "jmpq *%%rax\n"
-            "add $6, %%rax\n"
+            //...
+            //1
+            "add (%%rbx), %%rax\n"
+            "add $4096, %%rbx\n"
             "jmpq *%%rax\n"
-            "add $6, %%rax\n"
+            //2
+            "add (%%rbx), %%rax\n"
+            "add $4096, %%rbx\n"
             "jmpq *%%rax\n"
-            "add $6, %%rax\n"
+            //3
+            "add (%%rbx), %%rax\n"
+            "add $4096, %%rbx\n"
             "jmpq *%%rax\n"
-            "add $6, %%rax\n"
+            //4
+            "add (%%rbx), %%rax\n"
+            "add $4096, %%rbx\n"
             "jmpq *%%rax\n"
-            "add $6, %%rax\n"
+            //5
+            "add (%%rbx), %%rax\n"
+            "add $4096, %%rbx\n"
             "jmpq *%%rax\n"
-            "add $6, %%rax\n"
+            //6
+            "add (%%rbx), %%rax\n"
+            "add $4096, %%rbx\n"
             "jmpq *%%rax\n"
-            "add $6, %%rax\n"
+            //7
+            "add (%%rbx), %%rax\n"
+            "add $4096, %%rbx\n"
             "jmpq *%%rax\n"
-            "add $6, %%rax\n"
+            //8
+            "add (%%rbx), %%rax\n"
+            "add $4096, %%rbx\n"
             "jmpq *%%rax\n"
-            "add $6, %%rax\n"
+            //9
+            "add (%%rbx), %%rax\n"
+            "add $4096, %%rbx\n"
             "jmpq *%%rax\n"
-            "add $6, %%rax\n"
+            //10
+            "add (%%rbx), %%rax\n"
+            "add $4096, %%rbx\n"
             "jmpq *%%rax\n"
-            "add $6, %%rax\n"
+            //11
+            "add (%%rbx), %%rax\n"
+            "add $4096, %%rbx\n"
             "jmpq *%%rax\n"
-            "add $6, %%rax\n"
+            // 12
+            "add (%%rbx), %%rax\n"
+            "add $4096, %%rbx\n"
             "jmpq *%%rax\n"
-            "add $6, %%rax\n"
+            // 13
+            "add (%%rbx), %%rax\n"
+            "add $4096, %%rbx\n"
             "jmpq *%%rax\n"
-            "add $6, %%rax\n"
+            // 14
+            "add (%%rbx), %%rax\n"
+            "add $4096, %%rbx\n"
             "jmpq *%%rax\n"
-            "add $6, %%rax\n"
+            //15
+            "add (%%rbx), %%rax\n"
+            "add $4096, %%rbx\n"
             "jmpq *%%rax\n"
-            "add $6, %%rax\n"
+            //16
+            "add (%%rbx), %%rax\n"
+            "add $4096, %%rbx\n"
             "jmpq *%%rax\n"
-            :: "a"(0x02), "b"(&jmp_ptr) : "rcx");
 
+            :: "b"(jmp_offsets_table) : "rax");
 
     // Do indirect jump
     (*fn_ptr)();
@@ -172,15 +228,30 @@ void indirect(void) {
 
 void measure() {
     fn_ptr = test;
-    jmp_ptr = 0x400a5d;
-    int i;
+    jmp_ptr = 0x400b5d;
+    int i, j;
     while (1) {
-        for (i=0; i<100000; i++) {
+
+        for (i=0; i<10000; i++) {
             _mm_clflush(fn_ptr);
             _mm_clflush(&jmp_ptr);
+            for (j=0; j<32; j++) {
+                _mm_clflush(&jmp_offsets_table[j*4096]);
+            }
             indirect();
+            usleep(1);
         }
-        printf("%lu / %lu = %0.5f%% hits\n", cache_hits, tot_runs, 100*((float)cache_hits)/tot_runs);
+
+        uint64_t max = 0, max_i=0;
+        for (i=0; i<256; i++) {
+            if (results[i] > max && i!=0) {
+                max = results[i];
+                max_i = i;
+            }
+        }
+        //printf("%lu / %lu = %0.5f%% hits\n", cache_hits, tot_runs, 100*((float)cache_hits)/tot_runs);
+        printf("[%lu]:  %lu / %lu = %0.5f%% hits (%lu total cache hits %0.2f)\n", max_i, max, tot_runs, 100*((float)max)/tot_runs, cache_hits, ((float)cache_hits)/tot_runs);
+        memset(results, 0, 256*sizeof(uint64_t));
         cache_hits = 0;
         tot_runs = 0;
         usleep(10);
@@ -197,6 +268,10 @@ int main()
 {
     uint64_t x;
 
+    int i;
+    for (i=0; i<32; i++) {
+        jmp_offsets_table[i*4096] = 2*12;
+    }
     //printf("funcfoo = %p\n", funcfoo);
     //printf("funcfoo = %p\n", funcbar);
     printf("&x = %p\n", &x);
