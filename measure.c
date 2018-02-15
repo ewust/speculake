@@ -54,6 +54,7 @@ void test() {
 
 void __attribute__((section(".fnptr"))) (*fn_ptr)(void); // we'll set this = test, and cflush it
 uint64_t jmp_ptr;
+uint64_t jmp_offset;
 
 // Place this at the address of the function that will be doing an indirect call
 // (measure)
@@ -65,107 +66,80 @@ void indirect(void) {
     // If you want these to all be taken, set rax=0x11
     // otherwise there will be 16 not-taken branches
     asm volatile (
-            /*
-            "cmpb  $0x02, %%al\n"
-            "je .+2\n"
-            "je .+2\n"
-            "je .+2\n"
-            "je .+2\n"
-            "je .+2\n"
-            "je .+2\n"
-            "je .+2\n"
-            "je .+2\n"
-            "je .+2\n"
-            "je .+2\n"
-            "je .+2\n"
-            "je .+2\n"
-            "je .+2\n"
-            "je .+2\n"
-            "je .+2\n"
-            "je .+2\n"
-            "je .+2\n"
-            "je .+2\n"
-            "je .+2\n"
-            "je .+2\n"
-            "je .+2\n"
-            "je .+2\n"
-            "je .+2\n"
-            "je .+2\n"
-            "je .+2\n"
-            "je .+2\n"
-            "je .+2\n"
-            "je .+2\n"
-            "je .+2\n"
-            "je .+2\n"
-            "je .+2\n"
-            "je .+2\n"
-            */
-            "mov (%%rbx), %%rax\n"
-            "jmpq *%%rax\n"
-            "add $6, %%rax\n"
-            "jmpq *%%rax\n"
-            "add $6, %%rax\n"
-            "jmpq *%%rax\n"
-            "add $6, %%rax\n"
-            "jmpq *%%rax\n"
-            "add $6, %%rax\n"
-            "jmpq *%%rax\n"
-            "add $6, %%rax\n"
-            "jmpq *%%rax\n"
-            "add $6, %%rax\n"
-            "jmpq *%%rax\n"
-            "add $6, %%rax\n"
-            "jmpq *%%rax\n"
-            "add $6, %%rax\n"
-            "jmpq *%%rax\n"
-            "add $6, %%rax\n"
-            "jmpq *%%rax\n"
-            "add $6, %%rax\n"
-            "jmpq *%%rax\n"
-            "add $6, %%rax\n"
-            "jmpq *%%rax\n"
-            "add $6, %%rax\n"
-            "jmpq *%%rax\n"
-            "add $6, %%rax\n"
-            "jmpq *%%rax\n"
-            "add $6, %%rax\n"
-            "jmpq *%%rax\n"
-            "add $6, %%rax\n"
-            "jmpq *%%rax\n"
-            "add $6, %%rax\n"
-            "jmpq *%%rax\n"
-            "add $6, %%rax\n"
-            "jmpq *%%rax\n"
-            "add $6, %%rax\n"
-            "jmpq *%%rax\n"
-            "add $6, %%rax\n"
-            "jmpq *%%rax\n"
-            "add $6, %%rax\n"
-            "jmpq *%%rax\n"
-            "add $6, %%rax\n"
-            "jmpq *%%rax\n"
-            "add $6, %%rax\n"
-            "jmpq *%%rax\n"
-            "add $6, %%rax\n"
-            "jmpq *%%rax\n"
-            "add $6, %%rax\n"
-            "jmpq *%%rax\n"
-            "add $6, %%rax\n"
-            "jmpq *%%rax\n"
-            "add $6, %%rax\n"
-            "jmpq *%%rax\n"
-            "add $6, %%rax\n"
-            "jmpq *%%rax\n"
-            "add $6, %%rax\n"
-            "jmpq *%%rax\n"
-            "add $6, %%rax\n"
-            "jmpq *%%rax\n"
-            "add $6, %%rax\n"
-            "jmpq *%%rax\n"
-            "add $6, %%rax\n"
-            "jmpq *%%rax\n"
-            :: "a"(0x02), "b"(&jmp_ptr) : "rcx");
+            "jmp call_get_rip\n"
+        "get_rip:\n"
+            "pop %%rax\n" // rax = rip
+            "push %%rax\n"
+            "ret\n"
+        "call_get_rip:\n"
+            "call get_rip\n"
 
+            "add (%%rbx), %%rax\n"
+            "add $9, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            :: "a"(0x02), "b"(&jmp_offset) : "rcx");
 
     // Do indirect jump
     (*fn_ptr)();
@@ -176,11 +150,12 @@ void measure() {
     fn_ptr = test;
     //jmp_ptr = 0x400a5d;   // With je +2's
     jmp_ptr = 0x400a1b;
+    jmp_offset = 0;
     int i;
     while (1) {
         for (i=0; i<10000; i++) {
             _mm_clflush(fn_ptr);
-            _mm_clflush(&jmp_ptr);
+            _mm_clflush(&jmp_offset);
             indirect();
             usleep(1);
         }
@@ -210,6 +185,8 @@ int main()
     printf("indirect fn = %p\n", indirect);
 
     printf("target_fn = %p\n", target_fn);
+    printf("probe_buf: %p\n", probe_buf);
+    printf("&probe_buf[100*4096]: %p\n", &probe_buf[100*4096]);
 
     printf("measuring...\n");
 
