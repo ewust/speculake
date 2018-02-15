@@ -24,12 +24,13 @@ uint8_t probe_buf[4096*256];
  */
 void target_fn(void) __attribute__((section(".targetfn")));
 void target_fn(void) {
-    asm volatile ( "movb (%%rbx), %%al\n" :: "b"((uint8_t*)&probe_buf[100*4096]) : "rax");
+    asm volatile ( "movb (%%rbx), %%al\n" :: "b"((uint8_t*)&probe_buf[120*4096]) : "rax");
 }
 
 // Keep stats
 uint64_t cache_hits = 0;    // Basically number of times target_fn was speculatively executed
 uint64_t tot_runs = 0;
+uint64_t bad_hits = 0;
 
 
 void test() {
@@ -43,6 +44,17 @@ void test() {
         cache_hits++;
         //printf("# %lu\n", t1-t0);
     }
+
+    // Test a random probe_buf and see that it takes a while to load
+    t0 = _rdtscp(&junk);
+    asm volatile( "movb (%%rbx), %%al\n"
+            :: "b"(&probe_buf[132*4096]) : "rax");
+    t1 = _rdtscp(&junk);
+    if (t1-t0 < 140) {
+        // bad, this shouldn't be in cache ever
+        bad_hits++;
+    }
+
     tot_runs++;
 
     // Clear probe_buf from cache
@@ -160,8 +172,10 @@ void measure() {
             usleep(1);
         }
         printf("%lu / %lu = %0.5f%% hits\n", cache_hits, tot_runs, 100*((float)cache_hits)/((float)tot_runs));
+        printf("--%lu / %lu = %0.5f%% bad hits\n", bad_hits, tot_runs, 100*((float)bad_hits)/((float)tot_runs));
         cache_hits = 0;
         tot_runs = 0;
+        bad_hits = 0;
     }
 
 
