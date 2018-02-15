@@ -22,14 +22,15 @@ uint8_t some_other_buf[4096*256];
 void alias_target_fn(void) __attribute__((section(".aliastarget")));
 void alias_target_fn(void)
 {
-    asm volatile ( "movb (%%rbx), %%al\n" :: "b"((uint8_t*)&some_other_buf[100*4096]) : "rax");
+    asm volatile ( "movb (%%rbx), %%al\n" :: "b"((uint8_t*)&some_other_buf[1*4096]) : "rax");
+    asm volatile ("mfence\n");
 
 }
 
 // This will never be called directly (but will happen speculatively)
 void target_fn(void) __attribute__((section(".targetfn")));
 void target_fn(void) {
-    asm volatile ( "movb (%%rbx), %%al\n" :: "b"((uint8_t*)&probe_buf[100*4096]) : "rax");
+    //asm volatile ( "movb (%%rbx), %%al\n" :: "b"((uint8_t*)&probe_buf[100*4096]) : "rax");
 }
 
 // Keep stats
@@ -39,10 +40,11 @@ uint64_t tot_runs = 0;
 
 void test() {
     uint64_t t0, t1;
-    uint8_t *addr = &probe_buf[100*4096];
+    asm volatile("mfence\n" :::);
     t0 = _rdtscp(&junk);
     asm volatile( "movb (%%rbx), %%al\n"
-            :: "b"(addr) : "rax");
+                "mfence\n"
+            :: "b"(&probe_buf[100*4096]) : "rax");
     t1 = _rdtscp(&junk);
     if (t1-t0 < 140) {
         cache_hits++;
@@ -58,11 +60,103 @@ void test() {
 }
 
 void __attribute__((section(".fnptr"))) (*fn_ptr)(void); // we'll set this = test, and cflush it
+void __attribute__((section(".aliasfnptr"))) (*alias_fn_ptr)(void); // we'll set this = test, and cflush it
 uint64_t jmp_offset;
 
 void alias_indirect(void) __attribute__((section(".aliasindirect")));
 void alias_indirect(void) {
     asm volatile (
+            "jmp call_get_ripa\n"
+        "get_ripa:\n"
+            "pop %%rax\n" // rax = rip
+            "push %%rax\n"
+            "ret\n"
+        "call_get_ripa:\n"
+            "call get_ripa\n"
+            // At this point, rip == rax
+            "add (%%rbx), %%rax\n"
+            "add $9, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+ 
+            :
+            : "b"(&jmp_offset)
+            : "rax");
+            //*/
+    (*alias_fn_ptr)();
+}
+
+
+// Place this at the address of the function that will be doing an indirect call
+// (measure)
+void indirect(void) __attribute__((section(".indirect")));
+void indirect(void) {
+    // Do indirect jump
+       asm volatile (
             "jmp call_get_rip\n"
         "get_rip:\n"
             "pop %%rax\n" // rax = rip
@@ -92,38 +186,98 @@ void alias_indirect(void) {
             "jmpq *%%rax\n"
             "add $6, %%rax\n"
             "jmpq *%%rax\n"
+
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
+            "add $6, %%rax\n"
+            "jmpq *%%rax\n"
             :
             : "b"(&jmp_offset)
             : "rax");
-            //*/
-    (*fn_ptr)();
-}
-
-
-// Place this at the address of the function that will be doing an indirect call
-// (measure)
-void indirect(void) __attribute__((section(".indirect")));
-void indirect(void) {
-    // Do indirect jump
     (*fn_ptr)();
 }
 
 
 void measure() {
-    fn_ptr = test;
     int i, j;
     while (1) {
+        alias_fn_ptr = alias_target_fn;
+        fn_ptr = test;
+
         for (i=0; i<10000; i++) {
+            //_mm_clflush(&probe_buf[100*4096]);
+            for (j=0; j<256; j++) {
+                _mm_clflush(&probe_buf[j*4096]);
+            }
+            /*
             for (j=0; j<100; j++) {
-                fn_ptr = alias_target_fn;
-                //fn_ptr = test;
-                if (j == 95) {
-                    fn_ptr = test;
-                }
                 _mm_clflush(&jmp_offset);
                 _mm_clflush(fn_ptr);
+                _mm_clflush(alias_fn_ptr);
+                if (j == 95) {
+                    indirect();
+                }
                 alias_indirect();
             }
+            */
+            /*
+            alias_indirect();
+            alias_indirect();
+            alias_indirect();
+            alias_indirect();
+            alias_indirect();
+            alias_indirect();
+            alias_indirect();*/
+            alias_indirect();
+            alias_indirect();
+            alias_indirect();
+            alias_indirect();
+            alias_indirect();
+            indirect();
+
+            //test();
             //usleep(1);
         }
         printf("%lu / %lu = %0.4f%% hits\n", cache_hits, tot_runs, 100*((float)cache_hits)/((float)tot_runs));
