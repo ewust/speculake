@@ -66,12 +66,14 @@ SECTIONS
     *.funcfoo.*
     /*__test_end__ = .;*/
   }
-  .fnptr  0x400e00: { KEEP(*(.fnptr)) }
-  .targetfn     0x1000000: { *targetfn.* }
-  .aliastarget  0x1402000: { *aliastarget.* }
+  .fnptr        0x01400000: { KEEP(*(.fnptr)) }
+  .aliasfnptr   0x01002e00: { KEEP(*(.aliasfnptr)) }
 
-  .indirect         0x2000000: { *indirect.* }
-  .aliasindirect    0x2804000: { *aliasindirect.* }
+  .targetfn     0x01500000: { *targetfn.* }
+  .aliastarget  0x00100a000: { *aliastarget.* }
+
+  .indirect         0x01600000: { *indirect.* }
+  .aliasindirect    0x01002000: { *aliasindirect.* }
 
   .fini           :
   {
