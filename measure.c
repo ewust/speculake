@@ -13,7 +13,7 @@
 unsigned int junk=0;
 
 // Put this in its own (4KB) page
-uint8_t probe_buf[4096*256];
+uint8_t probe_buf[4096*256*1024];
 
 
 /*
@@ -24,7 +24,7 @@ uint8_t probe_buf[4096*256];
  */
 void target_fn(void) __attribute__((section(".targetfn")));
 void target_fn(void) {
-    asm volatile ( "movb (%%rbx), %%al\n" :: "b"((uint8_t*)&probe_buf[120*4096]) : "rax");
+    asm volatile ( "movb (%%rbx), %%al\n" :: "b"((uint8_t*)&probe_buf[100*4096*1024]) : "rax");
 }
 
 // Keep stats
@@ -35,7 +35,7 @@ uint64_t bad_hits = 0;
 
 void test() {
     uint64_t t0, t1;
-    uint8_t *addr = &probe_buf[100*4096];
+    uint8_t *addr = &probe_buf[100*4096*1024];
     t0 = _rdtscp(&junk);
     asm volatile( "movb (%%rbx), %%al\n"
             :: "b"(addr) : "rax");
@@ -45,6 +45,7 @@ void test() {
         //printf("# %lu\n", t1-t0);
     }
 
+    /*
     // Test a random probe_buf and see that it takes a while to load
     t0 = _rdtscp(&junk);
     asm volatile( "movb (%%rbx), %%al\n"
@@ -54,13 +55,14 @@ void test() {
         // bad, this shouldn't be in cache ever
         bad_hits++;
     }
+    */
 
     tot_runs++;
 
     // Clear probe_buf from cache
     int i;
     for (i=0; i<256; i++) {
-        _mm_clflush(&probe_buf[i*4096]);
+        _mm_clflush(&probe_buf[i*4096*1024]);
     }
 }
 

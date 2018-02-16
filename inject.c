@@ -9,7 +9,7 @@
 //void funcbar(void) __attribute__((section(".funcbar")));
 
 
-uint8_t probe_buf[4096*256];
+//uint8_t probe_buf[4096*256];
 /*
  * This is the target of the indirect call
  * which we locate at the address of a gadget
@@ -18,7 +18,7 @@ uint8_t probe_buf[4096*256];
  */
 void target_fn(void) __attribute__((section(".targetfn")));
 void target_fn(void) {
-    asm volatile ( "movb (%%rbx), %%al\n"                :: "b"((uint8_t*)&probe_buf[190*4096]) : "rax");
+    //asm volatile ( "movb (%%rbx), %%al\n"                :: "b"((uint8_t*)&probe_buf[190*4096]) : "rax");
 
 }
 
@@ -153,8 +153,8 @@ int main()
     printf("indirect fn = %p\n", indirect);
     printf("target_fn = %p\n", target_fn);
 
-    printf("probe_buf: %p\n", probe_buf);
-    printf("&probe_buf[190*4096]: %p\n", &probe_buf[190*4096]);
+    //printf("probe_buf: %p\n", probe_buf);
+    //printf("&probe_buf[190*4096]: %p\n", &probe_buf[190*4096]);
     printf("training...\n");
 
     train();
