@@ -8,9 +8,14 @@
 
 
 #define NUM_PROBES 256
-#define PROBE_IDX 3
+#define PROBE_IDX 0
 
-#define PROBE_SPACE (1000003)  // A prime number > 1mil
+#define MAX_PROBE_SPACE (1000003)  //
+
+
+uint64_t cur_probe_space = 4177;
+
+
 
 //void funcfoo(void) __attribute__((section(".funcfoo")));
 //void funcbar(void) __attribute__((section(".funcbar")));
@@ -41,17 +46,21 @@ uint64_t tot_time = 0;
 void target_fn(void) __attribute__((section(".targetfn")));
 void target_fn(void) {
     //int idx = (signal_idx*3)&0xff;
-    asm volatile ( "movb (%%rbx), %%al\n" :: "b"(&probe_buf[PROBE_SPACE*(255-signal_idx)]) : "rax");
-    /*
+    //asm volatile ( "movb (%%rbx), %%al\n" :: "b"(signal_ptr) : "rax");
+    asm volatile ( "movb (%%rbx), %%al\n" :: "b"(&probe_buf[cur_probe_space*((NUM_PROBES-1)-signal_idx)]) : "rax");
+    //asm volatile ( "movb (%%rbx), %%al\n" :: "b"(&probe_buf[PROBE_SPACE*(((signal_idx*167)+13)&0xf)]) : "rax");
+    //asm volatile ( "movb (%%rbx), %%al\n" :: "b"(&probe_buf[PROBE_SPACE*(signal_idx)]) : "rax");
+        /*
     asm volatile(
             "mov %%rax, %%rcx\n"
             "add %%rax, %%rax\n"    // rax = idx + idx
-            //"add %%rcx, %%rax\n"    // rax += idx
-            //"and $0xff, %%rax\n"    // rax &= 0xff
+            "add %%rcx, %%rax\n"    // rax += idx
+            "and $0xff, %%rax\n"    // rax &= 0xff
             "imul $0xf4243,%%rax,%%rax\n"
             "add %%rax,%%rbx\n"
             "movb (%%rbx), %%al\n" :: "a"(signal_idx), "b"(probe_buf) : "rcx");
-            */
+            //*/
+        
 
 
     //asm volatile( "nop");
@@ -71,7 +80,7 @@ void test() {
 
     int i;
     for (i=0; i<NUM_PROBES; i++) {
-        addr = &probe_buf[i*PROBE_SPACE];
+        addr = &probe_buf[i*cur_probe_space];
         t0 = _rdtscp(&junk);
         asm volatile( "movb (%%rbx), %%al\n"
             :: "b"(addr) : "rax");
@@ -92,7 +101,7 @@ void test() {
         //_mm_clflush(&probe_buf[i*1024*1024]);
         //int mix_i = ((i*167)+13)&255;
 
-        _mm_clflush(&probe_buf[i*PROBE_SPACE]);
+        _mm_clflush(&probe_buf[i*cur_probe_space]);
 
         //_mm_clflush(signal_ptr);
     }
@@ -229,6 +238,7 @@ void measure() {
             _mm_clflush(&jmp_ptr);
             indirect();
             //usleep(100);
+            //usleep(1);
         }
         uint64_t avg = 0;
         if (cache_hits > 0) avg = tot_time/cache_hits;
@@ -242,17 +252,24 @@ void measure() {
         }
 
         //printf("%lu / %lu = %0.5f%% hits, %lu avg ns\n", cache_hits, tot_runs, 100*((float)cache_hits)/tot_runs, avg);
-        if (max_res > 10) {
-            printf("[%lu]: %lu / %lu = %0.5f%% hits, %lu avg ns\n", max_i, max_res, tot_runs, 100*((float)max_res)/tot_runs, avg);
+        if (max_res > 10){
+            printf("[%lu]: %lu / %lu = %0.5f%% hits, %lu avg cycles, ps %ld\n", max_i, max_res, tot_runs, 100*((float)max_res)/tot_runs, avg, cur_probe_space);
+            signal_idx++;
+        } else {
+            printf("--[%lu]: %lu, %lu avg cycles ps %ld\n", max_i, max_res, avg, cur_probe_space);
+            cur_probe_space += 63;
+            cur_probe_space %= MAX_PROBE_SPACE;
         }
         cache_hits = 0;
         tot_runs = 0;
         tot_time = 0;
-        signal_ptr = &probe_buf[signal_idx++*PROBE_SPACE];
+        signal_ptr = &probe_buf[signal_idx*cur_probe_space];
         memset(results, 0, sizeof(uint64_t)*NUM_PROBES);
-        if (signal_idx >= NUM_PROBES) {
-            signal_idx = 0;
-        }
+        //signal_idx++;
+        signal_idx %= NUM_PROBES;
+        //if (signal_idx >= NUM_PROBES) {
+        //    signal_idx = 0;
+        //}
         usleep(10);
     }
 
@@ -265,7 +282,7 @@ void funcbar() {
 
 int main()
 {
-    probe_buf = malloc(PROBE_SPACE*NUM_PROBES);
+    probe_buf = malloc(MAX_PROBE_SPACE*NUM_PROBES);
     if (probe_buf == NULL) {
         perror("malloc");
         return -1;
@@ -274,15 +291,15 @@ int main()
     printf("probe_buf @%p\n", probe_buf);
     int i =0;
     for (i=0; i<NUM_PROBES; i++) {
-        memset(&probe_buf[i*PROBE_SPACE], i, PROBE_SPACE);
+        memset(&probe_buf[i*MAX_PROBE_SPACE], i, MAX_PROBE_SPACE);
         //memset(&stack_probe_buf[i*PROBE_SPACE], i, PROBE_SPACE);
-        _mm_clflush(&probe_buf[i*PROBE_SPACE]);
+        //_mm_clflush(&probe_buf[i*MAX_PROBE_SPACE]);
         //_mm_clflush(&stack_probe_buf[i*PROBE_SPACE]);
     }
 
-    signal_ptr = (uint8_t*)(((uint64_t)(probe_buf + PROBE_SPACE*PROBE_IDX)));
-    printf("probe_buf[.]: %p\n", &probe_buf[PROBE_SPACE*PROBE_IDX]);
-    printf("signal_ptr:   %p\n", signal_ptr);
+    //signal_ptr = (uint8_t*)(((uint64_t)(probe_buf + PROBE_SPACE*PROBE_IDX)));
+    //printf("probe_buf[.]: %p\n", &probe_buf[PROBE_SPACE*PROBE_IDX]);
+    //printf("signal_ptr:   %p\n", signal_ptr);
 
 
 
