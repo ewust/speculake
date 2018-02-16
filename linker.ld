@@ -59,14 +59,17 @@ SECTIONS
     *(.gnu.warning)
   }
   /* Define custom addresses here... */
-  .fnptr        0x01400000: { KEEP(*(.fnptr)) }
-  .aliasfnptr   0x01002e00: { KEEP(*(.aliasfnptr)) }
+  .funcfoo 0x400777:
+  {
+    /*. = ALIGN(4);*/
+    /*__test_start__ = .; */
+    *.funcfoo.*
+    /*__test_end__ = .;*/
+  }
+  .indirect 0x400e00: { *indirect.* }
+  .targetfn 0x401000: { *targetfn.* }
+  .fnptr  0x401b00: { KEEP(*(.fnptr)) }
 
-  .targetfn     0x01500000: { *targetfn.* }
-  .aliastarget  0x00100a000: { *aliastarget.* }
-
-  .indirect         0x01600000: { *indirect.* }
-  .aliasindirect    0x01002000: { *aliasindirect.* }
 
   .fini           :
   {
