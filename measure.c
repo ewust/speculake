@@ -25,7 +25,7 @@ uint8_t *probe_buf;
 uint8_t *signal_ptr;   // Point to some cache-aligned memory surrounded by...nothing
 uint8_t signal_idx = 0;
 
-uint8_t stack_probe_buf[PROBE_SPACE*NUM_PROBES];
+//uint8_t stack_probe_buf[PROBE_SPACE*NUM_PROBES];
 
 // Keep stats
 uint64_t cache_hits = 0;    // Basically number of times target_fn was speculatively executed
@@ -40,7 +40,20 @@ uint64_t tot_time = 0;
  */
 void target_fn(void) __attribute__((section(".targetfn")));
 void target_fn(void) {
-    asm volatile ( "movb (%%rbx), %%al\n" :: "b"((uint8_t*)signal_ptr) : "rax");
+    //int idx = (signal_idx*3)&0xff;
+    asm volatile ( "movb (%%rbx), %%al\n" :: "b"(&probe_buf[PROBE_SPACE*(255-signal_idx)]) : "rax");
+    /*
+    asm volatile(
+            "mov %%rax, %%rcx\n"
+            "add %%rax, %%rax\n"    // rax = idx + idx
+            //"add %%rcx, %%rax\n"    // rax += idx
+            //"and $0xff, %%rax\n"    // rax &= 0xff
+            "imul $0xf4243,%%rax,%%rax\n"
+            "add %%rax,%%rbx\n"
+            "movb (%%rbx), %%al\n" :: "a"(signal_idx), "b"(probe_buf) : "rcx");
+            */
+
+
     //asm volatile( "nop");
     //asm volatile ( "movb (%%rbx), %%al\n" :: "b"(&probe_buf[1200]) : "rax");
 
@@ -262,9 +275,9 @@ int main()
     int i =0;
     for (i=0; i<NUM_PROBES; i++) {
         memset(&probe_buf[i*PROBE_SPACE], i, PROBE_SPACE);
-        memset(&stack_probe_buf[i*PROBE_SPACE], i, PROBE_SPACE);
+        //memset(&stack_probe_buf[i*PROBE_SPACE], i, PROBE_SPACE);
         _mm_clflush(&probe_buf[i*PROBE_SPACE]);
-        _mm_clflush(&stack_probe_buf[i*PROBE_SPACE]);
+        //_mm_clflush(&stack_probe_buf[i*PROBE_SPACE]);
     }
 
     signal_ptr = (uint8_t*)(((uint64_t)(probe_buf + PROBE_SPACE*PROBE_IDX)));
