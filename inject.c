@@ -8,7 +8,7 @@
 //void funcfoo(void) __attribute__((section(".funcfoo")));
 //void funcbar(void) __attribute__((section(".funcbar")));
 
-uint64_t foo = 7;
+//uint64_t foo = 7;
 uint8_t probe_buf[256*4096*1024];
 
 /*
@@ -141,7 +141,7 @@ void indirect(void) {
 void train()
 {
     fn_ptr = target_fn;
-    jmp_ptr = 0x400a5d;
+    jmp_ptr = 0x400b5d;
     while (1) {
         _mm_clflush(fn_ptr);
         _mm_clflush(&jmp_ptr);
@@ -157,11 +157,9 @@ void funcbar() {
 
 int main()
 {
-    uint64_t x;
 
     //printf("funcfoo = %p\n", funcfoo);
     //printf("funcfoo = %p\n", funcbar);
-    printf("&x = %p\n", &x);
 
     fn_ptr = target_fn;
     printf("&fn_ptr = %p\n", &fn_ptr);
