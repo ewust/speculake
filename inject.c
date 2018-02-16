@@ -8,7 +8,8 @@
 //void funcfoo(void) __attribute__((section(".funcfoo")));
 //void funcbar(void) __attribute__((section(".funcbar")));
 
-
+uint64_t foo = 7;
+uint8_t probe_buf[256*4096*1024];
 
 /*
  * This is the target of the indirect call
@@ -18,6 +19,7 @@
  */
 void target_fn(void) __attribute__((section(".targetfn")));
 void target_fn(void) {
+    //asm volatile("movb (%%rbx), %%al\n" :: "b"(&probe_buf[200*4096*1024]) : "rax");
 }
 
 void __attribute__((section (".fnptr"))) (*fn_ptr)(void); // we'll set this = target_fn, and cflush it

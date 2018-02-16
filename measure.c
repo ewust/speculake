@@ -13,8 +13,12 @@
 unsigned int junk=0;
 
 // Put this in its own (4KB) page
-uint8_t probe_buf[4096*256];
+uint8_t probe_buf[4096*256*1024];
 
+
+// Keep stats
+uint64_t cache_hits = 0;    // Basically number of times target_fn was speculatively executed
+uint64_t tot_runs = 0;
 
 /*
  * This function is NEVER CALLED in measure.c
@@ -24,17 +28,18 @@ uint8_t probe_buf[4096*256];
  */
 void target_fn(void) __attribute__((section(".targetfn")));
 void target_fn(void) {
-    asm volatile ( "movb (%%rbx), %%al\n" :: "b"((uint8_t*)&probe_buf[100*4096]) : "rax");
+    asm volatile ( "movb (%%rbx), %%al\n" :: "b"((uint8_t*)&probe_buf[100*4096*1024]) : "rax");
+    //asm volatile( "nop");
+    //asm volatile ( "movb (%%rbx), %%al\n" :: "b"(&probe_buf[1200]) : "rax");
+
+
 }
 
-// Keep stats
-uint64_t cache_hits = 0;    // Basically number of times target_fn was speculatively executed
-uint64_t tot_runs = 0;
 
 
 void test() {
     uint64_t t0, t1;
-    uint8_t *addr = &probe_buf[100*4096];
+    uint8_t *addr = &probe_buf[100*4096*1024];
     t0 = _rdtscp(&junk);
     asm volatile( "movb (%%rbx), %%al\n"
             :: "b"(addr) : "rax");
