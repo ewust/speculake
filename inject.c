@@ -141,7 +141,7 @@ void indirect(void) {
 void train()
 {
     fn_ptr = target_fn;
-    jmp_ptr = 0x400b5d;
+    jmp_ptr = 0x400e5d;
     while (1) {
         _mm_clflush(fn_ptr);
         _mm_clflush(&jmp_ptr);
