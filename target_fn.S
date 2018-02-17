@@ -8,7 +8,7 @@ target_fn:
 	mov signal_idx, %rax
 	//add %rax, %rax
 	imul $3, %rax
-	and $0x3f, %rax
+	and $0xff, %rax
 	mul %rcx		// rax *= cur_probe_space
 	add %rax, %rbx
 	movb (%rbx),%al
