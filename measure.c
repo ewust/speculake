@@ -203,13 +203,6 @@ int main()
 
     signal_ptr = &probe_buf[signal_idx*cur_probe_space];
 
-    target_fn();
-
-    printf("ok\n");
-    target_fn();
-    //exit(0);
-    printf("hi\n");
-
     measure();
 
     printf("[+] Success!\n");
