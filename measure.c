@@ -5,9 +5,10 @@
 #include <x86intrin.h>
 #include <unistd.h>
 #include <string.h>
+#include "common.h"
 
 
-#define NUM_PROBES 256
+#define NUM_PROBES 100
 #define PROBE_IDX 0
 
 #define MAX_PROBE_SPACE (1000003)  //
@@ -44,10 +45,14 @@ uint64_t tot_time = 0;
  * then we'll load probe_buf[100] into cache
  */
 void target_fn(void) __attribute__((section(".targetfn")));
+//void target_fn(void);
+#if 0
 void target_fn(void) {
     //int idx = (signal_idx*3)&0xff;
-    //asm volatile ( "movb (%%rbx), %%al\n" :: "b"(signal_ptr) : "rax");
-    asm volatile ( "movb (%%rbx), %%al\n" :: "b"(&probe_buf[cur_probe_space*((NUM_PROBES-1)-signal_idx)]) : "rax");
+    asm volatile (
+        "mov (%%rcx), %%rbx\n"
+        "movb (%%rbx), %%al\n" :: "c"(0x6030c8) : "rax");
+    //asm volatile ( "movb (%%rbx), %%al\n" :: "b"(&probe_buf[cur_probe_space*((NUM_PROBES-1)-signal_idx)]) : "rax");
     //asm volatile ( "movb (%%rbx), %%al\n" :: "b"(&probe_buf[PROBE_SPACE*(((signal_idx*167)+13)&0xf)]) : "rax");
     //asm volatile ( "movb (%%rbx), %%al\n" :: "b"(&probe_buf[PROBE_SPACE*(signal_idx)]) : "rax");
         /*
@@ -68,8 +73,7 @@ void target_fn(void) {
 
 
 }
-
-
+#endif
 
 uint64_t results[NUM_PROBES];
 
@@ -110,133 +114,18 @@ void test() {
     //_mm_clflush(&probe_buf[100*1024*1024]);
 }
 
-void __attribute__((section(".fnptr"))) (*fn_ptr)(void); // we'll set this = test, and cflush it
 uint64_t jmp_ptr;
-
-// Place this at the address of the function that will be doing an indirect call
-// (measure)
-void indirect(void) __attribute__((section(".indirect")));
-void indirect(void) {
-    // do our indirect jump
-    // 16 taken (conditional?) branches...
-    // HACK: relative jmp is 2 bytes (74 00 is "je foo\nfoo:")
-    // If you want these to all be taken, set rax=0x11
-    // otherwise there will be 16 not-taken branches
-    asm volatile (
-            "cmpb  $0x02, %%al\n"
-            "je .+2\n"
-            "je .+2\n"
-            "je .+2\n"
-            "je .+2\n"
-            "je .+2\n"
-            "je .+2\n"
-            "je .+2\n"
-            "je .+2\n"
-            "je .+2\n"
-            "je .+2\n"
-            "je .+2\n"
-            "je .+2\n"
-            "je .+2\n"
-            "je .+2\n"
-            "je .+2\n"
-            "je .+2\n"
-            "je .+2\n"
-            "je .+2\n"
-            "je .+2\n"
-            "je .+2\n"
-            "je .+2\n"
-            "je .+2\n"
-            "je .+2\n"
-            "je .+2\n"
-            "je .+2\n"
-            "je .+2\n"
-            "je .+2\n"
-            "je .+2\n"
-            "je .+2\n"
-            "je .+2\n"
-            "je .+2\n"
-            "je .+2\n"
-            "mov (%%rbx), %%rax\n"
-            "jmpq *%%rax\n"
-            "add $6, %%rax\n"
-            "jmpq *%%rax\n"
-            "add $6, %%rax\n"
-            "jmpq *%%rax\n"
-            "add $6, %%rax\n"
-            "jmpq *%%rax\n"
-            "add $6, %%rax\n"
-            "jmpq *%%rax\n"
-            "add $6, %%rax\n"
-            "jmpq *%%rax\n"
-            "add $6, %%rax\n"
-            "jmpq *%%rax\n"
-            "add $6, %%rax\n"
-            "jmpq *%%rax\n"
-            "add $6, %%rax\n"
-            "jmpq *%%rax\n"
-            "add $6, %%rax\n"
-            "jmpq *%%rax\n"
-            "add $6, %%rax\n"
-            "jmpq *%%rax\n"
-            "add $6, %%rax\n"
-            "jmpq *%%rax\n"
-            "add $6, %%rax\n"
-            "jmpq *%%rax\n"
-            "add $6, %%rax\n"
-            "jmpq *%%rax\n"
-            "add $6, %%rax\n"
-            "jmpq *%%rax\n"
-            "add $6, %%rax\n"
-            "jmpq *%%rax\n"
-            "add $6, %%rax\n"
-            "jmpq *%%rax\n"
-            "add $6, %%rax\n"
-            "jmpq *%%rax\n"
-            "add $6, %%rax\n"
-            "jmpq *%%rax\n"
-            "add $6, %%rax\n"
-            "jmpq *%%rax\n"
-            "add $6, %%rax\n"
-            "jmpq *%%rax\n"
-            "add $6, %%rax\n"
-            "jmpq *%%rax\n"
-            "add $6, %%rax\n"
-            "jmpq *%%rax\n"
-            "add $6, %%rax\n"
-            "jmpq *%%rax\n"
-            "add $6, %%rax\n"
-            "jmpq *%%rax\n"
-            "add $6, %%rax\n"
-            "jmpq *%%rax\n"
-            "add $6, %%rax\n"
-            "jmpq *%%rax\n"
-            "add $6, %%rax\n"
-            "jmpq *%%rax\n"
-            "add $6, %%rax\n"
-            "jmpq *%%rax\n"
-            "add $6, %%rax\n"
-            "jmpq *%%rax\n"
-            "add $6, %%rax\n"
-            "jmpq *%%rax\n"
-            "add $6, %%rax\n"
-            "jmpq *%%rax\n"
-            :: "a"(0x02), "b"(&jmp_ptr) : "rcx");
-
-
-    // Do indirect jump
-    (*fn_ptr)();
-}
-
 
 void measure() {
     fn_ptr = test;
-    jmp_ptr = 0x400e5d; //400a5d
+    //jmp_ptr = 0x400e5d; //400a5d
+    jmp_ptr = 0x400e60;
     int i;
     while (1) {
         for (i=0; i<10000; i++) {
             _mm_clflush(fn_ptr);
             _mm_clflush(&jmp_ptr);
-            indirect();
+            indirect(&jmp_ptr);
             //usleep(100);
             //usleep(1);
         }
@@ -252,7 +141,7 @@ void measure() {
         }
 
         //printf("%lu / %lu = %0.5f%% hits, %lu avg ns\n", cache_hits, tot_runs, 100*((float)cache_hits)/tot_runs, avg);
-        if (max_res > 10){
+        if (max_res > 10 && avg < 80){
             printf("[%lu]: %lu / %lu = %0.5f%% hits, %lu avg cycles, ps %ld\n", max_i, max_res, tot_runs, 100*((float)max_res)/tot_runs, avg, cur_probe_space);
             signal_idx++;
         } else {
@@ -311,6 +200,15 @@ int main()
     printf("target_fn = %p\n", target_fn);
 
     printf("measuring...\n");
+
+    signal_ptr = &probe_buf[signal_idx*cur_probe_space];
+
+    target_fn();
+
+    printf("ok\n");
+    target_fn();
+    //exit(0);
+    printf("hi\n");
 
     measure();
 

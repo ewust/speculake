@@ -1,9 +1,12 @@
 
 
-inject: inject.c
+inject: inject.c common.c
 	$(CC) -Wl,-Tlinker.ld $^ -o $@
 
-measure: measure.c
+measure: target_fn.S measure.c common.c
+	$(CC) -Wl,-Tlinker.ld $^ -o $@
+
+measure_noasm: measure.c common.c
 	$(CC) -Wl,-Tlinker.ld $^ -o $@
 
 single: single.c linker.ld
