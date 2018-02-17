@@ -21,7 +21,8 @@ uint64_t jmp_ptr;
 void train()
 {
     fn_ptr = target_fn;
-    jmp_ptr = 0x400e60;
+    //jmp_ptr = 0x400e60;
+    jmp_ptr = 0;
     while (1) {
         _mm_clflush(fn_ptr);
         _mm_clflush(&jmp_ptr);

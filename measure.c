@@ -86,10 +86,11 @@ uint64_t jmp_ptr;
 
 void measure() {
     fn_ptr = check_probes;
-    jmp_ptr = 0x400e60;
+    //jmp_ptr = 0x400e60;
+    jmp_ptr = 0;
     int i;
     while (1) {
-        for (i=0; i<10000; i++) {
+        for (i=0; i<1000; i++) {
             _mm_clflush(&fn_ptr);
             _mm_clflush(&jmp_ptr);
             indirect(&jmp_ptr);
