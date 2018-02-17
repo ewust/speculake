@@ -94,6 +94,7 @@ void measure() {
             _mm_clflush(&fn_ptr);
             _mm_clflush(&jmp_ptr);
             indirect(&jmp_ptr);
+            usleep(1);
         }
         uint64_t avg = 0;
         if (cache_hits > 0) avg = tot_time/cache_hits;
