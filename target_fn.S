@@ -3,9 +3,12 @@
   .global target_fn
   .type target_fn, @function
 target_fn:
-	mov probe_buf, %rbx
-	mov cur_probe_space, %rcx
-	mov signal_idx, %rax
+	movabs $probe_buf, %rbx
+    mov (%rbx), %rbx
+	movabs $cur_probe_space, %rcx
+    mov  (%rcx), %rcx 
+	movabs $signal_idx, %rax
+    mov  (%rax), %rax
 	//add %rax, %rax
 	imul $3, %rax
 	and $0xff, %rax
