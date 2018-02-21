@@ -67,8 +67,8 @@ SECTIONS
     /*__test_end__ = .;*/
   }
   .indirect 0x400e00: { *indirect.* }
-  .targetfn 0x410e00: { *targetfn.* }
-  .fnptr    0x420e00: { KEEP(*(.fnptr)) }
+  .targetfn 0x401000: { *targetfn.* }
+  .fnptr    0x401b00: { KEEP(*(.fnptr)) }
 
 
   .fini           :
