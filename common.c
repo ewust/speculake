@@ -52,7 +52,7 @@ void indirect(void *jmp_ptr) {
         "ret\n"
     "call_get_rip:\n"
         "call get_rip\n"
-        "add (%%rbx), %%rax\n"
+        "add (%%rcx), %%rax\n"
         // len("add (rbx), rax") + len("add $9, rax") + len("jmpq *rax") => 9
         "add $9, %%rax\n"
         // 1
@@ -154,7 +154,7 @@ void indirect(void *jmp_ptr) {
         // 32
         "jmpq *%%rax\n"
         "nop\n"
-    :: "b"(jmp_ptr) : "rax");
+    :: "c"(jmp_ptr) : "rax");
 
     // Do indirect jump
     (*fn_ptr)();
@@ -210,7 +210,7 @@ void alias_indirect(void *jmp_ptr) {
         "ret\n"
     "call_get_rip_al:\n"
         "call get_rip_al\n"
-        "add (%%rbx), %%rax\n"
+        "add (%%rcx), %%rax\n"
         // len("add (rbx), rax") + len("add $9, rax") + len("jmpq *rax") => 9
         "add $9, %%rax\n"
         // 1
@@ -312,7 +312,7 @@ void alias_indirect(void *jmp_ptr) {
         // 32
         "jmpq *%%rax\n"
         "nop\n"
-    :: "b"(jmp_ptr) : "rax");
+    :: "c"(jmp_ptr) : "rax");
 
     // Do indirect jump
     (*alias_fn_ptr)();
