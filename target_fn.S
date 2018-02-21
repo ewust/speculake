@@ -4,10 +4,13 @@
   .type target_fn, @function
 target_fn:
 	push %rbx
-	mov probe_buf, %rbx
-	mov cur_probe_space, %rcx
-	mov signal_idx, %rax
-	/*add %rax, %rax */
+	movabs $probe_buf, %rbx
+    mov (%rbx), %rbx
+	movabs $cur_probe_space, %rcx
+    mov  (%rcx), %rcx 
+	movabs $signal_idx, %rax
+    mov  (%rax), %rax
+	//add %rax, %rax
 	imul $3, %rax
 	and $0xff, %rax
 	mul %rcx		/* rax *= cur_probe_space */
