@@ -9,5 +9,5 @@ measure: target_fn.S measure.c common.c
 measure_noasm: measure.c common.c
 	$(CC) -Wl,-Tlinker.ld $^ -o $@
 
-single: single.c linker.ld
-	$(CC) -Wl,-Tlinker.ld single.c -o $@
+single: target_fn.S single.c link-single.ld common.c
+	$(CC) -Wl,-Tlink-single.ld target_fn.S single.c common.c -o $@
