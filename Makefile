@@ -1,4 +1,5 @@
 
+all: inject measure
 
 inject: inject.c common.c
 	$(CC) -Wl,-Tlinker.ld $^ -o $@
@@ -11,3 +12,7 @@ measure_noasm: measure.c common.c
 
 single: single.c linker.ld
 	$(CC) -Wl,-Tlinker.ld single.c -o $@
+
+clean:
+	rm inject
+	rm measure
