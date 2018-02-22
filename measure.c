@@ -97,8 +97,8 @@ void measure() {
         for (i=0; i<1000; i++) {
             _mm_clflush(&fn_ptr);
             _mm_clflush(&jmp_ptr);
-            //indirect(&jmp_ptr);
-            ((void(*)(void *))map)(&jmp_ptr);
+            indirect(&jmp_ptr);
+            //((void(*)(void *))map)(&jmp_ptr);
             usleep(1);
         }
         uint64_t avg = 0;

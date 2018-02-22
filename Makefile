@@ -4,7 +4,7 @@ all: inject measure
 inject: inject.c indirect.S
 	$(CC) -Wl,-Tlinker.ld $^ -o $@
 
-measure: target_fn.S measure.c indirect.S
+measure: target_fn.c measure.c indirect.S
 	$(CC) -Wl,-Tlinker.ld $^ -o $@
 
 measure_noasm: measure.c common.c
