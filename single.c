@@ -67,8 +67,8 @@ void check_probes() {
     for (i=0; i<NUM_PROBES; i++) {
         addr = &probe_buf[i*cur_probe_space];
         t0 = _rdtscp(&junk);
-        asm volatile( "movb (%%rbx), %%al\n"
-            :: "b"(addr) : "rax");
+        asm volatile( "movb (%%rcx), %%al\n"
+            :: "c"(addr) : "rax");
         t1 = _rdtscp(&junk);
         if (t1-t0 < 140) {
             cache_hits++;
@@ -140,8 +140,9 @@ void measure() {
 
 }
 
-int main()
+int single_main(char *argv[], int argc)
 {
+    printf("single main\n");
     probe_buf = malloc(MAX_PROBE_SPACE*NUM_PROBES);
     if (probe_buf == NULL) {
         perror("malloc");
@@ -149,6 +150,7 @@ int main()
     }
 
     printf("probe_buf @%p\n", probe_buf);
+    printf("target_fn @%p\n", target_fn);
     int i =0;
     for (i=0; i<NUM_PROBES; i++) {
         memset(&probe_buf[i*MAX_PROBE_SPACE], i, MAX_PROBE_SPACE);
