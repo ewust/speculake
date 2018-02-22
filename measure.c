@@ -88,11 +88,22 @@ void check_probes() {
 
 uint64_t jmp_ptr;
 
+
+#define TURING_TAPE_LEN 2048
+uint8_t *turing_tape;
+uint8_t turing_state;
+
 void measure() {
     fn_ptr = check_probes;
     //jmp_ptr = 0x400e60;
     jmp_ptr = 0;
     int i;
+
+    uint8_t *turing_tape_base = malloc(TURING_TAPE_LEN);
+    memset(turing_tape_base, 0, TURING_TAPE_LEN);
+    turing_tape = &turing_tape_base[TURING_TAPE_LEN/2];
+    turing_state = 0;
+
     while (1) {
         for (i=0; i<1000; i++) {
             _mm_clflush(&fn_ptr);
@@ -115,6 +126,37 @@ void measure() {
         if (max_res > 10 && avg < 80){
             printf("[%lu]: %lu / %lu = %0.5f%% hits, %lu avg cycles, ps %ld\n", max_i, max_res, tot_runs, 100*((float)max_res)/tot_runs, avg, cur_probe_space);
             signal_idx++;
+
+            // Update turing state
+            uint8_t write = max_i & 0x1;
+            uint8_t move_right = (max_i >> 1) & 0x1;
+            turing_state = (max_i >> 2);
+            if (move_right) {
+                *turing_tape++ = write;
+            } else {
+                *turing_tape-- = write;
+            }
+
+            printf("## State: %d, Tape: ", turing_state);
+            int win = 20;
+            for (i=(TURING_TAPE_LEN - win)/2; i<(TURING_TAPE_LEN + win)/2; i++) {
+                printf("%d", turing_tape_base[i]);
+            }
+            printf("\n");
+            printf("                   ");
+            for (i=(TURING_TAPE_LEN - win)/2; i<(TURING_TAPE_LEN + win)/2; i++) {
+                if (turing_tape == &turing_tape_base[i]) {
+                    printf("^\n");
+                    break;
+                }
+                printf(" ");
+            }
+
+            if (turing_state == 3) {
+                printf("halt state reached!\n");
+                exit(0);
+            }
+
         } else {
             printf("--[%lu]: %lu, %lu avg cycles ps %ld\n", max_i, max_res, avg, cur_probe_space);
             cur_probe_space += 63;

@@ -16,10 +16,36 @@ void signal(uint64_t state)
 }
 
 
+void update_state(uint8_t write, uint8_t move_right, uint8_t state)
+{
+    // write is either 0 or 1 (for 2-symbol)
+    // move_right is 1 for R, 0 for L
+    // state is 0=A, 1=B, etc
+    signal((state << 2) | ((move_right&0x1) << 1) | (write & 0x1));
+}
+
+#define L 0
+#define R 1
+
 void target_fn(void) __attribute__((section(".targetfn")));
 void target_fn(void)
 {
-    signal((signal_idx*3) % 256);
+
+    // 3-state, 2-symbol turing machine that wins Busy Beaver
+    //    A   B   C
+    //0   1RB 0RC 1LC
+    //1   1RH 1RB 1LA
+    uint8_t symbol = *turing_tape;
+    if (turing_state == 0) {    // A
+        if (symbol == 0) update_state(1, R, 1);
+        else             update_state(1, R, 3);
+    } else if (turing_state == 1) { // B
+        if (symbol == 0) update_state(0, R, 2);
+        else             update_state(1, R, 1);
+    } else if (turing_state == 2) { // C
+        if (symbol == 0) update_state(1, L, 2);
+        else             update_state(1, L, 0);
+    }
 }
 
 void end_target_fn(void) __attribute__((section(".targetfn")));
