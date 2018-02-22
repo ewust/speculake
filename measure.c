@@ -5,6 +5,7 @@
 #include <x86intrin.h>
 #include <unistd.h>
 #include <string.h>
+#include <sys/mman.h>
 #include "common.h"
 
 // Defines the bandwidth we can communicate
@@ -42,6 +43,8 @@ uint64_t tot_time = 0;      // Number cycles total
 unsigned int junk=0;    // For rdtscp
 
 
+void *map;
+#define TARGET_FN_ADDR 0x414100401000
 
 // We define this function in assembly (target_fn.S)
 // It is never called directly (essentially dead code)
@@ -52,6 +55,7 @@ unsigned int junk=0;    // For rdtscp
 // In reality, the CPU will (eventually) call check_probes()
 // where we collect results and see what's in cache
 void target_fn(void) __attribute__((section(".targetfn")));
+void end_target_fn(void);
 
 uint64_t results[NUM_PROBES];
 
@@ -93,7 +97,8 @@ void measure() {
         for (i=0; i<1000; i++) {
             _mm_clflush(&fn_ptr);
             _mm_clflush(&jmp_ptr);
-            indirect(&jmp_ptr);
+            //indirect(&jmp_ptr);
+            ((void(*)(void *))map)(&jmp_ptr);
             usleep(1);
         }
         uint64_t avg = 0;
@@ -141,6 +146,10 @@ int main()
         memset(&probe_buf[i*MAX_PROBE_SPACE], i, MAX_PROBE_SPACE);
         _mm_clflush(&probe_buf[i*cur_probe_space]);
     }
+
+    map = mmap((void*)TARGET_FN_ADDR, 0x1000, PROT_READ|PROT_WRITE|PROT_EXEC, MAP_PRIVATE|MAP_ANONYMOUS|MAP_FIXED, -1, 0);
+    memcpy(map, indirect, 322);
+    memcpy(map+600, target_fn, end_target_fn-target_fn);
 
     fn_ptr = check_probes;
     measure();
