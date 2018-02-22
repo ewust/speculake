@@ -33,6 +33,7 @@ uint8_t *probe_buf;
 // This is a simple counter, accessed by the speculative function (target_fn)
 // so it can compute on it.
 uint8_t signal_idx = 0;
+uint64_t instr = 0;
 
 
 // Stats
@@ -89,7 +90,7 @@ void check_probes() {
 uint64_t jmp_ptr;
 
 
-#define TURING_TAPE_LEN 2048
+#define TURING_TAPE_LEN 1024*512
 uint8_t *turing_tape;
 uint8_t turing_state;
 
@@ -105,7 +106,7 @@ void measure() {
     turing_state = 0;
 
     while (1) {
-        for (i=0; i<1000; i++) {
+        for (i=0; i<50; i++) {
             _mm_clflush(&fn_ptr);
             _mm_clflush(&jmp_ptr);
             indirect(&jmp_ptr);
@@ -123,9 +124,10 @@ void measure() {
             }
         }
 
-        if (max_res > 10 && avg < 80){
+        if (max_res > 10 && avg < 50){
             printf("[%lu]: %lu / %lu = %0.5f%% hits, %lu avg cycles, ps %ld\n", max_i, max_res, tot_runs, 100*((float)max_res)/tot_runs, avg, cur_probe_space);
             signal_idx++;
+            instr++;
 
             // Update turing state
             uint8_t write = max_i & 0x1;
@@ -137,22 +139,28 @@ void measure() {
                 *turing_tape-- = write;
             }
 
-            printf("## State: %d, Tape: ", turing_state);
-            int win = 20;
-            for (i=(TURING_TAPE_LEN - win)/2; i<(TURING_TAPE_LEN + win)/2; i++) {
-                printf("%d", turing_tape_base[i]);
+            printf("## Step %08d State: %d, Symbol: %d Tape: ", instr, turing_state, *turing_tape);
+            int win = 160;
+            uint8_t *p = &turing_tape[-win/2];
+            if (p < turing_tape_base) {
+                printf("  ");
+                p = turing_tape_base;
+            } else {
+                printf("..");
             }
+            for (i=0; i<win; i++) {
+                if (p > &turing_tape_base[TURING_TAPE_LEN]) break;
+                printf("%d", *p++);
+            }
+            if (i==win) printf("..");
             printf("\n");
-            printf("                   ");
-            for (i=(TURING_TAPE_LEN - win)/2; i<(TURING_TAPE_LEN + win)/2; i++) {
-                if (turing_tape == &turing_tape_base[i]) {
-                    printf("^\n");
-                    break;
-                }
+            printf("                                             ");
+            for (i=0; i<win/2; i++) {
                 printf(" ");
             }
+            printf("^\n");
 
-            if (turing_state == 3) {
+            if (turing_state == 5) {
                 printf("halt state reached!\n");
                 exit(0);
             }
