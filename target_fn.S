@@ -1,6 +1,7 @@
 //#include "consts.h"
 .section .targetfn, "ax"
   .global target_fn
+  .global end_target_fn
   .type target_fn, @function
 target_fn:
 	push %rbx
@@ -16,6 +17,7 @@ target_fn:
 	mul %rcx		/* rax *= cur_probe_space */
 	add %rax, %rbx
 	movb (%rbx),%al
+end_target_fn:
 
 	pop %rbx
 	ret

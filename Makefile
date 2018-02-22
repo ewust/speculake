@@ -1,10 +1,10 @@
 
 all: inject measure
 
-inject: inject.c common.c
+inject: inject.c indirect.S
 	$(CC) -Wl,-Tlinker.ld $^ -o $@
 
-measure: target_fn.S measure.c common.c
+measure: target_fn.S measure.c indirect.S
 	$(CC) -Wl,-Tlinker.ld $^ -o $@
 
 measure_noasm: measure.c common.c
