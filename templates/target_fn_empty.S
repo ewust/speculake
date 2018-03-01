@@ -1,0 +1,50 @@
+//#declude "consts.h"
+.section .targetfn, "ax"
+  .global target_fn
+  .type target_fn, @function
+target_fn:
+	movabs $probe_buf, %rbx
+    mov (%rbx), %rbx
+	movabs $cur_probe_space, %rcx
+    mov  (%rcx), %rcx 
+	movabs $signal_idx, %rax
+    mov  (%rax), %rax
+    xor    %rdx, %rdx
+
+    /*<<<{0}>>>*/
+
+    xor     %rdx, %rdx
+    xor     $0x03, %rdx
+	mul     %rdx        // rax *= rdx (3)
+	//add %rax, %rax
+    //muli $3, %rax
+	and $0xff, %rax
+	mul %rcx		// rax *= cur_probe_space
+	add %rax, %rbx
+	movb (%rbx),%al
+
+
+/*
+	mov signal_ptr, %rcx
+	mov	(%rcx), %al
+	retq
+*/
+
+
+/*
+	// works
+	push	%rbp
+	mov		%rsp,%rbp
+	push	%rbx
+	push	%rcx
+	push	%rdx
+	mov		$signal_ptr,%edx
+	mov		%edx,%ecx
+	mov		(%rcx),%rbx
+	mov		(%rbx),%al
+	pop		%rdx
+	pop		%rcx
+	pop		%rbx
+	pop		%rbp
+	retq
+*/
