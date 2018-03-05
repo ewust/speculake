@@ -12,7 +12,7 @@ void indirect(void *jmp_ptr) {
         "mov $2, %%rax\n"
         "cmpb  $0x02, %%al\n"
         // "je .+2\n"
-        /*<<<{}>>>*/
+/*<<<{0}>>>*/
 
         // Do some indirect calls
         "jmp call_get_rip\n"

@@ -109,12 +109,12 @@ void measure() {
         
         if (max_res > 10 && avg < 80){
             /*<<<{0}>>>*/
-            fprintf(/*<<<{1}>>>*/, "%lu %lu\n",  max_res, tot_runs, avg);
+            fprintf(/*<<<{1}>>>*/, "%lu %lu %lu\n",  max_res, tot_runs, avg);
             fflush(stdout);
             signal_idx++;
         } else {
             /*<<<{0}>>>*/
-            fprintf(/*<<<{1}>>>*/, "%lu %lu\n",  max_res, tot_runs, avg);
+            fprintf(/*<<<{1}>>>*/, "%lu %lu %lu\n",  max_res, tot_runs, avg);
             fflush(stdout);
             cur_probe_space += 63;
             cur_probe_space %= MAX_PROBE_SPACE;
