@@ -16,4 +16,4 @@ single: single.c linker.ld
 	$(CC) -Wl,-Tlinker.ld single.c -o $@
 
 clean:
-	$(RM) inject measure
+	$(RM) inject measure measure.c common.c target_fn.S
