@@ -15,20 +15,21 @@ INC_STR = "    inc %rdx\n"
 DEC_STR = "    dec %rdx\n"
 ADD_STR = "    add $1, %dx\n"
 ADD_LONG_STR = "    add $0xBEEF, %rdx\n"
-MUL_STR = "    imul $3, %rdx\n"
-XOR_STR = "    inc %rdx\n"
-NOT_STR = "    inc %rdx\n"
-AND_STR = "    inc %rdx\n"
-NEG_STR = "    inc %rdx\n"
-SHL_STR = "    inc %rdx\n"
-T_TESTS = [INC_STR, DEC_STR, ADD_STR, ADD_LONG_STR, MUL_STR, XOR_STR, NOT_STR, AND_STR, NEG_STR, SHL_STR]
+MUL_STR = "    imul $3, %rdx, %rdx\n"
+XOR_STR = "    xor %rdx, %rax\n"
+SHL_STR = "    shl $1, %rdx\n"
+AND_STR = "    and %rdx, %rax\n"
+T_TESTS = {
+    "inc": INC_STR, "dec": DEC_STR, "add":ADD_STR, "add_long":ADD_LONG_STR, "mul":MUL_STR, 
+    "xor":XOR_STR, "and":AND_STR, "shl":SHL_STR}
 
-JMP_REL_STR = "\t\t\"jmp .+2\\\\n\"\n"
-JMP_IND_STR = "\t\"jmp %%rax\"\n"
-BRANCH_STR = "    cmp $0x02, %%al\n    je .+2\n"
-CALL_STR = "    j .+2\n"
-TAKEN_B_STR = "    j .+2\n"
-UNTAKEN_B_STR = "    j .+2\n"
+C_INSTR =  "\t\t\"{}\\\\n\"\n"
+JMP_REL_STR = C_INSTR.format("jmp .+2")
+JMP_IND_STR = C_INSTR.format("jmp %%rax")
+BRANCH_STR = C_INSTR.format("cmp $0x02, %%al")+C_INSTR.format("je .+2")
+CALL_STR = C_INSTR.format("call get_rip")
+TAKEN_B_STR = C_INSTR.format("jmp .+2")
+UNTAKEN_B_STR = C_INSTR.format("jmp .+2")
 C_TESTS = [JMP_REL_STR, JMP_IND_STR, BRANCH_STR, CALL_STR, TAKEN_B_STR, UNTAKEN_B_STR]
 
 
@@ -36,68 +37,6 @@ C_TEMPLATE_DEFAULT = "templates/common.c"
 M_TEMPLATE_DEFAULT = "templates/measure.c"
 T_TEMPLATE_DEFAULT = "templates/target_fn_empty.S"
 
-
-
-def main():
-    file_job("c_m_testfile.dat")
-
-def file_job(outfile):
-    
-    print("Testing file_out")
-
-    # Add strings to measure.c template to determine where output goes 
-    m_strs = ["FILE *fp = fopen(\""+outfile+"\", \"w\");", "fp"] 
-
-    # Add strings to common.c to test how instructions affects BHB 
-    c_strs = [JMP_REL_STR* 10] 
-
-    # Add strings to target_fn.S to test how instr class affects spec-ex duration  
-    t_strs = [INC_STR * 10]
-
-    # Use default templates and cpu masks
-    job = Gen_Job(m_strings=m_strs, c_strings=c_strs, t_strings=t_strs,
-                description="test run to make sure files are filled correctly and all.")
-    
-
-    # Set the job run function In this case we are printing all data to a file in .dat format 
-    job.run = job.run_file
-    
-    # Fill all templates.
-    job.setup()
-
-    print(job)
-    # job.run()
-
-
-def print_job():
-
-    m_strings = ["// Printing to Pipe","stdout"]
-    c_strs = [JMP_REL_STR* 10]
-    t_strs = [INC_STR * 100]
-
-    # Use default templates and cpu masks
-    job = Gen_Job(m_strings=m_strs, c_strings=c_strs, t_strings=t_strs,
-                description="test run for live printing into pipe.")
-
-    job.run = job.run_pipe
-    job.setup()
-    # job.run()
-    
-    r = range(0, 181, 20)
-
-    job1 = Gen_Job()
-
-    for i in r:
-        max_res, avg = run(ADD_LONG_STR, i, 20) 
-        averages.append(np.mean(max_res))
-        stds.append(np.std(max_res))
-    
-    plt.plot(r, averages) 
-    plt.xlabel("# of instructions")
-    plt.ylabel("Max Cache hit Results")
-    plt.show()
-    
-    print("Done") 
 
 
 
@@ -151,7 +90,7 @@ class Gen_Job:
 
     def run_file(self):
         # Make the new measure and inject executables
-        m = subprocess.Popen(["make", "new"], stdout=None)
+        m = subprocess.Popen(["make", "all"], stdout=None)
         make_result =  m.wait()
         if make_result != 0:
             exit(1)
