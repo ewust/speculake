@@ -76,7 +76,7 @@ void printInstr(Instruction *instr) {
                     break;
 
                 case 0x08:
-                    sprintf(out, "JMP  ||  SRIP = (VAL==0)? PTR : SRIP+1");
+                    sprintf(out, "JMP  ||  SRSP = (VAL==0)? PTR : SRSP+1");
                     break;
 
                 case 0x06:
@@ -179,65 +179,70 @@ void printISA_short(){
         0x18,0x19,0x1A,0x1B,0x1C,0x1D,0x1E,0x1F,
         0x20,0x30};
     
+    printf("SP-ASM ISA v%s -- %s\n", SPASM_VERSION, SPASM_JIT_SUPPORT);
+    printf("----------------------------------------\n");
     for (i=0; i<24; i++) {
         printf("%02X  - ", defined_instrs[23-i]) ;
         b = getInstruction(defined_instrs[23-i]);
         printInstr(b);
     } 
+    printf("----------------------------------------\n");
 }
 
 
 void printISA() {
     Instruction *b; 
     int i;
+    printf("SP-ASM ISA v%s -- %s\n", SPASM_VERSION, SPASM_JIT_SUPPORT);
+    printf("----------------------------------------\n");
     for (i=63; i >= 0; i--) {
         printf("%02X  - ", i);
         b = getInstruction(i);
         printInstr(b);
     }
+    printf("----------------------------------------\n");
     free(b);
 }
 
-void printRegs_64(uint64_t *R){
-     printf("--[Registers]---\n");
-     printf("SIP  --  ADDR:%016lX \t Value: %lX\n", (uint64_t)(R+SIP_OFFSET), *(R+SIP_OFFSET) );
-     printf("SSP  --  ADDR:%016lX \t Value: %lX\n", (uint64_t)(R+SSP_OFFSET), *(R+SSP_OFFSET) );
-     printf("PTR  --  ADDR:%016lX \t Value: %lX\n", (uint64_t)(R+PTR_OFFSET), *(R+PTR_OFFSET) );
-     printf("VAL  --  ADDR:%016lX \t Value: %lX\n", (uint64_t)(R+VAL_OFFSET), *(R+VAL_OFFSET) );
-     printf("SRAX --  ADDR:%016lX \t Value: %lX\n", (uint64_t)(R+SRAX_OFFSET), *(R+SRAX_OFFSET) );
-     printf("SRBX --  ADDR:%016lX \t Value: %lX\n", (uint64_t)(R+SRBX_OFFSET), *(R+SRBX_OFFSET) );
-     printf("SRCX --  ADDR:%016lX \t Value: %lX\n", (uint64_t)(R+SRCX_OFFSET), *(R+SRCX_OFFSET) );
-     printf("SRDX --  ADDR:%016lX \t Value: %lX\n", (uint64_t)(R+SRDX_OFFSET), *(R+SRDX_OFFSET) );
-     printf("SRSI --  ADDR:%016lX \t Value: %lX\n", (uint64_t)(R+SRSI_OFFSET), *(R+SRSI_OFFSET) );
-     printf("SRDI --  ADDR:%016lX \t Value: %lX\n", (uint64_t)(R+SRDI_OFFSET), *(R+SRDI_OFFSET) );
-     printf("SR8  --  ADDR:%016lX \t Value: %lX\n", (uint64_t)(R+SR8_OFFSET), *(R+SR8_OFFSET) );
-     printf("SR9  --  ADDR:%016lX \t Value: %lX\n", (uint64_t)(R+SR9_OFFSET), *(R+SR9_OFFSET) );
-     printf("STK  --  ADDR:%016lX \t Value: %lX\n", (uint64_t)(R+STK_OFFSET), *(R+STK_OFFSET) );
-     printf("STK  --  ADDR:%016lX \t Value: %lX\n", (uint64_t)(R+STK_OFFSET+1), *(R+STK_OFFSET+1) );
-     printf("STK  --  ADDR:%016lX \t Value: %lX\n", (uint64_t)(R+STK_OFFSET+2), *(R+STK_OFFSET+2) );
-     printf("STK  --  ADDR:%016lX \t Value: %lX\n", (uint64_t)(R+STK_OFFSET+3), *(R+STK_OFFSET+3) );
-     printf("STK  --  ADDR:%016lX \t Value: %lX\n", (uint64_t)(R+STK_OFFSET+4), *(R+STK_OFFSET+4) );
-     printf("STK  --  ADDR:%016lX \t Value: %lX\n", (uint64_t)(R+STK_OFFSET+5), *(R+STK_OFFSET+5) );
-     printf("STK  --  ADDR:%016lX \t Value: %lX\n", (uint64_t)(R+STK_OFFSET+6), *(R+STK_OFFSET+6) );
-     printf("STK  --  ADDR:%016lX \t Value: %lX\n", (uint64_t)(R+STK_OFFSET+7), *(R+STK_OFFSET+7) );
-     printf("STK  --  ADDR:%016lX \t Value: %lX\n", (uint64_t)(R+STK_OFFSET+8), *(R+STK_OFFSET+8) );
-     printf("------------\n\n");
+void printReg(uint_reg *reg, char *name) {
+    #if defined(ENV64) 
+    printf("%s --  ADDR:%016lX \t Value: %lX\n", name, (uint_reg)(reg), *(reg));
+    #elif defined(ENV32)
+    printf("%s --  ADDR:%08X \t Value: %X\n", name, (uint_reg)(reg), *(reg));
+    #else 
+    printf("[64/32] something went wrong\n");
+    #endif
 }
 
 
-// TODO: DETERMINE SRIP vs RIP
-void doSetIP(uint64_t *R){
-    // EITHER:
-    //      jump real world execution to an address specified in R
-    // or 
-    //      set the SIP to do a jump in speculative world
-
-    *(R+SIP_OFFSET) = *R;
-
-    // goto *R
+void printRegs(uint_reg *R, int stk_items) {
+    uint32_t i;
+    printf("--[Registers]---\n");
+    printReg((R+SRIP_OFFSET), "SRIP");
+    printReg((R+SRSP_OFFSET), "SRSP");
+    printReg((R+PTR_OFFSET),  "PTR ");
+    printReg((R+VAL_OFFSET),  "VAL ");
+    printReg((R+SRAX_OFFSET), "SRAX");
+    printReg((R+SRBX_OFFSET), "SRBX");
+    printReg((R+SRCX_OFFSET), "SRCX");
+    printReg((R+SRDX_OFFSET), "SRDX");
+    printReg((R+SRSI_OFFSET), "SRSI");
+    printReg((R+SRDI_OFFSET), "SRDI");
+    printReg((R+SRBP_OFFSET), "SRBP");
+    printReg((R+SR8_OFFSET),  "SR8 ");
+    printReg((R+SR9_OFFSET),  "SR9 ");
+    for (i=0; i< stk_items; i++){
+        printReg((R+STK_OFFSET+i), "STK ");
+    }
+    printf("------------\n\n");
 }
 
-void doSyscall(uint64_t *R) {
+void doSetIP(uint_reg *R){
+    // set the SRSP to do a jump in speculative world
+    *(R+SRSP_OFFSET) = *R;
+}
+
+void doSyscall(uint_reg *R) {
     /* doSyscall -- Perorm a syscall using the x86-64 calling conventions from the linux 64 abi
      *      https://software.intel.com/sites/default/files/article/402129/mpx-linux64-abi.pdf
      *
@@ -247,65 +252,75 @@ void doSyscall(uint64_t *R) {
     
     // Syscall
     asm volatile (
-    // #ifdef ENV64 
+    #if defined(ENV64)
         "syscall\n"
         : /* outputs*/ "=a"(*(R+SRAX_OFFSET))
         : /* inputs */ "a"(*(R+SRAX_OFFSET)), "D"(*(R+SRDI_OFFSET)), "S"(*(R+SRSI_OFFSET)), "d"(*(R+SRDX_OFFSET)), "c"(*(R+SRCX_OFFSET)), "g"(*(R+SR8_OFFSET)), "g"(*(R+SR9_OFFSET))
         : /*clobbers*/ "cc", "r11", "memory"
-    // #else
-    //     "int $0x80\n"
-    //     : /* outputs*/ "=a"(ret)
-    //     :  /* inputs */ "a"(*(R+SRAX_OFFSET)), "D"(*(R+SRDI_OFFSET)), "S"(*(R+SRSI_OFFSET)), "d"(*(R+SRDX_OFFSET)), "c"(*(R+SRCX_OFFSET)), "g"(*(R+SR8_OFFSET)), "g"(*(R+SR9_OFFSET))
-    //     : "cc", "edi", "esi", "memory"
-    // #endif
+    #elif defined(ENV32)
+        "int $0x80\n"
+        : /* outputs*/ "=a"(*(R+SRAX_OFFSET))
+        :  /* inputs */ "a"(*(R+SRAX_OFFSET)),  "b"(*(R+SRBX_OFFSET)),  "c"(*(R+SRCX_OFFSET)), "d"(*(R+SRDX_OFFSET)), "D"(*(R+SRDI_OFFSET)) , "bp"(*(R+SRBP_OFFSET))
+        : "cc", "memory"
+    #else
+    printf("[64/32] something went wrong\n");
+    #endif
     ); 
 } 
 
-void doUpdateR(uint64_t *R, uint8_t step){
+void doUpdateReg(uint_reg *R, uint8_t step){
      *R &= ~0xf;
      *R |= step;
 }
 
-void doSHLR(uint64_t *R) {
+void doSHLReg(uint_reg *R) {
     *R = *R << 4;
 }
 
-void doPushR(uint64_t *R){
-
-    printf("Pushing Value:%lX \t @ 0x%016lX\n", *R, (uint64_t)(R + *(R+SSP_OFFSET)) );
-    *(R + *(R+SSP_OFFSET)) = *R;
-    *(R+SSP_OFFSET) +=1; 
+void doPushReg(uint_reg *R){
+    *(R+*(R+SRSP_OFFSET)) = *(R+VAL_OFFSET);
+    *(R+SRSP_OFFSET) +=1; 
 }
 
-void doPopR(uint64_t *R){
-    if ( *(R+SSP_OFFSET) <=9 ){
+void doPopReg(uint_reg *R){
+    if ( *(R+SRSP_OFFSET) <= STK_OFFSET){
+        // Stack is Empty
         *R = 0x0;
         return;
     }
-    printf("Popping Value:%lX \t from 0x%016lX\n", *(R + *(R+SSP_OFFSET)), (uint64_t)(R + *(R+SSP_OFFSET)) );
-    *R = *(R + *(R+SSP_OFFSET));
-    *(R+SSP_OFFSET) -=1; 
+    *(R+VAL_OFFSET) = *(R+*(R+SRSP_OFFSET));
+    *(R+SRSP_OFFSET) -=1; 
 }
 
-// TODO: Fill in NOP Options
-void doNOPR(uint64_t *R, uint8_t opts){
-    *(R+SIP_OFFSET) +=1;
+void doClrReg(uint_reg *R){
+    *R = 0x0;
 }
 
+void doGetBase(uint_reg *R){
+    *(R+PTR_OFFSET) = (uint_reg)R;
+}
 
-void update(uint64_t* R, State *state, uint8_t instr_i){
+void doSwap(uint_reg *R) {
+    uint_reg tmp;
+
+    tmp = *(R+VAL_OFFSET);
+    *(R+VAL_OFFSET) = *(R+PTR_OFFSET);
+    *(R+PTR_OFFSET) = tmp;
+}
+
+void update(uint_reg* R, uint8_t instr_i){
     Instruction *instr = getInstruction(instr_i);
     uint8_t step = 0;
 
     switch(instr->int8 & 0x30){
-        case 0x30:
+        case 0x30:  // Update VAL
             step = instr->int8 & 0x0F;
-            // Update VAL
+            doUpdateReg((R+VAL_OFFSET), step);
             break; 
 
-        case 0x20:
+        case 0x20:  // Update PTR
             step = instr->int8 & 0x0F;
-            // Update PTR
+            doUpdateReg((R+PTR_OFFSET), step);
             break; 
 
         case 0x10:
@@ -314,25 +329,24 @@ void update(uint64_t* R, State *state, uint8_t instr_i){
                     doSetIP(R);
                     break;
 
-                case 0x0E:
-                    // sprintf(out, "SYSCALL");
+                case 0x0E:    // sprintf(out, "SYSCALL");
                     doSyscall(R);
                     break;
 
-                case 0x0D:
-                    // sprintf(out, "VAL = VAL<<4");
+                case 0x0D:    // sprintf(out, "VAL = VAL<<4");
+                    doSHLReg(R+VAL_OFFSET);
                     break;
 
-                case 0x0C:
-                    // sprintf(out, "PTR = PTR<<4");
+                case 0x0C:    // sprintf(out, "PTR = PTR<<4");
+                    doSHLReg(R+PTR_OFFSET);
                     break;
 
-                case 0x0B:
-                    //sprintf(out, "PUSH VAL");
+                case 0x0B:    //sprintf(out, "PUSH VAL");
+                    doPushReg(R+VAL_OFFSET);
                     break;
 
-                case 0x0A:
-                    //sprintf(out, "POP VAL");
+                case 0x0A:    //sprintf(out, "POP VAL");
+                    doPopReg(R+VAL_OFFSET);
                     break;
 
                 case 0x09:
@@ -343,21 +357,25 @@ void update(uint64_t* R, State *state, uint8_t instr_i){
                     //sprintf(out, "JMP");
                     break;
 
-                case 0x02:
-                    //sprintf(out, "VAL = *PTR");
+                case 0x03:   // PTR = BASE ADDR 
+                    doGetBase(R); 
                     break;
 
-                case 0x01:
-                    //sprintf(out, "*PTR = VAL");
+                case 0x02:    //sprintf(out, "VAL = *PTR");
+                    *(R+VAL_OFFSET) = *((uint_reg *)*(R+PTR_OFFSET));
                     break;
 
-                case 0x00:
-                    //sprintf(out, "SWAP   PTR <-> VAL");
+                case 0x01:    //sprintf(out, "*PTR = VAL");
+                    *((uint_reg *)*(R+PTR_OFFSET)) = *(R+VAL_OFFSET);
+                    break;
+
+                case 0x00:    //sprintf(out, "SWAP   PTR <-> VAL");
+                    doSwap(R);
                     break;
 
                 default:
                     // TODO: Handle this case
-                    // SOMETHING WENT WRONG 
+                    printf("[ERROR] UPDATE - undefined Instruction\n");
                     break;
 
             } // END SWITCH 10
@@ -365,32 +383,42 @@ void update(uint64_t* R, State *state, uint8_t instr_i){
 
         case 0x00:
             switch(instr->int8 & 0x0F){
-                case 0x07:
-                    //sprintf(out, "CLR BOTH REPEAT");
+                case 0x0F:   // PTR = PTR + VAL
+                    *(R+PTR_OFFSET) = *(R+PTR_OFFSET) + *(R+VAL_OFFSET);
                     break;
 
-                case 0x06:
-                    //sprintf(out, "CLR VAL REPEAT");
+                case 0x0E:   // VAL = 2comp(VAL) 
+                    *(R+VAL_OFFSET) = 1 + ~(*(R+VAL_OFFSET));
                     break;
 
-                case 0x05:
-                    //sprintf(out, "CLR PTR REPEAT");
-                    break;
+                case 0x07:   //sprintf(out, "CLR BOTH REPEAT");
+                    doClrReg(R+PTR_OFFSET);
+                    doClrReg(R+VAL_OFFSET);
+                    return;
+
+                case 0x06:   //sprintf(out, "CLR VAL REPEAT"); 
+                    doClrReg(R+VAL_OFFSET);
+                    return;
+
+                case 0x05:   //sprintf(out, "CLR PTR REPEAT"); 
+                    doClrReg(R+PTR_OFFSET);
+                    return;
 
                 case 0x04:
                     //sprintf(out, "NOP REPEAT");
+                    return;
+
+                case 0x03:    //sprintf(out, "CLR BOTH");
+                    doClrReg(R+PTR_OFFSET);
+                    doClrReg(R+VAL_OFFSET);
                     break;
 
-                case 0x03:  
-                    //sprintf(out, "CLR BOTH");
+                case 0x02:    //sprintf(out, "CLR VAL");
+                    doClrReg(R+VAL_OFFSET);
                     break;
 
-                case 0x02:
-                    //sprintf(out, "CLR VAL");
-                    break;
-
-                case 0x01:  
-                    //sprintf(out, "CLR PTR");
+                case 0x01:    //sprintf(out, "CLR PTR");
+                    doClrReg(R+PTR_OFFSET);
                     break;
 
                 case 0x00:  
@@ -400,56 +428,8 @@ void update(uint64_t* R, State *state, uint8_t instr_i){
                 default: 
                     //sprintf(out, "FREE (DEFINE IF YOU NEED IT)");
                     break;
-    
-                    
             }// END Switch 00
-    }// Update R switch 
+    }// Update Reg Switch 
+                    
+    *(R+SRIP_OFFSET) += 1;
 }
-/*
-    Instruction *instr = getInstruction(instr_i);
-    printInstr(instr);
-    
-    uint8_t step = 0;
-
-    switch(instr->int8 & 0x10){
-        case 0x10:
-            step = instr->int8 & 0x0F;
-            break; 
-
-        case 0x00:
-            switch(instr->int8 & 0x0F){
-                case 0x0: break;
-                case 0x01:
-                    break;
-
-                case 0x02:
-                    // doChangeDerefR(R, false);
-                    break;
-                
-                case 0x03:
-                    // doChangeDerefR(R, true);
-                    break;
-                
-                case 0x04:
-                    doSyscall(R);
-                    break;
-                
-                case 0x05:
-                    doSHLR(R);
-                    break;
-                    
-                case 0x06:
-                    doPushR(R);
-                    break;
-                    
-                case 0x07:
-                    doPopR(R);
-                    break;
-                    
-                default:
-                    step = instr->int8 & 0x07;
-                    doNOPR(R, step);
-                    break;
-            }// Instr Switch 
-    }// Update R switch 
-}*/

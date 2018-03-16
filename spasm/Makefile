@@ -1,5 +1,5 @@
 
-all: spasm
+all: spasm spasm32
 
 new: clean all
 
@@ -13,5 +13,8 @@ process: sub_vm.h process.c sub_vm.c
 spasm: spasm_test.c spasm.c spasm.h
 	$(CC) $^ -o $@
 
+spasm32: spasm32_test.c spasm.c spasm.h
+	$(CC) -m32 $^ -o $@
+
 clean:
-	$(RM) sub_vm test spasm process
+	$(RM) sub_vm test spasm process spasm32
