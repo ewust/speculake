@@ -1,17 +1,15 @@
 .data
-.global hello
 key_schedule:
     .zero 160
 
 plaintext:
-    .skip 16, 0xab
+    .quad 0x8badf00ddeadbeef, 0x3141592653589793
 
-# can't find a way to create a 128 bit variable, so two 64-bit values it is
-# key will be 0x123456789abcef0fedcba987654321 so put them in memory backwards
-key2:
-    .quad 0xfedcba9876543210
-key1:
-    .quad 0x123456789abcdef0
+key:
+    .quad 0xfedcba9876543210, 0x123456789abcdef0
+
+format:
+    .asciz "0x%08x%08x%08x%08x\n"
 
 .text
 .global main
@@ -20,20 +18,8 @@ main:
     pushq   %rbp
     movq    %rsp, %rbp
 
-    # this works by pushing values to the stack
-    # movabs  $0x123456789abcdef0, %rax
-    # movabs $0x3c4fcf098815f7ab, %rax # tmp key to check aeskeygenassist from spec
-    # push %rax
-    # movabs $0xfedcba9876543210, %rax
-    # movabs $0xa6d2ae2816157e2b, %rax # tmp key to check aeskeygenassist from spec
-    # push %rax
-
-    # move the key into xmm1
-    # movdqa (%rsp), %xmm1
-
-    # move the "key" to the stack (just registers)
-    movq $key2, %rdi
-    movdqa (%rdi), %xmm1
+    movq $key, %rbx
+    movdqu (%rbx), %xmm1
 
     movdqa %xmm1, %xmm0 # store the original key for key-whitening
     movq $key_schedule, %rcx
@@ -60,11 +46,44 @@ main:
     aeskeygenassist $0x36, %xmm1, %xmm2
     call key_expansion_128
 
-    # load keys into registers
+    # load keys into registers, whitening is in xmm0, rest will be in xmm1-10
+    movq $key_schedule, %rcx
+    movdqu (%rcx),     %xmm1
+    movdqu 0x10(%rcx), %xmm2
+    movdqu 0x20(%rcx), %xmm3
+    movdqu 0x30(%rcx), %xmm4
+    movdqu 0x40(%rcx), %xmm5
+    movdqu 0x50(%rcx), %xmm6
+    movdqu 0x60(%rcx), %xmm7
+    movdqu 0x70(%rcx), %xmm8
+    movdqu 0x80(%rcx), %xmm8
+    movdqu 0x90(%rcx), %xmm10
+
     # key is now expanded, do encryption
     movq $plaintext, %rdi
-    movdqa (%rdi), %xmm15
+    movdqu (%rdi), %xmm15
+    pxor %xmm0, %xmm15
+    aesenc %xmm1, %xmm15
+    aesenc %xmm2, %xmm15
+    aesenc %xmm3, %xmm15
+    aesenc %xmm4, %xmm15
+    aesenc %xmm5, %xmm15
+    aesenc %xmm6, %xmm15
+    aesenc %xmm7, %xmm15
+    aesenc %xmm8, %xmm15
+    aesenc %xmm9, %xmm15
+    aesenclast %xmm10, %xmm15
 
+    movq $format, %rdi
+    movq %xmm15, %r8
+    psrldq $4, %xmm15
+    movd %xmm15, %ecx
+    psrldq $4, %xmm15
+    movd %xmm15, %edx
+    psrldq $4, %xmm15
+    movd %xmm15, %esi
+    movq $0, %rax
+    call printf
 
     leave
     ret
@@ -79,6 +98,6 @@ key_expansion_128:
     pslldq $4,    %xmm3
     pxor   %xmm3, %xmm1       
     pxor   %xmm2, %xmm1       
-    movdqa %xmm1, (%rcx)
+    movdqu %xmm1, (%rcx)
     add $0x10, %rcx
     ret       
