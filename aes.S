@@ -53,6 +53,20 @@ main:
 
     # load keys into registers, whitening is in xmm0, rest will be in xmm1-10
     movq $key_schedule, %rcx
+
+	# TODO: move this to a function, do it for each subkey
+	movq (%rcx), %rax
+	bswap %rax
+	push %rax
+	movq 0x08(%rcx), %rax
+	bswap %rax
+	push %rax
+	movdqu (%rsp), %xmm1
+	add $0x10, %rsp
+
+
+
+
     movdqu (%rcx),     %xmm1
     movdqu 0x10(%rcx), %xmm2
     movdqu 0x20(%rcx), %xmm3
