@@ -4,10 +4,7 @@ all: spasm spasm32
 new: clean all
 
 
-sub_vm: sub_vm_test.c sub_vm.c sub_vm.h
-	$(CC) $^ -o $@
-
-process: sub_vm.h process.c sub_vm.c
+process: spasm.h process.c spasm.c
 	$(CC) $^ -o $@
 
 spasm: spasm_test.c spasm.c spasm.h

@@ -59,6 +59,53 @@ void test_changeRegs(){
     }
 }
 
+
+void test_ControlFlow(){
+    printf("-[ Test Base UPTR SHPTR CMP JMP SETIP ]-\n");
+    uint_reg R_mock[16] = {0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0};
+    
+    R_mock[SRAX_OFFSET] = 0x1;
+    R_mock[SRDI_OFFSET] = 0x1;
+    R_mock[SRSI_OFFSET] = (uint_reg)(R_mock + STK_OFFSET);
+    R_mock[SRDX_OFFSET] = 0xC;
+
+    printRegs(R_mock, 0);
+    
+    update(R_mock, 0x01);   // CLR PTR 
+    update(R_mock, 0x2D);   // UPTR D
+    update(R_mock, 0x1C);   // SHPTR 
+    update(R_mock, 0x2E);   // UPTR E
+    update(R_mock, 0x1C);   // SHPTR 
+    update(R_mock, 0x2A);   // UPTR A
+    update(R_mock, 0x1C);   // SHPTR 
+    update(R_mock, 0x2D);   // UPTR D
+    update(R_mock, 0x1F);   // SET IP
+    
+    printRegs(R_mock, 0);
+
+    update(R_mock, 0x18);   // JMP
+    update(R_mock, 0x01);   // CLR PTR 
+    update(R_mock, 0x2B);   // UPTR B
+    update(R_mock, 0x1C);   // SHPTR 
+    update(R_mock, 0x2E);   // UPTR E
+    update(R_mock, 0x1C);   // SHPTR 
+    update(R_mock, 0x2E);   // UPTR E
+    update(R_mock, 0x1C);   // SHPTR 
+    update(R_mock, 0x2F);   // UPTR F
+
+    printRegs(R_mock, 0);
+
+    update(R_mock, 0x02);   // CLR VAL
+    update(R_mock, 0x19);   // CMP
+    update(R_mock, 0x18);   // JMP
+    update(R_mock, 0x00);   // NOP
+    update(R_mock, 0x00);   // NOP
+    update(R_mock, 0x00);   // NOP
+    update(R_mock, 0x00);   // NOP
+
+    printRegs(R_mock, 0);
+}
+
 void test_Pointers(){
     printf("-----[ Test Base Add Deref Assign ]-----\n");
     uint_reg R_mock[16] = {0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0};
@@ -97,39 +144,41 @@ void test_PushPop(){
     uint_reg *R_val = &(R_mock[VAL_OFFSET]);
     uint8_t step = 0x0;
     
-    for (step=0; step < 8; step++){
-        doUpdateReg(R_val, step);
-        doSHLReg(R_val);
-    }
+
+    R_mock[SRIP_OFFSET] = 0x18;
+    R_mock[SRSP_OFFSET] = STK_OFFSET;
+    R_mock[VAL_OFFSET] = 0xDEADBEEF12345678;
+
     printf("Push R: 0x%lX\n", *R_val);
-    doPushReg( R_val );
+    update(R_mock, 0x1B);   // Push VAL
+    update(R_mock, 0x1B);   // Push VAL
+
     printRegs(R_mock, 4);
-    doPushReg( R_val );
-    doPushReg( R_val );
-    
-    for (step=0xf; step >8 ; step--){
-        doUpdateReg(R_val, step);
-        doSHLReg(R_val);
-    }
-    printf("Push R: 0x%lX\n", *R_val);
-    doPushReg( R_val );
-    printRegs(R_mock, 6);
-    doPopReg(R_val);
-    printRegs(R_mock, 6);
-    doPopReg(R_val);
+
+    update(R_mock, 0x1A);   // Pop VAL
+    update(R_mock, 0x1A);   // Pop VAL
+   /* 
+    R_mock[VAL_OFFSET] = 0x41424344454647;
+    */
+
+    update(R_mock, 0x1B);   // Push VAL
+    update(R_mock, 0x1A);   // Pop VAL
+    update(R_mock, 0x1A);   // Pop VAL
+
     printRegs(R_mock, 6);
      
-    for (step=0; step < 8; step ++){doSHLReg(R_val);}
-    doPushReg(R_val);
-    doPushReg(R_val);
-    doPushReg(R_val);
-    printRegs(R_mock, 8);
-    doPopReg(R_val);
-    doPopReg(R_val);
-    doPopReg(R_val);
-    doPopReg(R_val);
-    doPopReg(R_val);
-    doPopReg(R_val);
+    update(R_mock, 0x02);   // CLR VAL
+    update(R_mock, 0x1B);   // Push VAL
+    update(R_mock, 0x1B);   // Push VAL
+    update(R_mock, 0x1B);   // Push VAL
+    printRegs(R_mock, 6);
+    update(R_mock, 0x1A);   // Pop VAL
+    update(R_mock, 0x1A);   // Pop VAL
+    update(R_mock, 0x1A);   // Pop VAL
+    update(R_mock, 0x1A);   // Pop VAL
+    update(R_mock, 0x1A);   // Pop VAL
+    update(R_mock, 0x1A);   // Pop VAL
+    update(R_mock, 0x1A);   // Pop VAL
     printRegs(R_mock, 4);
 }
 
@@ -165,13 +214,13 @@ int test_generic(){
 
 int main(){
     printISA_short();
+    //1 test_ControlFlow();
     //1 printISA();
     //1 test_asmSyscall();
     //1 test_doSyscall_write();
     //1 test_changeRegs();
-    test_Pointers();
-    // test_PushPop();
+    //1 test_Pointers();
+    //1 test_PushPop();
     // test_generic();
-    // test_doChangeDerefR();
 }
     

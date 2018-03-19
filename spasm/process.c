@@ -8,19 +8,21 @@
 
 State state; 
 
-uint64_t *R;
+uint_reg *R;
 
 
-void run() {
-    uint8_t instr;
+void run(int num_instr) {
+    uint_reg rip = *(R+SRIP_OFFSET);
 
-    FILE *finstr = fopen("./hello.sp", "r");
-    while (fread(&instr, 1, 1, finstr) == 1) {
-        printf("%02X - ", (uint8_t)instr); 
-        printInstr(getInstruction((uint8_t)instr));
+    while (true) {
+        rip = *(R+SRIP_OFFSET);
+        printf("RIP - %lX, I - 0x%02X\n", rip, state.instr[ rip ]);
+        if ( state.instr[ rip ] == 0x1E ) {
+            printRegs(R, 3);
+        }
+        update(R, state.instr[ rip ]);
     }
 }
-
 
 int setup(char *fname){
     uint8_t instr;
@@ -29,25 +31,22 @@ int setup(char *fname){
 
     // Parse spasm instructions out of file into state text section
     while (fread(&instr, 1, 1, finstr) == 1) {
-        printInstr(getInstruction((uint8_t)instr));
+        // printInstr(getInstruction((uint8_t)instr));
         state.instr[i] = (uint8_t)instr;
         i++;
     }
 
+    initState(&state);
     R = state.regs;
-    printf("0x%016lX\n", (uint64_t)R);
-
-    for (i=0; i<168; i++){
-        printf("%02X\n", state.instr[i]); 
-    }
+    return i;
 }
 
 
 int main(){
     // printISA();
+    int x =0; 
+    char *fname = "./examples/hello.sp";
     
-    char *fname = "./hello.sp";
-    
-    setup(fname);
-    // run();
+    x = setup(fname);
+    run(x);
 }

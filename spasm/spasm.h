@@ -35,6 +35,8 @@ typedef struct {
 
 Instruction* getInstruction(uint8_t instr);
 
+void initState(State *state);
+
 void printInstr(Instruction *instr);
 
 void printISA();
@@ -46,7 +48,7 @@ void update(uint_reg *R, uint8_t);
 void doSyscall(uint_reg *R);
 void doUpdateReg(uint_reg *R, uint8_t step);
 void doSHLReg(uint_reg *R);
-void doSetIP(uint_reg *R);
+void doSetIP(uint_reg *R, uint_reg *src);
 void doPopReg(uint_reg *R);
 void doPushReg(uint_reg *R);
 void doNOPR(uint_reg *R, uint8_t opts);

@@ -59,6 +59,53 @@ void test_changeRegs(){
 }
 
 
+void test_ControlFlow(){
+    printf("-[ Test Base UPTR SHPTR CMP JMP SETIP ]-\n");
+    uint_reg R_mock[16] = {0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0};
+    
+    R_mock[SRAX_OFFSET] = 0x1;
+    R_mock[SRDI_OFFSET] = 0x1;
+    R_mock[SRSI_OFFSET] = (uint_reg)(R_mock + STK_OFFSET);
+    R_mock[SRDX_OFFSET] = 0xC;
+
+    printRegs(R_mock, 0);
+    
+    update(R_mock, 0x01);   // CLR PTR 
+    update(R_mock, 0x2D);   // UPTR D
+    update(R_mock, 0x1C);   // SHPTR 
+    update(R_mock, 0x2E);   // UPTR E
+    update(R_mock, 0x1C);   // SHPTR 
+    update(R_mock, 0x2A);   // UPTR A
+    update(R_mock, 0x1C);   // SHPTR 
+    update(R_mock, 0x2D);   // UPTR D
+    update(R_mock, 0x1F);   // SET IP
+    
+    printRegs(R_mock, 0);
+
+    update(R_mock, 0x18);   // JMP
+    update(R_mock, 0x01);   // CLR PTR 
+    update(R_mock, 0x2B);   // UPTR B
+    update(R_mock, 0x1C);   // SHPTR 
+    update(R_mock, 0x2E);   // UPTR E
+    update(R_mock, 0x1C);   // SHPTR 
+    update(R_mock, 0x2E);   // UPTR E
+    update(R_mock, 0x1C);   // SHPTR 
+    update(R_mock, 0x2F);   // UPTR F
+
+    printRegs(R_mock, 0);
+
+    update(R_mock, 0x02);   // CLR VAL
+    update(R_mock, 0x19);   // CMP
+    update(R_mock, 0x18);   // JMP
+    update(R_mock, 0x00);   // NOP
+    update(R_mock, 0x00);   // NOP
+    update(R_mock, 0x00);   // NOP
+    update(R_mock, 0x00);   // NOP
+
+    printRegs(R_mock, 0);
+}
+
+
 void test_Pointers(){
     printf("-----[ Test Base Add Deref Assign ]-----\n");
     uint_reg R_mock[16] = {0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0};
@@ -123,7 +170,7 @@ void test_PushPop(){
     doPushReg(R_p);
     doPushReg(R_p);
     doPushReg(R_p);
-    printRegs(R_p, 8);
+    printRegs(R_p, 6);
     doPopReg(R_p);
     doPopReg(R_p);
     doPopReg(R_p);
@@ -178,13 +225,14 @@ int test_generic(){
 }
 
 int main(){
-    //1 test_printISA_short();
+    test_printISA_short();
+    test_ControlFlow();
     //1 test_printISA();
     //1 test_asmSyscall();
     //1 test_doSyscall_write();
     //1 test_changeRegs();
     //1 test_PushPop();
-    test_Pointers();
+    //1 test_Pointers();
     // test_generic();
 }
     

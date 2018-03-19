@@ -29,6 +29,10 @@ Instruction* getInstruction(uint8_t instr) {
     return b;
 }
 
+void initState(State *state){
+    state->regs[SRIP_OFFSET] = 0;
+    state->regs[SRSP_OFFSET] = STK_OFFSET;
+}
 
 void printInstr(Instruction *instr) {
     char *out = (char*)malloc(64*sizeof(char));
@@ -72,11 +76,11 @@ void printInstr(Instruction *instr) {
                     break;
 
                 case 0x09:
-                    sprintf(out, "CMP  ||  VAL = (VAL <= *PTR)? 1 : 0");
+                    sprintf(out, "CMP  ||  VAL = (VAL <= RAX)? 1 : 0");
                     break;
 
                 case 0x08:
-                    sprintf(out, "JMP  ||  SRSP = (VAL==0)? PTR : SRSP+1");
+                    sprintf(out, "JMP  ||  SRIP = (VAL==0)? PTR : SRIP+1");
                     break;
 
                 case 0x06:
@@ -237,9 +241,9 @@ void printRegs(uint_reg *R, int stk_items) {
     printf("------------\n\n");
 }
 
-void doSetIP(uint_reg *R){
-    // set the SRSP to do a jump in speculative world
-    *(R+SRSP_OFFSET) = *R;
+void doSetIP(uint_reg *R, uint_reg *src){
+    // set the SRIP to do a jump in speculative world
+    *(R+SRIP_OFFSET) = *src;
 }
 
 void doSyscall(uint_reg *R) {
@@ -285,7 +289,7 @@ void doPushReg(uint_reg *R){
 void doPopReg(uint_reg *R){
     if ( *(R+SRSP_OFFSET) <= STK_OFFSET){
         // Stack is Empty
-        *R = 0x0;
+        *(R+VAL_OFFSET) = 0x0;
         return;
     }
     *(R+VAL_OFFSET) = *(R+*(R+SRSP_OFFSET));
@@ -308,6 +312,17 @@ void doSwap(uint_reg *R) {
     *(R+PTR_OFFSET) = tmp;
 }
 
+void doCompare(uint_reg *R) {
+    // CMP  ||  VAL = (VAL <= RAX)? 1 : 0
+    if ( *(R+VAL_OFFSET) <= *(R+SRAX_OFFSET) ){
+        *(R+VAL_OFFSET) = 0x1;
+    }
+    else {
+        *(R+VAL_OFFSET) = 0x0;
+    }
+}
+
+
 void update(uint_reg* R, uint8_t instr_i){
     Instruction *instr = getInstruction(instr_i);
     uint8_t step = 0;
@@ -326,8 +341,8 @@ void update(uint_reg* R, uint8_t instr_i){
         case 0x10:
             switch(instr->int8 & 0x0F){
                 case 0x0F:
-                    doSetIP(R);
-                    break;
+                    doSetIP(R, R+PTR_OFFSET);
+                    return;
 
                 case 0x0E:    // sprintf(out, "SYSCALL");
                     doSyscall(R);
@@ -342,19 +357,22 @@ void update(uint_reg* R, uint8_t instr_i){
                     break;
 
                 case 0x0B:    //sprintf(out, "PUSH VAL");
-                    doPushReg(R+VAL_OFFSET);
+                    doPushReg(R);
                     break;
 
                 case 0x0A:    //sprintf(out, "POP VAL");
-                    doPopReg(R+VAL_OFFSET);
+                    doPopReg(R);
                     break;
 
-                case 0x09:
-                    //sprintf(out, "CMP (VAL <= *PTR)");
+                case 0x09:    // CMP  ||  VAL = (VAL <= RAX)? 1 : 0
+                    doCompare(R);
                     break;
 
-                case 0x08:
-                    //sprintf(out, "JMP");
+                case 0x08:    // JMP  ||  SRIP = (VAL==0)? PTR : SRIP+1
+                    if ( *(R+VAL_OFFSET) != 0 ) {
+                        doSetIP(R, R+PTR_OFFSET); 
+                        return;
+                    }
                     break;
 
                 case 0x03:   // PTR = BASE ADDR 
@@ -433,3 +451,11 @@ void update(uint_reg* R, uint8_t instr_i){
                     
     *(R+SRIP_OFFSET) += 1;
 }
+
+
+/*void run(uint_reg *R, uint8_t * Instructions){
+
+    // TODO: Check Instruction bounds
+    update(R, Instructions[*(R+SRIP_OFFSET)])
+}
+*/
