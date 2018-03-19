@@ -6,7 +6,12 @@ plaintext:
     .quad 0x8badf00ddeadbeef, 0x3141592653589793
 
 key:
-    .quad 0xfedcba9876543210, 0x123456789abcdef0
+    # .quad 0xfedcba9876543210, 0x123456789abcdef0
+    # .quad 0x0001020304050607, 0x08090a0b0c0d0e0f
+    .quad 0x0706050403020100, 0x0f0e0d0c0b0a0908
+    # .quad 0x0f0e0d0c0b0a0908, 0x0706050403020100
+    # .quad 0x0302010007060504, 0x0b0a09080f0e0d0c
+    # .quad 0xffffffffffffffff, 0xffffffffffffffff
 
 format:
     .asciz "0x%08x%08x%08x%08x\n"
@@ -48,6 +53,20 @@ main:
 
     # load keys into registers, whitening is in xmm0, rest will be in xmm1-10
     movq $key_schedule, %rcx
+
+	# TODO: move this to a function, do it for each subkey
+	movq (%rcx), %rax
+	bswap %rax
+	push %rax
+	movq 0x08(%rcx), %rax
+	bswap %rax
+	push %rax
+	movdqu (%rsp), %xmm1
+	add $0x10, %rsp
+
+
+
+
     movdqu (%rcx),     %xmm1
     movdqu 0x10(%rcx), %xmm2
     movdqu 0x20(%rcx), %xmm3
