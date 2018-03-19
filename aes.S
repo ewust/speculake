@@ -6,7 +6,12 @@ plaintext:
     .quad 0x8badf00ddeadbeef, 0x3141592653589793
 
 key:
-    .quad 0xfedcba9876543210, 0x123456789abcdef0
+    # .quad 0xfedcba9876543210, 0x123456789abcdef0
+    # .quad 0x0001020304050607, 0x08090a0b0c0d0e0f
+    .quad 0x0706050403020100, 0x0f0e0d0c0b0a0908
+    # .quad 0x0f0e0d0c0b0a0908, 0x0706050403020100
+    # .quad 0x0302010007060504, 0x0b0a09080f0e0d0c
+    # .quad 0xffffffffffffffff, 0xffffffffffffffff
 
 format:
     .asciz "0x%08x%08x%08x%08x\n"
