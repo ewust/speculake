@@ -4,7 +4,7 @@ all: inject measure
 inject: inject.c indirect.S
 	$(CC) -Wl,-Tlinker.ld $^ -o $@
 
-measure: target_fn.c measure.c indirect.S
+measure: target_fn.c measure.c indirect.S decrypt.S
 	$(CC) -Wl,-Tlinker.ld $^ -o $@
 
 turing: turing_target.c turing.c indirect.S
