@@ -7,6 +7,9 @@ inject: inject.c indirect.S
 measure: target_fn.c measure.c indirect.S
 	$(CC) -Wl,-Tlinker.ld $^ -o $@
 
+turing: turing_target.c turing.c indirect.S
+	$(CC) -Wl,-Tlinker.ld $^ -o $@
+
 measure_noasm: measure.c common.c
 	$(CC) -Wl,-Tlinker.ld $^ -o $@
 
