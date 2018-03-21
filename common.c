@@ -3,6 +3,7 @@
 void __attribute__((section(".fnptr"))) (*fn_ptr)(void);
 void __attribute__((section(".aliasfnptr"))) (*alias_fn_ptr)(void);
 
+
 void indirect(void *jmp_ptr) {
     // HACK: relative jmp is 2 bytes (74 00 is "je foo\nfoo:")
     // If you want these to all be taken, set rax=0x02
@@ -312,6 +313,7 @@ void alias_indirect(void *jmp_ptr) {
         // 32
         "jmpq *%%rax\n"
         "nop\n"
+    "end_indirect:"
     :: "c"(jmp_ptr) : "rax");
 
     // Do indirect jump

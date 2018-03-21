@@ -58,7 +58,7 @@ int main(int argc, char *argv[])
         perror("mmap");
         return -1;
     }
-    memcpy(map, indirect, 322);
+    memcpy(map, indirect, ((uint64_t)end_indirect)-((uint64_t)indirect));
 
     // Set it to just immediately return (retq = 0xc3)...
     memset(map+600, '\xc3', 1);

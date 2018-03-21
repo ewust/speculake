@@ -106,9 +106,9 @@ void measure() {
     turing_state = 0;
 
     while (1) {
-        for (i=0; i<50; i++) {
+        for (i=0; i<10000; i++) {
             _mm_clflush(&fn_ptr);
-            _mm_clflush(&jmp_ptr);
+            //_mm_clflush(&jmp_ptr);
             indirect(&jmp_ptr);
             //((void(*)(void *))map)(&jmp_ptr);
             usleep(1);
@@ -125,10 +125,11 @@ void measure() {
         }
 
         if (max_res > 10 && avg < 50){
-            printf("[%lu]: %lu / %lu = %0.5f%% hits, %lu avg cycles, ps %ld\n", max_i, max_res, tot_runs, 100*((float)max_res)/tot_runs, avg, cur_probe_space);
+            printf("[%lx]: %lu / %lu = %0.5f%% hits, %lu avg cycles, ps %ld\n", max_i, max_res, tot_runs, 100*((float)max_res)/tot_runs, avg, cur_probe_space);
             signal_idx++;
             instr++;
 
+            /*
             // Update turing state
             uint8_t write = max_i & 0x1;
             uint8_t move_right = (max_i >> 1) & 0x1;
@@ -164,6 +165,7 @@ void measure() {
                 printf("halt state reached!\n");
                 exit(0);
             }
+            */
 
         } else {
             printf("--[%lu]: %lu, %lu avg cycles ps %ld\n", max_i, max_res, avg, cur_probe_space);
@@ -198,7 +200,7 @@ int main()
     }
 
     map = mmap((void*)TARGET_FN_ADDR, 0x1000, PROT_READ|PROT_WRITE|PROT_EXEC, MAP_PRIVATE|MAP_ANONYMOUS|MAP_FIXED, -1, 0);
-    memcpy(map, indirect, 322);
+    memcpy(map, indirect, ((uint64_t)end_indirect)-((uint64_t)indirect));
     memcpy(map+600, target_fn, end_target_fn-target_fn);
 
     fn_ptr = check_probes;
