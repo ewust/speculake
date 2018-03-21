@@ -23,7 +23,7 @@ def le_ctr():
 
 ctr_mode = AES.new(key, AES.MODE_CTR, counter=ctr)
 
-msg = 'The Magic Words are Squeamish Ossifrage'
+msg = 'The Magic Words are Squeamish Ossifrage\x00'
 
 ctr_ct = ctr_mode.encrypt(msg)
 print '// ', ctr_ct.encode('hex')

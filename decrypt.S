@@ -20,7 +20,7 @@ key_schedule:
 ctext:
     .quad 0x59abacd30dd66f0c, 0xeb3ceeca175ec992
     .quad 0x7962d40d90d41628, 0x7bc1b1c6b5763412
-    .quad 0x00, 0xc3fcf821e1bf3a
+    .quad 0x00, 0x8cc3fcf821e1bf3a
 
 
 .text
