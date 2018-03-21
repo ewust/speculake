@@ -25,6 +25,8 @@ ctr_mode = AES.new(key, AES.MODE_CTR, counter=ctr)
 
 msg = 'The Magic Words are Squeamish Ossifrage\x00'
 
+msg = ''.join([chr(x&0xff) for x in xrange(1024)])
+
 ctr_ct = ctr_mode.encrypt(msg)
 print '// ', ctr_ct.encode('hex')
 print 'ctext:'
