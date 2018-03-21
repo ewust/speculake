@@ -17,9 +17,11 @@ key_schedule:
 	.quad 0xc1d38f0297b36395, 0xff5fe2ff496d7f41
 
 
-plaintext:
-			//0x8badf00ddeadbeef3141592653589793
-    .quad 0x9397585326594131, 0xefbeadde0df0ad8b # correct ordering, so no swapping necessary in code
+ctext:
+    .quad 0x59abacd30dd66f0c, 0xeb3ceeca175ec992
+    .quad 0x7962d40d90d41628, 0x7bc1b1c6b5763412
+    .quad 0x00, 0xc3fcf821e1bf3a
+
 
 .text
 .global try_decrypt
@@ -69,4 +71,49 @@ try_decrypt:
 	//bswap %rax
 
 	leave
+	ret
+
+.text
+.global aes_ctr
+aes_ctr:
+	mov $key_schedule, %rcx
+    movaps 0x00(%rcx), %xmm0
+    movaps 0x10(%rcx), %xmm1
+    movaps 0x20(%rcx), %xmm2
+    movaps 0x30(%rcx), %xmm3
+    movaps 0x40(%rcx), %xmm4
+    movaps 0x50(%rcx), %xmm5
+    movaps 0x60(%rcx), %xmm6
+    movaps 0x70(%rcx), %xmm7
+    movaps 0x80(%rcx), %xmm8
+    movaps 0x90(%rcx), %xmm9
+    movaps 0xa0(%rcx), %xmm10
+
+	movq %rdi, %rax
+	bswap %rax
+	movq %rax, %xmm15		// initialize counter
+
+	pxor %xmm0, %xmm15
+    aesenc %xmm1, %xmm15
+    aesenc %xmm2, %xmm15
+    aesenc %xmm3, %xmm15
+    aesenc %xmm4, %xmm15
+    aesenc %xmm5, %xmm15
+    aesenc %xmm6, %xmm15
+    aesenc %xmm7, %xmm15
+    aesenc %xmm8, %xmm15
+    aesenc %xmm9, %xmm15
+    aesenclast %xmm10, %xmm15
+
+	// Xor with ctext
+	mov $ctext, %rcx
+	imul $0x10, %rdi
+	addq %rcx, %rdi
+	movaps 0x00(%rdi), %xmm14
+	pxor %xmm14, %xmm15
+
+	// return __uint128_t in rax,rdx
+	movq %xmm15, %rdx
+	psrldq $0x8, %xmm15
+	movq %xmm15, %rax
 	ret

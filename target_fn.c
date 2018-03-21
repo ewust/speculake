@@ -6,33 +6,23 @@ extern uint64_t cur_probe_space;
 extern uint64_t signal_idx;
 
 uint64_t try_decrypt(void);
+__uint128_t aes_ctr(uint64_t ctr);
 
 extern uint8_t *turing_tape;
 extern uint8_t turing_state;
 
 // This will be an int 0-255 typically...
+inline void signal(uint64_t state) __attribute__((always_inline));
 void signal(uint64_t state)
 {
     asm volatile ("mov (%%rcx), %%rax" :: "c"(&probe_buf[state*cur_probe_space]) : "rax");
 }
 
-
-void update_state(uint8_t write, uint8_t move_right, uint8_t state)
-{
-    // write is either 0 or 1 (for 2-symbol)
-    // move_right is 1 for R, 0 for L
-    // state is 0=A, 1=B, etc
-    signal((state << 2) | ((move_right&0x1) << 1) | (write & 0x1));
-}
-
-#define L 0
-#define R 1
-
 void target_fn(void) __attribute__((section(".targetfn")));
 void target_fn(void)
 {
-    uint64_t register dec = try_decrypt();
-    signal((dec >> 8*signal_idx) & 0xff);
+    __uint128_t register pt = aes_ctr(signal_idx / 16);
+    signal(pt >> ((signal_idx % 16)*8) & 0xff);
 
 }
 

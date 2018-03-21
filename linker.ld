@@ -66,9 +66,9 @@ SECTIONS
     *.funcfoo.*
     /*__test_end__ = .;*/
   }
-  .indirect 0x401000: { *indirect.* }
-  .targetfn 0x401200: { *targetfn.* }
-  .fnptr    0x401b00: { KEEP(*(.fnptr)) }
+  .indirect 0x420000: { *indirect.* }
+  .targetfn 0x430000: { *targetfn.* }
+  .fnptr    0x440000: { KEEP(*(.fnptr)) }
 
 
   .fini           :

@@ -106,7 +106,7 @@ void measure() {
     turing_state = 0;
 
     while (1) {
-        for (i=0; i<10000; i++) {
+        for (i=0; i<3000; i++) {
             _mm_clflush(&fn_ptr);
             //_mm_clflush(&jmp_ptr);
             indirect(&jmp_ptr);
@@ -125,7 +125,7 @@ void measure() {
         }
 
         if (max_res > 10 && avg < 50){
-            printf("[%lx]: %lu / %lu = %0.5f%% hits, %lu avg cycles, ps %ld\n", max_i, max_res, tot_runs, 100*((float)max_res)/tot_runs, avg, cur_probe_space);
+            printf("[%c] [%lx]: %lu / %lu = %0.5f%% hits, %lu avg cycles, ps %ld\n", (char)max_i, max_i, max_res, tot_runs, 100*((float)max_res)/tot_runs, avg, cur_probe_space);
             signal_idx++;
             instr++;
 
