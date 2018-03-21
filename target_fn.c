@@ -31,38 +31,9 @@ void update_state(uint8_t write, uint8_t move_right, uint8_t state)
 void target_fn(void) __attribute__((section(".targetfn")));
 void target_fn(void)
 {
-
-
-    uint64_t dec = try_decrypt();
+    uint64_t register dec = try_decrypt();
     signal((dec >> 8*signal_idx) & 0xff);
 
-    /*
-    asm volatile (
-        ".align 16\n"
-        "key_schedule:\n"
-            ".quad 0xf0e0d0c0b0a0908, 0x706050403020100  \n"      // xmm0
-            ".quad 0xfe76abd6f178a6da, 0xfa72afd2fd74aad6\n"    // xmm1
-            ".quad 0xfeb3306800c59bbe, 0xf1bd3d640bcf92b6\n"    // xmm2
-            ".quad 0x41bf6904bf0c596c, 0xbfc9c2d24e74ffb6\n"    // xmm3
-            ".quad 0xfd8d05fdbc326cf9, 0x33e3595bcf7f747 \n"    // xmm4
-            ".quad 0xaa22f6ad57aff350, 0xeb9d9fa9e8a3aa3c\n"    // xmm5
-            ".quad 0x6b1fa30ac13d55a7, 0x9692a6f77d0f395e\n"    // xmm6
-            ".quad 0x26c0a94e4ddf0a44, 0x8ce25fe31a70f914\n"    // xmm7
-            ".quad 0xd27abfaef4ba16e0, 0xb9651ca435874347\n"    // xmm8
-            ".quad 0x4e972cbe9ced9310, 0x685785f0d1329954\n"    // xmm9
-            ".quad 0xc5302b4d8ba707f3, 0x174a94e37f1d1113\n"    // xmm10
-        */
-
-
-    /*
-    register int i;
-    register int x = 0;
-    //signal(15);
-    for (i=0; i<19; i++) {
-        x += i;
-    }
-    signal(x & 0xff);
-    */
 }
 
 void end_target_fn(void) __attribute__((section(".targetfn")));
