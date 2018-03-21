@@ -60,7 +60,11 @@ get_rip:
 call_get_rip:
 	call get_rip
 
-	add (%rbx), %rax
+	//add (%rbx), %rax
+	//add $0x0, %rax
+	nop
+	nop
+	nop
     // len("add (rbx), rax") + len("add $9, rax") + len("jmpq *rax") => 9
     add $9, %rax
         // 1
@@ -161,13 +165,43 @@ call_get_rip:
         add $6, %rax
         // 32
         jmpq *%rax
+/*
+        add $6, %rax
+        // 33
+        jmpq *%rax
+        add $6, %rax
+        // 34
+        jmpq *%rax
+        add $6, %rax
+        // 35
+        jmpq *%rax
+        add $6, %rax
+        // 36
+        jmpq *%rax
+        add $6, %rax
+        // 37
+        jmpq *%rax
+        add $6, %rax
+        // 38
+        jmpq *%rax
+        add $6, %rax
+        // 39
+        jmpq *%rax
+		//
+
+
+
         //nop
+		// */
 
     // Do indirect jump
 	mov fn_ptr,%rax
+	add (%rbx), %rax
 	callq *%rax
 	add	$0x18,%rsp
 	pop %rbx
 	pop %rbp
 	retq
+  .global end_indirect
+  .type end_indirect, @function
 end_indirect:
