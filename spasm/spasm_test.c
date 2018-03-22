@@ -219,7 +219,7 @@ int main(){
     //1 test_doSyscall_write();
     //1 test_changeRegs();
     //1 test_Pointers();
-    test_PushPop();
+    //1 test_PushPop();
     // test_generic();
 }
     

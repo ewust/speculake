@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 
+import sys
 
 
+def main(fname):
 
-def main():
-
+    fname_out = ''.join([fname.split(".")[0], ".sp"])
     out = []
 
-    with open("hello.hex", 'rb') as f:
+    with open(fname, 'rb') as f:
         byte = f.read(2)
         while byte != b"":
             # Do stuff with byte.
@@ -19,8 +20,11 @@ def main():
         f.close()
 
 
-    with open("hello.sp", 'w') as fout:
+    with open(fname_out, 'w') as fout:
         fout.write("".join(out))
 
 if __name__ == "__main__":
-    main()
+    if len(sys.argv) < 2:
+        print("No File Specified")
+    else:
+        main(sys.argv[1])
