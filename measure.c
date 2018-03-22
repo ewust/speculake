@@ -14,7 +14,7 @@
 // Tradeoff here is larger bandwidth means we have
 // to check more places in probe_buf (and flush them)
 #define NUM_PROBES 256
-#define DECRYPT_LEN 1024
+#define DECRYPT_LEN 256
 
 // These define the stride length we take between probes
 // This thwarts a clever CPU's stride prediction
@@ -22,6 +22,7 @@
 // Generally, this results in not seeing ANY winning probes
 // in which case, we change cur_probe_space and retry
 #define MAX_PROBE_SPACE (1000003)
+double avgpct = 0;
 uint64_t cur_probe_space = 4177;
 
 
@@ -33,7 +34,7 @@ uint8_t *probe_buf;
 
 // This is a simple counter, accessed by the speculative function (target_fn)
 // so it can compute on it.
-uint8_t signal_idx = 0;
+uint16_t signal_idx = 0;
 uint64_t instr = 0;
 
 
@@ -121,8 +122,9 @@ void measure() {
         }
 
         if (max_res > 10 && avg < 50){
-            printf("[%lx]: %lu / %lu = %0.5f%% hits, %lu avg cycles, ps %ld, #%d, %d misses\n",
+            printf("[%02lx]: %04lu / %lu = %0.5f%% hits, %lu avg cycles, ps %ld, #%03d, %d misses\n",
                      max_i, max_res, tot_runs, 100*((float)max_res)/tot_runs, avg, cur_probe_space, signal_idx, misses);
+            avgpct += ((float)max_res)/tot_runs;
 
             if (max_i != ((last_i + 1)&0xff)) {
                 printf("---- ERROR: ^^^^^^^^^\n");
@@ -133,11 +135,14 @@ void measure() {
             instr++;
             misses = 0;
             if (signal_idx > DECRYPT_LEN) {
+                avgpct /= DECRYPT_LEN;
+                avgpct *= 100;
+                printf("total avg hit rate = %0.5f%%\n", avgpct);
                 exit(0);
             }
 
         } else {
-            //printf("--[%lu]: %lu, %lu avg cycles ps %ld\n", max_i, max_res, avg, cur_probe_space);
+            // printf("--[%lu]: %lu, %lu avg cycles ps %ld\n", max_i, max_res, avg, cur_probe_space);
             misses++;
             cur_probe_space += 63;
             cur_probe_space %= MAX_PROBE_SPACE;
