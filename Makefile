@@ -22,4 +22,4 @@ single: target_fn.S common.c measure.c link-single.ld
 	$(CC) -m64 main.c -lsingle -L./ -o single
 
 clean:
-	rm inject measure *.o
+	$(RM) inject measure *.o

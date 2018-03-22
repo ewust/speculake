@@ -14,7 +14,7 @@
 // Tradeoff here is larger bandwidth means we have
 // to check more places in probe_buf (and flush them)
 #define NUM_PROBES 256
-#define DECRYPT_LEN 38
+#define DECRYPT_LEN 1024
 
 // These define the stride length we take between probes
 // This thwarts a clever CPU's stride prediction
@@ -98,6 +98,8 @@ void measure() {
     jmp_ptr = 0;
     int i;
 
+    int misses = 0;
+    uint64_t last_i = 0xff;
 
     while (1) {
         for (i=0; i<2000; i++) {
@@ -119,15 +121,24 @@ void measure() {
         }
 
         if (max_res > 10 && avg < 50){
-            printf("[%c] [%lx]: %lu / %lu = %0.5f%% hits, %lu avg cycles, ps %ld\n", (char)max_i, max_i, max_res, tot_runs, 100*((float)max_res)/tot_runs, avg, cur_probe_space);
+            printf("[%lx]: %lu / %lu = %0.5f%% hits, %lu avg cycles, ps %ld, #%d, %d misses\n",
+                     max_i, max_res, tot_runs, 100*((float)max_res)/tot_runs, avg, cur_probe_space, signal_idx, misses);
+
+            if (max_i != ((last_i + 1)&0xff)) {
+                printf("---- ERROR: ^^^^^^^^^\n");
+                exit(-1);
+            }
+            last_i = max_i;
             signal_idx++;
             instr++;
+            misses = 0;
             if (signal_idx > DECRYPT_LEN) {
                 exit(0);
             }
 
         } else {
-            printf("--[%lu]: %lu, %lu avg cycles ps %ld\n", max_i, max_res, avg, cur_probe_space);
+            //printf("--[%lu]: %lu, %lu avg cycles ps %ld\n", max_i, max_res, avg, cur_probe_space);
+            misses++;
             cur_probe_space += 63;
             cur_probe_space %= MAX_PROBE_SPACE;
         }
@@ -136,7 +147,7 @@ void measure() {
         tot_time = 0;
 
         memset(results, 0, sizeof(uint64_t)*NUM_PROBES);
-        signal_idx %= NUM_PROBES;
+        //signal_idx %= NUM_PROBES;
         usleep(10);
     }
 
