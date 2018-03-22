@@ -32,7 +32,6 @@ void run(int num_instr) {
         //     printRegs(R, 3);
         // }
         update(R, state.instr[ rip ]);
-        if (rip > 102) break;
     }
 }
 

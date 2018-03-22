@@ -84,26 +84,25 @@
       //syscall      - sys_write (4, 1, rsp, 0x10)
 0x1E        syscall
 
-      //mov $0x3c, %rax
+      //mov $0x1, %rax
+0x02        CLR VAL                        
 0x13        PTR = base_addr                
-0x32        UVAL  0x2  [rax_offset == 0x20]
-0x1D        SHVAL << 4 
+0x34        UVAL  0x4  [rax_offset == 0x4]
+0x0D        VAL *= REG_SIZE
 0x0F        PTR = PTR + VAL                
 0x02        CLR VAL                        
-0x33        UVAL  0x3
-0x1D        SHVAL << 4 
-0x3C        UVAL  0xC
+0x31        UVAL  0x1
 0x11        *PTR = VAL                     
  
-      //mov $0x0, %rdi
+      //mov $0x0, %rbx
+0x02        CLR VAL                        
 0x13        PTR = base_addr                
-0x34        UVAL  0x4  [rdi_offset == 0x48]
-0x1D        SHVAL << 4 
-0x38        UVAL  0x8  [rdi_offset == 0x48]
+0x35        UVAL  0x5  [rdi_offset == 0x5]
+0x0D        VAL *= REG_SIZE
 0x0F        PTR = PTR + VAL                
 0x02        CLR VAL                        
 0x11        *PTR = VAL                     
                                            
-      //syscall     - sys_exit(3c, 0)
+      //syscall     - sys_exit(1, 0)
 0x1E        syscall
 
