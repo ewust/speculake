@@ -14,13 +14,23 @@ uint_reg *R;
 void run(int num_instr) {
     uint_reg rip = *(R+SRIP_OFFSET);
 
+    Instruction *instr;
+
     while (true) {
         rip = *(R+SRIP_OFFSET);
-        printf("RIP - %lX, I - 0x%02X\n", rip, state.instr[ rip ]);
-        if ( state.instr[ rip ] == 0x1E ) {
-            printRegs(R, 3);
-        }
+        // printf("RIP - %lX, I - 0x%02X - ", rip, state.instr[ rip ]);
+        instr = getInstruction(state.instr[rip]);
+        // printInstr(instr);
+
+        // if (( state.instr[ rip ] == 0x1A ) || ( state.instr[ rip ] == 0x1B ))  {
+        //      printReg((R+VAL_OFFSET),  "VAL ");
+        //     printReg((R+SRAX_OFFSET), "SRAX");
+        // }
+        // if ( state.instr[ rip ] == 0x1E ) {
+        //       printRegs(R, 3);
+        // }
         update(R, state.instr[ rip ]);
+        if (rip > 102) break;
     }
 }
 

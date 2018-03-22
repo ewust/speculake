@@ -151,15 +151,17 @@ void test_PushPop(){
 
     printf("Push R: 0x%lX\n", *R_val);
     update(R_mock, 0x1B);   // Push VAL
+    R_mock[VAL_OFFSET] = 0x1111111111111111;
     update(R_mock, 0x1B);   // Push VAL
 
     printRegs(R_mock, 4);
 
     update(R_mock, 0x1A);   // Pop VAL
     update(R_mock, 0x1A);   // Pop VAL
-   /* 
+
+    printRegs(R_mock, 6);
+
     R_mock[VAL_OFFSET] = 0x41424344454647;
-    */
 
     update(R_mock, 0x1B);   // Push VAL
     update(R_mock, 0x1A);   // Pop VAL
@@ -172,9 +174,6 @@ void test_PushPop(){
     update(R_mock, 0x1B);   // Push VAL
     update(R_mock, 0x1B);   // Push VAL
     printRegs(R_mock, 6);
-    update(R_mock, 0x1A);   // Pop VAL
-    update(R_mock, 0x1A);   // Pop VAL
-    update(R_mock, 0x1A);   // Pop VAL
     update(R_mock, 0x1A);   // Pop VAL
     update(R_mock, 0x1A);   // Pop VAL
     update(R_mock, 0x1A);   // Pop VAL
@@ -220,7 +219,7 @@ int main(){
     //1 test_doSyscall_write();
     //1 test_changeRegs();
     //1 test_Pointers();
-    //1 test_PushPop();
+    test_PushPop();
     // test_generic();
 }
     

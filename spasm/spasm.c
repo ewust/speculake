@@ -129,6 +129,10 @@ void printInstr(Instruction *instr) {
                     sprintf(out, "VAL = 2sCompl(Val)");
                     break;
 
+                case 0x0D:
+                    sprintf(out, "VAL *= %d (reg_size)", BYTES_PER_REG);
+                    break;
+
                 case 0x07:
                     sprintf(out, "CLR BOTH REPEAT");
                     break;
@@ -178,7 +182,7 @@ void printISA_short(){
     int i=0;
     Instruction *b;
     uint8_t defined_instrs[] = {
-        0x00,0x01,0x02,0x03,0x04,0x05,0x06,0x07,0x0E,0x0F,
+        0x00,0x01,0x02,0x03,0x04,0x05,0x06,0x07,0x0D,0x0E,0x0F,
         0x10,0x11,0x12,0x13,
         0x18,0x19,0x1A,0x1B,0x1C,0x1D,0x1E,0x1F,
         0x20,0x30};
@@ -273,8 +277,8 @@ void doSyscall(uint_reg *R) {
 } 
 
 void doUpdateReg(uint_reg *R, uint8_t step){
-     *R &= ~0xf;
-     *R |= step;
+     *R &= ~0xF;
+     *R |= step & 0xF;
 }
 
 void doSHLReg(uint_reg *R) {
@@ -282,18 +286,24 @@ void doSHLReg(uint_reg *R) {
 }
 
 void doPushReg(uint_reg *R){
-    *(R+*(R+SRSP_OFFSET)) = *(R+VAL_OFFSET);
+    uint_reg * val_p = R+VAL_OFFSET;
+    uint_reg * stk_p = R+(int)*(R+SRSP_OFFSET);
+    // printf("Push: ADDR %016lX - VAL %lX\n", (uint_reg)stk_p, *(val_p));
+    *(stk_p) = *(val_p);
     *(R+SRSP_OFFSET) +=1; 
 }
 
 void doPopReg(uint_reg *R){
-    if ( *(R+SRSP_OFFSET) <= STK_OFFSET){
+    *(R+SRSP_OFFSET) -=1; 
+    uint_reg * val_p = R+VAL_OFFSET;
+    uint_reg * stk_p = R+(int)*(R+SRSP_OFFSET);
+    // printf("Pop: ADDR %016lX - VAL %lX\n", (uint_reg)stk_p, *(stk_p));
+    if ( *(val_p) <= STK_OFFSET){
         // Stack is Empty
-        *(R+VAL_OFFSET) = 0x0;
+        *(val_p) = 0x0;
         return;
     }
-    *(R+VAL_OFFSET) = *(R+*(R+SRSP_OFFSET));
-    *(R+SRSP_OFFSET) -=1; 
+    *(val_p) = *(stk_p);
 }
 
 void doClrReg(uint_reg *R){
@@ -407,6 +417,10 @@ void update(uint_reg* R, uint8_t instr_i){
 
                 case 0x0E:   // VAL = 2comp(VAL) 
                     *(R+VAL_OFFSET) = 1 + ~(*(R+VAL_OFFSET));
+                    break;
+
+                case 0x0D:   // VAL *= BYTES_PER_REG 
+                    *(R+VAL_OFFSET) *= BYTES_PER_REG;
                     break;
 
                 case 0x07:   //sprintf(out, "CLR BOTH REPEAT");
