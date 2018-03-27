@@ -1,0 +1,15 @@
+
+camellia write experiment
+======
+Run s_server -WWW serving 1MB file > openssl-write.gdb.out2
+have client connect with CAMELLIA256-SHA
+
+files:
+openssl-write.gdb.out2   - gdb output
+openssl-camellia-write.instructions - instructions only of above (grep =>)
+openssl-camellia-write.jumps    - indirect.py of above
+camellia-write-repeats - output of parse_jumps of above
+
+
+
+
