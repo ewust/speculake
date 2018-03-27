@@ -78,13 +78,59 @@ them.
 
 %%%%%%%%%%%%%%
 \section{Background}
+Modern CPU designs employ a wide range of tricks in order to maximize
+performance. In this section, we provide preliminary background as they are
+relevant to our system, as well as a brief summary of the Spectre vulnerability.
+
+\subsection{Out-of-Order Execution}
+Many CPUs attempt to keep the pipeline full by executing instructions \emph{out of
+order}, with the CPU allowing future instructions to be worked on and executed
+while it waits for slower or stalled instructions to complete. To maintain
+correctness and the original (Von Neumann) ordering, instructions are tracked in
+a \emph{reorder buffer} (ROB), which keeps the order of instructions as they are
+worked on out of order. Instructions are \emph{retired} from the ROB when
+they are completed and there are no previous instructions that have yet to
+retire. Upon retiring, an instruction's results are committed to the architectural
+state of the CPU. Thus, the ROB ensures that the program (or debugger) view
+of the CPU state always updates in program execution order, despite out of order
+execution.
 
 \subsection{Speculative Execution}
--CPU pipelines -> Branch predictors
+
+CPUs also attempt to keep their pipeline full by predicting the path of
+execution. For example, a program may contain a branch that depends on a result
+from a prior slow instruction. Rather than wait for the result, the CPU can
+\emph{speculatively execute} instructions down one of the paths of a branch,
+storing the results of the speculative instructions in the ROB.
+If the guess of the branch target turns out to be correct, the CPU can quickly
+retire all the instructions it has speculatively executed while waiting. If the
+guess is incorrect, the CPU must discard the
+(incorrectly) speculated instructions from the ROB, and continue executing from the
+correct branch target.
+
 
 \subsection{Branch Prediction}
-- direct vs indirect
-- BHB, BTB
+When a CPU mispredicts a branch, the speculative execution results are
+discarded, costing the CPU several cycles as the pipeline is flushed. To
+minimize this, CPUs employ \emph{branch predictors} that attempt to guess the
+path of execution. These predictors can maintain a short history of previous
+branch targets for a particular branch (e.g. whether a certain branch is
+frequently taken or not taken, or if it exhibits a particular pattern), and use
+this to inform the CPU's guess for speculative execution.
+
+There are two kinds of branches a CPU must be able to predict: \emph{direct} and
+\emph{indirect}. A \emph{direct} branch may either jump to a provided address or
+continue executing straight through depending on the state of the CPU (e.g. condition
+registers). While there are only two potential statically-known targets for a direct
+branch, the CPU may not know if the branch is taken or not until preceding
+instructions retire. An \emph{indirect} branch is always taken, but its address
+is determined by the value of a register or memory address. Direct branches are
+typically used for control flow such as \texttt{if} or
+\texttt{for}/\texttt{while} statements, while indirect branches are used for
+function pointers, class methods, or case statements.
+
+
+%- BHB, BTB
 
 \subsection{Spectre}
 - Basic direct branch
