@@ -7,6 +7,9 @@ inject: inject.c indirect.S
 measure: target_fn.c measure.c indirect.S decrypt.S
 	$(CC) -Wl,-Tlinker.ld $^ -o $@
 
+camellia: target_fn.c camellia-triggered.c indirect.S decrypt.S
+	$(CC) -Wl,-Tlinker.ld $^ -o $@
+
 turing: turing_target.c turing.c indirect.S
 	$(CC) -Wl,-Tlinker.ld $^ -o $@
 
