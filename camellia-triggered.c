@@ -23,13 +23,14 @@
 // in which case, we change cur_probe_space and retry
 #define MAX_PROBE_SPACE (1000003)
 double avgpct = 0;
-uint64_t cur_probe_space = 4177;
+
+uint64_t __attribute__((section(".cur_probe_space"))) cur_probe_space = 4177;
 
 
 // The (heap-allocated) probe buffer
 // We'll have NUM_PROBES in this, and use &probe_buf[i*cur_probe_space]
 // in the cache to communicate the value i from speculative -> von neuman
-uint8_t *probe_buf;
+uint8_t __attribute__((section(".probe_buf"))) *probe_buf;
 
 
 // This is a simple counter, accessed by the speculative function (target_fn)
@@ -156,8 +157,8 @@ void check_probes() {
     // Because indirect_camellia pushed rbx and rbp,
     // we have to pop them here to restore the stack
     // (and then we re-push them...)
-    asm volatile("pop %%rbx\n"
-            "pop %%rbp\n" :::);
+    //asm volatile("pop %%rbx\n"
+    //        "pop %%rbp\n" :::);
 
     uint64_t t0, t1;
     uint8_t *addr;
@@ -191,6 +192,9 @@ uint64_t jmp_ptr;
 
 void indirect_camellia(register uint64_t *jmp_ptr) {
 
+    // prologue stores these on stack, but we don't want em
+    //asm volatile("pop %%rbx\n"
+    //        "pop %%rbp\n" :::);
     // First, push where we want to come back to:
     // Note: check_probes will do a normal return,
     // but it's never called (it's returned into
@@ -205,7 +209,10 @@ void indirect_camellia(register uint64_t *jmp_ptr) {
     // To test:
     // Maybe we want a cached-copy of this value?
     //push((uint64_t)fn_ptr);
-    asm volatile ("push %%rax\n" :: "a"(fn_ptr):);
+    //asm volatile ("push %%rax\n" :: "a"(fn_ptr):);
+
+    //asm volatile ("push %%rax\n" :: "a"(0x7ffff788a420):);
+    asm volatile ("push %%rax\n" :: "a"(&&done_jumps):);
 
     for (i=NUM_JUMPS-2; i>=0; i--) {
         //push(jump_addrs[i].to);
@@ -216,15 +223,18 @@ void indirect_camellia(register uint64_t *jmp_ptr) {
     // Do something slow to stall the pipeline???
     // Call the first thing in the jump chain
     //call((void (*)(void))jump_addrs[0].from);
-    asm volatile ("add (%%rbx), %%rax\n"
-            "jmpq *%%rax\n" :: "a"(jump_addrs[0].from), "b"(jmp_ptr):);
+    asm volatile ("add (%%rcx), %%rax\n"
+            "jmpq *%%rax\n" :: "a"(jump_addrs[0].from), "c"(jmp_ptr):);
 
 
-    // This code won't execute...our ROP chain
-    // will end up retrurning from indirect_camellia()
+done_jumps:
+    //target_fn();
+    (*fn_ptr)();
+    //check_probes();
 }
 
 
+void (*fn_ptr)(void);
 
 void measure() {
     fn_ptr = check_probes;
@@ -236,9 +246,9 @@ void measure() {
     uint64_t last_i = 0xff;
 
     while (1) {
-        for (i=0; i<2000; i++) {
+        for (i=0; i<5000; i++) {
             _mm_clflush(&fn_ptr);
-            //_mm_clflush(&jmp_ptr);
+            _mm_clflush(&jmp_ptr);
             //indirect(&jmp_ptr);
             indirect_camellia(&jmp_ptr);
             //((void(*)(void *))map)(&jmp_ptr);
@@ -334,9 +344,7 @@ int main()
 
     // Copy the target_fn code into the last jump_addrs[NUM_JUMPS-1].to
     // This will hopefully be speculatively called...
-    // HACK: we are a few bytes over, and overwrite a value that should be a ret..
-    // but the last 6 bytes of target_fn aren't needed, sooo...
-    memcpy((void*)jump_addrs[NUM_JUMPS-1].to, target_fn, end_target_fn-target_fn - 6);
+    memcpy((void*)jump_addrs[NUM_JUMPS-1].to, target_fn, end_target_fn-target_fn);
 
 
 

@@ -70,6 +70,9 @@ SECTIONS
   .targetfn 0x430000: { *targetfn.* }
   .fnptr    0x440000: { KEEP(*(.fnptr)) }
 
+  .probe_buf 0x480000: { KEEP(*(.probe_buf)) }
+  .cur_probe_space 0x480010: { KEEP(*(.cur_probe_space)) }
+
 
   .fini           :
   {
