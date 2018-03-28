@@ -52,7 +52,8 @@ def count_repeats(needle, haystack):
 
 max_rep = 0
 tot_repeats = []
-for win in xrange(30, 100):
+thresh = 4
+for win in xrange(31, 100):
     print 'Window: %d jumps' % win
     for i in xrange(len(jumps)-win):
         #print i
@@ -60,7 +61,7 @@ for win in xrange(30, 100):
 
         repeats = count_repeats(cur_window, jumps[i+win:])
         #print rep
-        if len(repeats) > max_rep and repeats[0] not in tot_repeats:
+        if len(repeats) >= thresh and repeats[0] not in tot_repeats:
             print '==========='
             print '%d repeats:' % len(repeats)
             all_same = True
@@ -76,6 +77,7 @@ for win in xrange(30, 100):
             if not(all_same):
                 max_rep = len(repeats)
 
+    break
 
 
 print len(instrs)
