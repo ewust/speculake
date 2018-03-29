@@ -126,10 +126,11 @@ void measure() {
                      max_i, max_res, tot_runs, 100*((float)max_res)/tot_runs, avg, cur_probe_space, signal_idx, misses);
             avgpct += ((float)max_res)/tot_runs;
 
+            /*
             if (max_i != ((last_i + 1)&0xff)) {
                 printf("---- ERROR: ^^^^^^^^^\n");
                 exit(-1);
-            }
+            }*/
             last_i = max_i;
             signal_idx++;
             instr++;

