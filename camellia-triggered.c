@@ -286,9 +286,9 @@ void measure() {
             //indirect(&jmp_ptr);
             indirect_camellia(&jmp_ptr);
             //((void(*)(void *))map)(&jmp_ptr);
-            if ((i % 3)==0) {
+            //if ((i % 3)==0) {
                 usleep(10);
-            }
+            //}
         }
         uint64_t avg = 0;
         if (cache_hits > 0) avg = tot_time/cache_hits;
