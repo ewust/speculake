@@ -1,0 +1,344 @@
+      # Init
+      // call main
+0x02        CLR VAL
+0x3E        UVAL 0xE
+0x1D        SHVAL << 4
+0x3F        UVAL 0xF
+0x10        SWAP
+0x02        CLR VAL
+0x18        JMP
+
+
+      # doExit 7  18
+      //mov $0x3c, %rax
+0x02        CLR VAL                        
+0x13        PTR = base_addr                
+0x34        UVAL  0x4  [rax_offset == 0x4]
+0x0D        VAL *= REG_SIZE
+0x0F        PTR = PTR + VAL                
+0x02        CLR VAL                        
+0x33        UVAL  0x3
+0x1D        SHVAL << 4 
+0x3C        UVAL  0xC
+0x11        *PTR = VAL                     
+ 
+      //mov $0x0, %rdi
+0x02        CLR VAL                        
+0x13        PTR = base_addr                
+0x39        UVAL  0x9  [rdi_offset == 0x9]
+0x0D        VAL *= REG_SIZE
+0x0F        PTR = PTR + VAL                
+0x02        CLR VAL                        
+0x11        *PTR = VAL                     
+                                           
+      //syscall     - sys_exit(3c, 0)
+0x1E        syscall
+
+
+      # print_nl 25  62
+      //mov %rsp, %rsi                     
+0x02        CLR VAL
+0x13        PTR = base_addr                
+0x31        UVAL  0x1  [rsp_offset == 0x1] 
+0x0D        VAL *= REG_SIZE
+0x0F        PTR = PTR + VAL
+0x12        VAL = *PTR
+0x0D        VAL *= REG_SIZE
+0x13        PTR = base_addr                
+0x0F        PTR = PTR + VAL
+0x10        SWAP 
+0x1B        PUSH VAL
+0x13        PTR = base_addr
+0x02        CLR VAL
+0x38        UVAL  0x8  [rsi_offset == 0x8]
+0x0D        VAL *= REG_SIZE
+0x0F        PTR = PTR + VAL
+0x1A        POP VAL
+0x11        *PTR = VAL
+0x02        CLR VAL
+
+      //mov $0x0A, %rax
+0x03        CLR BOTH
+0x13        PTR = base_addr
+0x34        UVAL 0x4  [rax_offset == 0x4]
+0x0D        VAL *= REG_SIZE 
+0x0F        PTR = PTR + VAL
+0x02        CLR VAL
+0x3A        UVAL 0xA
+0x11        *PTR = VAL
+
+      //push %rax
+0x02        CLR VAL
+0x13        PTR = base_addr
+0x34        UVAL  0x4 [rax_offset == 0x4]
+0x0D        VAL *= REG_SIZE 
+0x0F        PTR = PTR + VAL                
+0x12        VAL = *PTR                     
+0x1B        PUSH VAL                       
+0x02        CLR VAL
+                                           
+      //mov $0x1, %rax                     
+0x13        PTR = base_addr                
+0x34        UVAL  0x4  [rax_offset == 0x4]
+0x0D        VAL *= REG_SIZE 
+0x0F        PTR = PTR + VAL                
+0x02        CLR VAL                        
+0x31        UVAL 0x1                       
+0x11        *PTR = VAL                     
+                                           
+      //mov $0x1, %rdi                     
+0x13        PTR = base_addr                
+0x39        UVAL  0x9  [rdi_offset == 0x9]
+0x0D        VAL *= REG_SIZE 
+0x0F        PTR = PTR + VAL                
+0x02        CLR VAL                        
+0x31        UVAL 0x1                       
+0x11        *PTR = VAL                     
+                                           
+      //mov $0x1, %rdx
+0x13        PTR = base_addr
+0x37        UVAL  0x7  [rdx_offset == 0x7]
+0x0D        VAL *= REG_SIZE
+0x0F        PTR = PTR + VAL
+0x02        CLR VAL
+0x31        UVAL 0x1
+0x11        *PTR = VAL
+
+      //syscall      - sys_write (1, 1, rsp, 0x10)
+0x1E        syscall
+0x1A        POP VAL
+
+      //ret
+0x1A        POP VAL
+0x10        SWAP
+0x02        CLR VAL
+0x18        JMP 
+
+
+      # print_fizz 87   0x57   70 
+      //mov %rsp, %rsi                     
+0x02        CLR VAL
+0x13        PTR = base_addr                
+0x31        UVAL  0x1  [rsp_offset == 0x1] 
+0x0D        VAL *= REG_SIZE
+0x0F        PTR = PTR + VAL
+0x12        VAL = *PTR
+0x0D        VAL *= REG_SIZE
+0x13        PTR = base_addr                
+0x0F        PTR = PTR + VAL
+0x10        SWAP 
+0x1B        PUSH VAL
+0x13        PTR = base_addr
+0x02        CLR VAL
+0x38        UVAL  0x8  [rsi_offset == 0x8]
+0x0D        VAL *= REG_SIZE
+0x0F        PTR = PTR + VAL
+0x1A        POP VAL
+0x11        *PTR = VAL
+0x02        CLR VAL
+
+      //mov $0x7a7a6946, %rax
+0x03        CLR BOTH
+0x13        PTR = base_addr
+0x34        UVAL 0x4  [rax_offset == 0x4]
+0x0D        VAL *= REG_SIZE 
+0x0F        PTR = PTR + VAL
+0x02        CLR VAL
+0x37        UVAL 0x7
+0x1D        SHVAL << 4 
+0x3A        UVAL 0xA
+0x1D        SHVAL << 4 
+0x37        UVAL 0x7
+0x1D        SHVAL << 4 
+0x3A        UVAL 0xA
+0x1D        SHVAL << 4 
+0x36        UVAL 0x6
+0x1D        SHVAL << 4 
+0x39        UVAL 0x9
+0x1D        SHVAL << 4 
+0x34        UVAL 0x4
+0x1D        SHVAL << 4 
+0x36        UVAL 0x6
+0x11        *PTR = VAL
+
+      //push %rax
+0x02        CLR VAL
+0x13        PTR = base_addr
+0x34        UVAL  0x4 [rax_offset == 0x4]
+0x0D        VAL *= REG_SIZE 
+0x0F        PTR = PTR + VAL                
+0x12        VAL = *PTR                     
+0x1B        PUSH VAL                       
+0x02        CLR VAL
+                                           
+      //mov $0x1, %rax                     
+0x13        PTR = base_addr                
+0x34        UVAL  0x4  [rax_offset == 0x4]
+0x0D        VAL *= REG_SIZE 
+0x0F        PTR = PTR + VAL                
+0x02        CLR VAL                        
+0x31        UVAL 0x1                       
+0x11        *PTR = VAL                     
+                                           
+      //mov $0x1, %rdi                     
+0x13        PTR = base_addr                
+0x39        UVAL  0x9  [rdi_offset == 0x9]
+0x0D        VAL *= REG_SIZE 
+0x0F        PTR = PTR + VAL                
+0x02        CLR VAL                        
+0x31        UVAL 0x1                       
+0x11        *PTR = VAL                     
+                                           
+      //mov $0x4, %rdx
+0x13        PTR = base_addr
+0x37        UVAL  0x7  [rdx_offset == 0x7]
+0x0D        VAL *= REG_SIZE
+0x0F        PTR = PTR + VAL
+0x02        CLR VAL
+0x34        UVAL 0x4
+0x11        *PTR = VAL
+
+      //syscall      - sys_write (1, 1, rsp, 0x10)
+0x1E        syscall
+0x1A        POP VAL
+
+      //ret
+0x1A        POP VAL
+0x10        SWAP
+0x02        CLR VAL
+0x18        JMP 
+
+  
+      # print_buzz 157 0x9d  70
+      //mov %rsp, %rsi                     
+0x02        CLR VAL
+0x13        PTR = base_addr                
+0x31        UVAL  0x1  [rsp_offset == 0x1] 
+0x0D        VAL *= REG_SIZE
+0x0F        PTR = PTR + VAL
+0x12        VAL = *PTR
+0x0D        VAL *= REG_SIZE
+0x13        PTR = base_addr                
+0x0F        PTR = PTR + VAL
+0x10        SWAP 
+0x1B        PUSH VAL
+0x13        PTR = base_addr
+0x02        CLR VAL
+0x38        UVAL  0x8  [rsi_offset == 0x8]
+0x0D        VAL *= REG_SIZE
+0x0F        PTR = PTR + VAL
+0x1A        POP VAL
+0x11        *PTR = VAL
+0x02        CLR VAL
+
+      //mov $0x7a7a7542, %rax
+0x03        CLR BOTH
+0x13        PTR = base_addr
+0x34        UVAL 0x4  [rax_offset == 0x4]
+0x0D        VAL *= REG_SIZE 
+0x0F        PTR = PTR + VAL
+0x02        CLR VAL
+0x37        UVAL 0x7
+0x1D        SHVAL << 4 
+0x3A        UVAL 0xA
+0x1D        SHVAL << 4 
+0x37        UVAL 0x7
+0x1D        SHVAL << 4 
+0x3A        UVAL 0xA
+0x1D        SHVAL << 4 
+0x37        UVAL 0x7
+0x1D        SHVAL << 4 
+0x35        UVAL 0x5
+0x1D        SHVAL << 4 
+0x34        UVAL 0x4
+0x1D        SHVAL << 4 
+0x32        UVAL 0x2
+0x11        *PTR = VAL
+
+      //push %rax
+0x02        CLR VAL
+0x13        PTR = base_addr
+0x34        UVAL  0x4 [rax_offset == 0x4]
+0x0D        VAL *= REG_SIZE 
+0x0F        PTR = PTR + VAL                
+0x12        VAL = *PTR                     
+0x1B        PUSH VAL                       
+0x02        CLR VAL
+                                           
+      //mov $0x1, %rax                     
+0x13        PTR = base_addr                
+0x34        UVAL  0x4  [rax_offset == 0x4]
+0x0D        VAL *= REG_SIZE 
+0x0F        PTR = PTR + VAL                
+0x02        CLR VAL                        
+0x31        UVAL 0x1                       
+0x11        *PTR = VAL                     
+                                           
+      //mov $0x1, %rdi                     
+0x13        PTR = base_addr                
+0x39        UVAL  0x9  [rdi_offset == 0x9]
+0x0D        VAL *= REG_SIZE 
+0x0F        PTR = PTR + VAL                
+0x02        CLR VAL                        
+0x31        UVAL 0x1                       
+0x11        *PTR = VAL                     
+                                           
+      //mov $0x4, %rdx
+0x13        PTR = base_addr
+0x37        UVAL  0x7  [rdx_offset == 0x7]
+0x0D        VAL *= REG_SIZE
+0x0F        PTR = PTR + VAL
+0x02        CLR VAL
+0x34        UVAL 0x4
+0x11        *PTR = VAL
+
+      //syscall      - sys_write (1, 1, rsp, 0x10)
+0x1E        syscall
+0x1A        POP VAL
+
+      //ret
+0x1A        POP VAL
+0x10        SWAP
+0x02        CLR VAL
+0x18        JMP 
+
+
+      # main
+      // call print_fizz
+0x02        CLR VAL
+0x35        UVAL 0x5
+0x1D        SHVAL << 4
+0x37        UVAL 0x7
+0x10        SWAP
+0x17        CALL
+
+      // call print_nl
+0x02        CLR VAL
+0x31        UVAL 0x1
+0x1D        SHVAL << 4
+0x39        UVAL 0x9
+0x10        SWAP
+0x17        CALL
+
+      // call print_buzz
+0x02        CLR VAL
+0x39        UVAL 0x9
+0x1D        SHVAL << 4
+0x3d        UVAL 0xd
+0x10        SWAP
+0x17        CALL
+
+      // call print_nl
+0x02        CLR VAL
+0x31        UVAL 0x1
+0x1D        SHVAL << 4
+0x39        UVAL 0x9
+0x10        SWAP
+0x17        CALL
+
+      // call doExit
+0x02        CLR VAL
+0x37        UVAL 0x7
+0x10        SWAP
+0x17        CALL
+
