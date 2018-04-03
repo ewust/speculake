@@ -17,41 +17,41 @@ indirect:
 	mov		-0x18(%rbp),%rdx
 	mov		%rdx,%rbx
 
-            mov $2, %rax
-            cmpb  $0x02, %al
-            je .+2
-            je .+2
-            je .+2
-            je .+2
-            je .+2
-            je .+2
-            je .+2
-            je .+2
-            je .+2
-            je .+2
-            je .+2
-            je .+2
-            je .+2
-            je .+2
-            je .+2
-            je .+2
-            je .+2
-            je .+2
-            je .+2
-            je .+2
-            je .+2
-            je .+2
-            je .+2
-            je .+2
-            je .+2
-            je .+2
-            je .+2
-            je .+2
-            je .+2
-            je .+2
-            je .+2
-            je .+2
-            // Do some indirect calls
+    mov $2, %rax
+    cmpb  $0x02, %al
+    je .+2
+    je .+2
+    je .+2
+    je .+2
+    je .+2
+    je .+2
+    je .+2
+    je .+2
+    je .+2
+    je .+2
+    je .+2
+    je .+2
+    je .+2
+    je .+2
+    je .+2
+    je .+2
+    je .+2
+    je .+2
+    je .+2
+    je .+2
+    je .+2
+    je .+2
+    je .+2
+    je .+2
+    je .+2
+    je .+2
+    je .+2
+    je .+2
+    je .+2
+    je .+2
+    je .+2
+    je .+2
+    // Do some indirect calls
 	jmp call_get_rip
 get_rip:
     pop %rax
@@ -195,7 +195,7 @@ call_get_rip:
 		// */
 
     // Do indirect jump
-	mov fn_ptr,%rax
+	movabs $fn_ptr,%rax
 	add (%rbx), %rax
 	callq *%rax
 	add	$0x18,%rsp

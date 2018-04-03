@@ -96,7 +96,7 @@ try_decrypt:
 	pushq %rbp
 	movq %rsp, %rbp
 
-    mov $key_schedule, %rcx
+    movabs $key_schedule, %rcx
     movaps 0x00(%rcx), %xmm0
     movaps 0x10(%rcx), %xmm1
     movaps 0x20(%rcx), %xmm2
@@ -143,7 +143,7 @@ try_decrypt:
 .text
 .global aes_ctr
 aes_ctr:
-	mov $key_schedule, %rcx
+	movabs $key_schedule, %rcx
     movaps 0x00(%rcx), %xmm0
     movaps 0x10(%rcx), %xmm1
     movaps 0x20(%rcx), %xmm2
