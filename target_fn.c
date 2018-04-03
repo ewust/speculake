@@ -24,7 +24,7 @@ void target_fn(void)
     //signal(11);
     register uint8_t *pb = (uint8_t*)*((uint8_t**)0x480000);  // probe_buf
     register uint64_t cps = *((uint64_t*)0x480010);  // cur_probe_space
-    asm volatile ("mov (%%rcx), %%rax" :: "c"(&pb[13*cps]) : "rax");
+    asm volatile ("mov (%%rcx), %%rax" :: "c"(&pb[6*cps]) : "rax");
     //*/
 
 
