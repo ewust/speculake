@@ -200,6 +200,36 @@ int test_asmSyscall(){
     return ret;
 }
 
+
+void test_CallConventions(){
+    
+    printf("-----[ Test Calling Conventions ]-----\n");
+    uint_reg R_mock[16] = {0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0};
+    
+    R_mock[SRIP_OFFSET] = 0x1234;
+    R_mock[SRSP_OFFSET] = STK_OFFSET;
+    R_mock[SRDX_OFFSET] = 0xC;
+
+    R_mock[PTR_OFFSET] = 0xDEAD;
+
+    
+    printRegs(R_mock, 2 );
+
+    update(R_mock, 0x17);   // CALL 
+
+    printRegs(R_mock, 2 );
+
+    update(R_mock, 0x1A);   // POP VAL
+
+    printRegs(R_mock, 2 );
+
+    update(R_mock, 0x10);   // SWAP
+    update(R_mock, 0x02);   // CLR VAL
+    update(R_mock, 0x18);   // JMP
+
+    printRegs(R_mock, 2 );
+}
+
 int test_generic(){
     bool b[5] = {1,1,1,0,1};
     char s[] = "TEST";
@@ -213,13 +243,14 @@ int test_generic(){
 
 int main(){
     printISA_short();
+    test_CallConventions();
     //1 test_ControlFlow();
     //1 printISA();
     //1 test_asmSyscall();
     //1 test_doSyscall_write();
     //1 test_changeRegs();
     //1 test_Pointers();
-    //1 test_PushPop();
+    test_PushPop();
     // test_generic();
 }
     

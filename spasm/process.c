@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <unistd.h>
 
 #include "spasm.h"
 
@@ -20,18 +21,22 @@ void run(int num_instr) {
     while (true) {
         rip = *(R+SRIP_OFFSET);
         // printf("RIP - %X, I - 0x%02X - ", rip, state.instr[ rip ]);
-        // instr = getInstruction(state.instr[rip]);
-        // printInstr(instr);
 
-        // if (( state.instr[ rip ] == 0x1A ) || ( state.instr[ rip ] == 0x1B ))  {
-        // }
-        // printReg((R+PTR_OFFSET),  "PTR ");
-        // printReg((R+VAL_OFFSET),  "VAL ");
+        if (( state.instr[ rip ] == 0x1A )  || ( state.instr[ rip ] == 0x1B ) || ( state.instr[ rip ] == 0x17 ) || ( state.instr[ rip ] == 0x18 ))  {
+           printRegs(R, 3);
+        }
+        printReg((R+SRIP_OFFSET),  "SRIP ");
+        printReg((R+VAL_OFFSET),   "VAL  "); 
+        printReg((R+PTR_OFFSET),   "PTR  "); 
         // printReg((R+SRAX_OFFSET), "SRAX");
-        // if ( state.instr[ rip ] == 0x1E ) {
-        //     printRegs(R, 3);
-        // }
+        if ( state.instr[ rip ] == 0x1E ) {
+            printRegs(R, 3);
+        }
+
+        instr = getInstruction(state.instr[rip]);
+        printInstr(instr);
         update(R, state.instr[ rip ]);
+        usleep(250000);
     }
 }
 

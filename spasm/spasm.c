@@ -83,6 +83,10 @@ void printInstr(Instruction *instr) {
                     sprintf(out, "JMP  ||  SRIP = (VAL==0)? PTR : SRIP+1");
                     break;
 
+                case 0x07:
+                    sprintf(out, "CALL  ||  PUSH SRIP+1; SRIP=PTR; //PUSH REGS?");
+                    break;
+
                 case 0x06:
                     sprintf(out, "FREE\t(goto?)");
                     break;
@@ -184,7 +188,7 @@ void printISA_short(){
     uint8_t defined_instrs[] = {
         0x00,0x01,0x02,0x03,0x04,0x05,0x06,0x07,0x0D,0x0E,0x0F,
         0x10,0x11,0x12,0x13,
-        0x18,0x19,0x1A,0x1B,0x1C,0x1D,0x1E,0x1F,
+        0x17,0x18,0x19,0x1A,0x1B,0x1C,0x1D,0x1E,0x1F,
         0x20,0x30};
     
     printf("SP-ASM ISA v%s -- %s\n", SPASM_VERSION, SPASM_JIT_SUPPORT);
@@ -286,7 +290,7 @@ void doSHLReg(uint_reg *R) {
 }
 
 void doPushReg(uint_reg *R){
-    uint_reg * val_p = R+VAL_OFFSET;
+    uint_reg * val_p  = R+VAL_OFFSET;
     uint_reg * stk_p = R+(int)*(R+SRSP_OFFSET);
     // printf("Push: ADDR %016lX - VAL %lX\n", (uint_reg)stk_p, *(val_p));
     *(stk_p) = *(val_p);
@@ -295,11 +299,13 @@ void doPushReg(uint_reg *R){
 
 void doPopReg(uint_reg *R){
     *(R+SRSP_OFFSET) -=1; 
+    uint_reg * srsp_p = R+SRSP_OFFSET;
     uint_reg * val_p = R+VAL_OFFSET;
     uint_reg * stk_p = R+(int)*(R+SRSP_OFFSET);
     // printf("Pop: ADDR %016lX - VAL %lX\n", (uint_reg)stk_p, *(stk_p));
-    if ( *(val_p) <= STK_OFFSET){
+    if ( *(srsp_p) < STK_OFFSET){
         // Stack is Empty
+        // printf("Stack is empty\n");
         *(val_p) = 0x0;
         return;
     }
@@ -332,6 +338,20 @@ void doCompare(uint_reg *R) {
     }
 }
 
+
+void doCall(uint_reg *R){
+    uint_reg * srip_p  = R+SRIP_OFFSET;
+    uint_reg * stk_p = R+(int)*(R+SRSP_OFFSET);
+    // printf("CALL: RIP_ADDR %016lX - VAL %lX\n", (uint_reg)srip_p, *(val_p));
+
+    // Push SRIP+1
+    *(stk_p) = *(srip_p)+1;
+    *(R+SRSP_OFFSET) +=1; 
+
+    // JMP PTR
+    doSetIP(R, R+PTR_OFFSET); 
+    return;
+}
 
 void update(uint_reg* R, uint8_t instr_i){
     Instruction *instr = getInstruction(instr_i);
@@ -379,11 +399,15 @@ void update(uint_reg* R, uint8_t instr_i){
                     break;
 
                 case 0x08:    // JMP  ||  SRIP = (VAL==0)? PTR : SRIP+1
-                    if ( *(R+VAL_OFFSET) != 0 ) {
+                    if ( *(R+VAL_OFFSET) == 0 ) {
                         doSetIP(R, R+PTR_OFFSET); 
                         return;
                     }
                     break;
+
+                case 0x07:    // CALL 
+                    doCall(R); 
+                    return;
 
                 case 0x03:   // PTR = BASE ADDR 
                     doGetBase(R); 
