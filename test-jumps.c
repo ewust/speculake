@@ -54,51 +54,51 @@ void load_page(uint64_t addr)
     memset(map, '\xc3', PAGE_SIZE);
 }
 
+jump addrs[NUM_JUMPS] = {
+        // in openssl-accept.repeats2}, //254 repeats (line 14491502):
+        // part of EC_GFp_nistp224_method()
+        {0x7ffff785a74b, 0x7ffff785c256}, //  retq   
+        {0x7ffff785a926, 0x7ffff785c261}, //  retq   
+        {0x7ffff785ae37, 0x7ffff785c277}, //  retq   
+        {0x7ffff785a74b, 0x7ffff785c28f}, //  retq   
+        {0x7ffff785a74b, 0x7ffff785c2a2}, //  retq   
+        {0x7ffff785abfc, 0x7ffff785c2b5}, //  retq   
+        {0x7ffff785ae37, 0x7ffff785c2cd}, //  retq   
+        {0x7ffff785a34a, 0x7ffff785c2e3}, //  retq   
+        {0x7ffff785a27e, 0x7ffff785c2f3}, //  retq   
+        {0x7ffff785a74b, 0x7ffff785ac1d}, //  retq   
+        {0x7ffff785a74b, 0x7ffff785ac28}, //  retq   
+        {0x7ffff785abfc, 0x7ffff785ac36}, //  retq   
+        {0x7ffff785ac40, 0x7ffff785c3c5}, //  retq   
+        {0x7ffff785ae37, 0x7ffff785c3d0}, //  retq   
+        {0x7ffff785a74b, 0x7ffff785c3e3}, //  retq   
+        {0x7ffff785a926, 0x7ffff785c3f3}, //  retq   
+        {0x7ffff785ae37, 0x7ffff785c3ff}, //  retq   
+        {0x7ffff785a34a, 0x7ffff785c4b7}, //  retq   
+        {0x7ffff785a27e, 0x7ffff785c4c9}, //  retq   
+        {0x7ffff785a27e, 0x7ffff785c538}, //  retq   
+        {0x7ffff785a74b, 0x7ffff785c543}, //  retq   
+        {0x7ffff785a926, 0x7ffff785c54e}, //  retq   
+        {0x7ffff785ae37, 0x7ffff785c55e}, //  retq   
+        {0x7ffff785a34a, 0x7ffff785c569}, //  retq   
+        {0x7ffff785a41a, 0x7ffff785c61d}, //  retq   
+        {0x7ffff785a74b, 0x7ffff785c628}, //  retq   
+        {0x7ffff785abfc, 0x7ffff785c638}, //  retq   
+        {0x7ffff785a926, 0x7ffff785c645}, //  retq   
+        {0x7ffff785a5f0, 0x7ffff785c798}, //  retq   
+        {0x7ffff785ae37, 0x7ffff785c847}, //  retq   
+        {0x7ffff785c858, 0x7ffff785ea59}, //  retq   
 
-
-int main()
-{
-
-
-    memset(loaded_pages, 0, sizeof(uint64_t)*MAX_PAGES);
-    jump addrs[NUM_JUMPS] = {
-        // CAMELLIA256-SHA / EVP_MD_CTX_init...
-        {0x7ffff780d32d, 0x7ffff780d3ff}, //  retq   
-        {0x7ffff788a28b, 0x7ffff788a3b1}, //  retq   
-        {0x7ffff77fedad, 0x7ffff77fe8f0}, //  callq  *0x36d5f5(%rip)        # 0x7ffff7b6c3a8
-        {0x7ffff77fe8f7, 0x7ffff7458a80}, //  jmpq   *%rax
-        {0x7ffff745687e, 0x7ffff7458ae0}, //  retq   
-        {0x7ffff7458b29, 0x7ffff77fedb3}, //  retq   
-        {0x7ffff77fede3, 0x7ffff788a513}, //  retq   
-        {0x7ffff77fdb40, 0x7ffff7470a30}, //  jmpq   *0x36e68a(%rip)        # 0x7ffff7b6c1d0
-        {0x7ffff7470a71, 0x7ffff788a40a}, //  retq   
-        {0x7ffff788a495, 0x7ffff780cc39}, //  retq   
-        {0x7ffff788a28b, 0x7ffff788a3b1}, //  retq   
-        {0x7ffff77fedad, 0x7ffff77fe8f0}, //  callq  *0x36d5f5(%rip)        # 0x7ffff7b6c3a8
-        {0x7ffff77fe8f7, 0x7ffff7458a80}, //  jmpq   *%rax
-        {0x7ffff745687e, 0x7ffff7458ae0}, //  retq   
-        {0x7ffff7458b29, 0x7ffff77fedb3}, //  retq   
-        {0x7ffff77fede3, 0x7ffff788a513}, //  retq   
-        {0x7ffff77fdb40, 0x7ffff7470a30}, //  jmpq   *0x36e68a(%rip)        # 0x7ffff7b6c1d0
-        {0x7ffff7470a71, 0x7ffff788a40a}, //  retq   
-        {0x7ffff788a495, 0x7ffff780cc5d}, //  retq   
-        {0x7ffff788a28b, 0x7ffff788a3b1}, //  retq   
-        {0x7ffff77fedad, 0x7ffff77fe8f0}, //  callq  *0x36d5f5(%rip)        # 0x7ffff7b6c3a8
-        {0x7ffff77fe8f7, 0x7ffff7458a80}, //  jmpq   *%rax
-        {0x7ffff745687e, 0x7ffff7458ae0}, //  retq   
-        {0x7ffff7458b29, 0x7ffff77fedb3}, //  retq   
-        {0x7ffff77fede3, 0x7ffff788a513}, //  retq   
-        {0x7ffff77fdb40, 0x7ffff7470a30}, //  jmpq   *0x36e68a(%rip)        # 0x7ffff7b6c1d0
-        {0x7ffff7470a71, 0x7ffff788a40a}, //  retq   
-        {0x7ffff788a495, 0x7ffff780cc6e}, //  retq   
-        {0x7ffff780cc45, 0x7ffff780d437}, //  retq   
-        {0x7ffff780d407, 0x7ffff789730b}, //  retq   
-        {0x7ffff7897318, 0x7ffff788a420}, //  retq  
     };
 
 
+
+
+void setup()
+{
+    memset(loaded_pages, 0, sizeof(uint64_t)*MAX_PAGES);
+
     int i;
-    // Setup
     for (i=0; i<NUM_JUMPS-1; i++) {
         load_page(addrs[i].from);
         load_page(addrs[i].to);
@@ -120,27 +120,53 @@ int main()
         }
     }
 
+    load_page(addrs[NUM_JUMPS-1].to);
+    //memcpy((void*)jump_addrs[NUM_JUMPS-1].to, target_fn, end_target_fn-target_fn);
+
+}
+
+
+
+int main()
+{
+
+
 
     // Do the jumps
-    void *x = &&come_home;
-    push((uint64_t)x);
+    //void *x = &&come_home;
+    //push((uint64_t)x);
+    //asm volatile ("push %%rax\n" :: "a"(x):);
+    setup();
+    printf("setup1\n");
 
-    // Do the pushes then call!
-    for (i=NUM_JUMPS-2; i>=0; i--) {
-        push(addrs[i].to);
+    /*
+    uint8_t *p = (uint8_t*)(addrs[NUM_JUMPS-1].to);
+    *p++ = 0xe9;
+    int32_t from = (uint64_t)&&done_jumps - addrs[NUM_JUMPS-1].to - 5;
+    memcpy(p, &from, 4);
+    */
+
+    printf("setup done\n");
+
+    int i;
+    while (1) {
+
+        asm volatile ("push %%rax\n" :: "a"(&&done_jumps):);
+        // Do the pushes then call!
+        for (i=NUM_JUMPS-1; i>=0; i--) {
+            //push(addrs[i].to);
+            asm volatile ("push %%rax\n" :: "a"(addrs[i].to):);
+        }
+
+        // Call the first thing in the chain. See ya!
+        void (*fn_ptr)(void);
+        fn_ptr = (void (*)(void))addrs[0].from;
+        //(*fn_ptr)();
+        //printf("calling...\n");
+        call(fn_ptr);
+done_jumps:
+        //printf("returned\n");
+        i = 0;
+
     }
-
-    // Call the first thing in the chain. See ya!
-    void (*fn_ptr)(void);
-    fn_ptr = (void (*)(void))addrs[0].from;
-    //(*fn_ptr)();
-    call(fn_ptr);
-
-
-    // We won't actually return here...
-    printf("look ma, no return\n");
-
-    //asm volatile("come_home:\n" :::);
-come_home:
-    printf("AND WE'RE BACK!!!\n");
 }
