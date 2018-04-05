@@ -16,6 +16,10 @@ turing: turing_target.c turing.c indirect.S
 measure_noasm: measure.c common.c
 	$(CC) -Wl,-Tlinker.ld $^ -o $@
 
+simulate-openssl: test-jumps.c
+	$(CC) $^ -o $@
+
+
 
 single: target_fn.S common.c measure.c link-single.ld
 	$(CC) -m64 -fPIC -pie -mcmodel=large -c measure.c
