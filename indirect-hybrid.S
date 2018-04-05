@@ -368,14 +368,14 @@ call_get_rip:
         jmpq *%rax
 
 
-//        // 15
-//        add $7, %rax
-//		nop
-//        jmpq *%rax
-	// 15
-	push $0x420113
-	retq
-	nop
+        // 15
+        add $7, %rax
+		nop
+        jmpq *%rax
+//	// 15
+//	push $0x420113
+//	retq
+//	nop
 
 
 //        // 16
@@ -399,7 +399,7 @@ call_get_rip:
 
 
         // 18
-        add $28, %rax
+        add $21, %rax
 		nop
         jmpq *%rax
 //	// 18
