@@ -60,6 +60,16 @@ void test_changeRegs(){
 }
 
 
+void test_Arithmetic(){
+    printf("------[ Test ADD MUL DIV 2'sComp ]------\n");
+    uint_reg R_mock[16] = {0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0};
+}
+
+void test_Logocal(){
+    printf("--------[ Test AND NOT SHIFT ]----------\n");
+    uint_reg R_mock[16] = {0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0};
+}
+
 void test_ControlFlow(){
     printf("-[ Test Base UPTR SHPTR CMP JMP SETIP ]-\n");
     uint_reg R_mock[16] = {0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0};
@@ -242,8 +252,8 @@ int test_generic(){
 }
 
 int main(){
-    printISA();
-    // printISA_short();
+    // printISA();
+    printISA_short();
     //1 test_CallConventions();
     //1 test_ControlFlow();
     //1 printISA();
