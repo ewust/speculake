@@ -367,46 +367,89 @@ call_get_rip:
 		nop
         jmpq *%rax
 
+
+//        // 15
+//        add $7, %rax
+//		nop
+//        jmpq *%rax
 	// 15
 	push $0x420113
 	retq
 	nop
 
+
+//        // 16
+//        add $14, %rax
+//		nop
+//        jmpq *%rax
 	// 16
 	push $0x42011a
 	retq
 	nop
 
+
+//        // 17
+//        add $7, %rax
+//		nop
+//        jmpq *%rax
 	// 17
 	push $0x420121
 	retq
 	nop
 
+
+//        // 18
+//        add $7, %rax
+//		nop
+//        jmpq *%rax
 	// 18
 	push $0x420128
 	retq
 	nop
 
+
+//        // 19
+//        add $7, %rax
+//		nop
+//        jmpq *%rax
 	// 19
 	push $0x42012f
 	retq
 	nop
 
+//        // 20
+//        add $7, %rax
+//		nop
+//        jmpq *%rax
 	// 20
 	push $0x420136
 	retq
 	nop
 
+//        // 21
+//        add $7, %rax
+//		nop
+//        jmpq *%rax
 	// 21
 	push $0x42013d
 	retq
 	nop
 
+//        // 22
+//        add $7, %rax
+//		nop
+//        jmpq *%rax
 	// 22
 	push $0x420144
 	retq
 	nop
 
+
+
+//        // 23
+//        add $7, %rax
+//		nop
+//        jmpq *%rax
 	// 23
 	push $0x42014b
 	retq
@@ -414,148 +457,96 @@ call_get_rip:
 
 
 
-/*
-        // 15
-        add $7, %rax
-		nop
-        jmpq *%rax
-
-        // 16
-        add $14, %rax
-		nop
-        jmpq *%rax
-
-        // 17
-        add $7, %rax
-		nop
-        jmpq *%rax
-
-        // 18
-        add $7, %rax
-		nop
-        jmpq *%rax
-
-        // 19
-        add $7, %rax
-		nop
-        jmpq *%rax
-
-        // 20
-        add $7, %rax
-		nop
-        jmpq *%rax
-
-		// 21
-        add $7, %rax
-		nop
-        jmpq *%rax
-
-        // 22
-        add $7, %rax
-		nop
-        jmpq *%rax
-
-        // 23
-        add $7, %rax
-		nop
-        jmpq *%rax
-
-*/
-
+//        // 24
+//        add $7, %rax
+//		nop
+//        jmpq *%rax
 	// 24
 	push $0x420152
 	retq
 	nop
-/*
-        // 24
-        add $7, %rax
-		nop
-        jmpq *%rax
 
-        // 25
-        add $14, %rax
-		nop
-        jmpq *%rax
 
-        // 26
-        add $7, %rax
-		nop
-        jmpq *%rax
-
-        // 27
-        add $7, %rax
-		nop
-        jmpq *%rax
-
-        // 28
-        add $7, %rax
-		nop
-        jmpq *%rax
-
-        // 29
-        add $7, %rax
-		nop
-        jmpq *%rax
-
-        // 30
-        add $7, %rax
-		nop
-        jmpq *%rax
-
-        // 31
-        add $7, %rax
-		nop
-        jmpq *%rax
-*/
+//        // 25
+//        add $14, %rax
+//		nop
+//        jmpq *%rax
 	// 25
 	push $0x420159
 	retq
 	nop
 
+
+//        // 26
+//        add $7, %rax
+//		nop
+//        jmpq *%rax
 	// 26
 	push $0x420160
 	retq
 	nop
 
+
+//        // 27
+//        add $7, %rax
+//		nop
+//        jmpq *%rax
 	// 27
 	push $0x420167
 	retq
 	nop
 
+
+//        // 28
+//        add $7, %rax
+//		nop
+//        jmpq *%rax
 	// 28
 	push $0x42016e
 	retq
 	nop
 
 
+//        // 29
+//        add $7, %rax
+//		nop
+//        jmpq *%rax
     // 29
     push $0x420175
     retq
     nop
 
+
+//        // 30
+//        add $7, %rax
+//		nop
+//        jmpq *%rax
     // 30
     push $0x42017c
     retq
     nop
 
 
-
+//		// 31
+//		add $7, %rax
+//		nop
+//      jmpq *%rax
     // 31
     push $0x420183
     retq
     nop
 
 
+//        // 32
+//        add $14, %rax
+//		nop
+//        jmpq *%rax
     // 32
     push $0x42018a
     retq
     nop
-/*
-        // 32
-        add $14, %rax
-		nop
-        jmpq *%rax
-*/
+
+
 
         // 33
         add $21, %rax
