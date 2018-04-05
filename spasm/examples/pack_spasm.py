@@ -10,17 +10,14 @@ def txtToHex(fname):
     out = []
     with open(fname, "rb") as f:
         for line in f:
-            # remove commented lines and empty lines
-            if "//" in line.decode():
-                continue
-            elif "#" in line.decode(): 
-                continue
-            elif len(line.decode().strip()) == 0:
-                continue
-
             # this is a line that needs to be parsed, only take the first hex value
-            opCode = [s for s in line.decode().split() if "0x" in s.lower()][0]
-            out.append(opCode[2:])
+            try:
+                opCode = [s for s in line.decode().split() if "0x" in s.lower()][0]
+                out.append(opCode[2:])
+                print(opCode[2:])
+            except: 
+                print(line)
+                continue
 
     with open(fname_out, "w") as fout:
         fout.write("".join(out))

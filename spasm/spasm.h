@@ -10,9 +10,9 @@
 
 #define SP_INSTR_LENGTH  6
 #define SP_STATE_REGS  32
-#define SP_STATE_INSTRS  256
+#define SP_STATE_INSTRS  1024
 
-#define SPASM_VERSION "1.0.1"
+#define SPASM_VERSION "1.0.2"
 
 #define DEBUG true
 

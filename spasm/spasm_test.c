@@ -242,15 +242,16 @@ int test_generic(){
 }
 
 int main(){
-    printISA_short();
-    test_CallConventions();
+    printISA();
+    // printISA_short();
+    //1 test_CallConventions();
     //1 test_ControlFlow();
     //1 printISA();
     //1 test_asmSyscall();
     //1 test_doSyscall_write();
     //1 test_changeRegs();
     //1 test_Pointers();
-    test_PushPop();
+    //1 test_PushPop();
     // test_generic();
 }
     

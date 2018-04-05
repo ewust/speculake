@@ -1,3 +1,8 @@
 *.o
 *.elf
 *.map
+*.swp
+*.swo
+
+.gitignore
+__pycache__/
