@@ -372,13 +372,54 @@ call_get_rip:
 	retq
 	nop
 
+	// 16
+	push $0x42011a
+	retq
+	nop
+
+	// 17
+	push $0x420121
+	retq
+	nop
+
+	// 18
+	push $0x420128
+	retq
+	nop
+
+	// 19
+	push $0x42012f
+	retq
+	nop
+
+	// 20
+	push $0x420136
+	retq
+	nop
+
+	// 21
+	push $0x42013d
+	retq
+	nop
+
+	// 22
+	push $0x420144
+	retq
+	nop
+
+	// 23
+	push $0x42014b
+	retq
+	nop
+
+
 
 /*
         // 15
         add $7, %rax
 		nop
         jmpq *%rax
-*/
+
         // 16
         add $14, %rax
 		nop
@@ -418,6 +459,8 @@ call_get_rip:
         add $7, %rax
 		nop
         jmpq *%rax
+
+*/
 
 	// 24
 	push $0x420152
