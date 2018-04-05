@@ -517,18 +517,18 @@ call_get_rip:
     nop
 
 
-//        // 30
-//        add $7, %rax
-//		nop
-//        jmpq *%rax
-    // 30
-    push $0x42017c
-    retq
-    nop
+        // 30
+        add $112, %rax
+		nop
+        jmpq *%rax
+//    // 30
+//    push $0x42017c
+//    retq
+//    nop
 
 
 		// 31
-		add $119, %rax
+		add $7, %rax
 		nop
       jmpq *%rax
 //    // 31
