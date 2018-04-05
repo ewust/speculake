@@ -389,13 +389,13 @@ call_get_rip:
 
 
         // 17
-        add $14, %rax
-		nop
-        jmpq *%rax
-//	// 17
-//	push $0x420121
-//	retq
-//	nop
+//        add $14, %rax
+//		nop
+//        jmpq *%rax
+	// 17
+	push $0x420121
+	retq
+	nop
 
 
 //        // 18
