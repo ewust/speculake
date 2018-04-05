@@ -51,15 +51,19 @@ void printInstr(Instruction *instr) {
         case 0x10:
             switch(instr->int8 & 0x0F){
                 case 0x0F:
-                    sprintf(out, "SET IP  ||  SRIP = PTR");
+                    sprintf(out, "SYSCALL");
                     break;
 
                 case 0x0E:
-                    sprintf(out, "SYSCALL");
+                    sprintf(out, "PTR = BASE_ADDR");
                     break;
 
                 case 0x0D:
                     sprintf(out, "VAL = VAL<<4");
+                    break;
+
+                case 0x0C:
+                    sprintf(out, "VAL *= %d (reg_size)", BYTES_PER_REG);
                     break;
 
                 case 0x0B:
@@ -71,15 +75,15 @@ void printInstr(Instruction *instr) {
                     break;
 
                 case 0x09:
-                    sprintf(out, "CMP  ||  VAL = (VAL <= PTR)? 1 : 0");
+                    sprintf(out, "VAL = *PTR");
                     break;
 
                 case 0x08:
-                    sprintf(out, "JMP  ||  SRIP = (VAL==0)? PTR : SRIP+1");
+                    sprintf(out, "*PTR = VAL");
                     break;
 
                 case 0x07:
-                    sprintf(out, "CALL ||  PUSH SRIP+1; SRIP=PTR;");
+                    sprintf(out, "SWAP || PTR <-> VAL");
                     break;
 
                 case 0x06:
@@ -95,19 +99,19 @@ void printInstr(Instruction *instr) {
                     break;
 
                 case 0x03:
-                    sprintf(out, "PTR = BASE_ADDR");
+                    sprintf(out, "JZ   ||  SRIP = (VAL==0)? PTR : SRIP+1");
                     break;
 
                 case 0x02:
-                    sprintf(out, "VAL = *PTR");
+                    sprintf(out, "J    ||  SRIP = PTR");
                     break;
 
                 case 0x01:
-                    sprintf(out, "*PTR = VAL");
+                    sprintf(out, "CALL ||  PUSH SRIP+1; SRIP=PTR;");
                     break;
 
                 case 0x00:
-                    sprintf(out, "SWAP   PTR <-> VAL");
+                    sprintf(out, "CMP  ||  VAL = (VAL <= PTR)? 1 : 0");
                     break;
 
                 default:
@@ -129,47 +133,43 @@ void printInstr(Instruction *instr) {
                     break;
 
                 case 0x0D:
-                    sprintf(out, "VAL *= %d (reg_size)", BYTES_PER_REG);
+                    sprintf(out, "*PTR += VAL");
                     break;
 
                 case 0x0C:
-                    sprintf(out, "PTR *= VAL");
+                    sprintf(out, "*PTR *= VAL");
                     break;
 
                 case 0x0B:
-                    sprintf(out, "PTR /= VAL");
-                    break;
-
-                case 0x0A:
-                    sprintf(out, "PTR << VAL");
+                    sprintf(out, "*PTR /= VAL");
                     break;
 
                 case 0x09:
-                    sprintf(out, "PTR &= VAL");
+                    sprintf(out, "*PTR << VAL");
                     break;
 
                 case 0x08:
-                    sprintf(out, "VAL = NOT VAL");
+                    sprintf(out, "*PTR >> VAL");
                     break;
 
                 case 0x07:
-                    sprintf(out, "CLR BOTH REPEAT");
+                    sprintf(out, "*PTR &= VAL");
                     break;
 
                 case 0x06:
-                    sprintf(out, "CLR VAL REPEAT");
+                    sprintf(out, "*PTR |= VAL");
                     break;
 
                 case 0x05:
-                    sprintf(out, "CLR PTR REPEAT");
+                    sprintf(out, "*PTR ^= VAL");
                     break;
 
                 case 0x04:
-                    sprintf(out, "NOP REPEAT");
+                    sprintf(out, "VAL = NOT VAL");
                     break;
 
                 case 0x03:  
-                    sprintf(out, "CLR BOTH");
+                    sprintf(out, "CLR VAL REPEAT");
                     break;
 
                 case 0x02:
@@ -177,7 +177,7 @@ void printInstr(Instruction *instr) {
                     break;
 
                 case 0x01:  
-                    sprintf(out, "CLR PTR");
+                    sprintf(out, "NOP REPEAT");
                     break;
 
                 case 0x00:  
@@ -190,7 +190,7 @@ void printInstr(Instruction *instr) {
             }// END Switch 00
     }// Update R switch 
 
-    printf(" [%s] - %s\n", instr->chars, out);
+    printf("0x%02X - [%s] - %s\n",instr->int8, instr->chars, out);
     free(out);
 }
 
@@ -201,9 +201,9 @@ void printISA_short(){
     Instruction *b;
     uint8_t defined_instrs[] = {
         0x00,0x01,0x02,0x03,0x04,0x05,0x06,0x07,
-        0x08,0x09,0x0A,0x0B,0x0C,0x0D,0x0E,0x0F,
-        0x10,0x11,0x12,0x13,
-        0x17,0x18,0x19,0x1A,0x1B,0x1D,0x1E,0x1F,
+        0x08,0x09,0x0B,0x0C,0x0D,0x0E,0x0F,
+        0x10,0x11,0x12,0x13,0x17,
+        0x18,0x19,0x1A,0x1B,0x1C,0x1D,0x1E,0x1F,
         0x30};
     
     printf("SP-ASM ISA v%s -- %s\n", SPASM_VERSION, SPASM_JIT_SUPPORT);
@@ -385,55 +385,59 @@ void update(uint_reg* R, uint8_t instr_i){
 
         case 0x10:
             switch(instr->int8 & 0x0F){
-                case 0x0F:
-                    doSetIP(R, R+PTR_OFFSET);
-                    return;
-
-                case 0x0E:    // sprintf(out, "SYSCALL");
+                case 0x0F:    // SYSCALL
                     doSyscall(R);
                     break;
 
-                case 0x0D:    // sprintf(out, "VAL = VAL<<4");
+                case 0x0E:    // PTR = BASE ADDR 
+                    doGetBase(R);
+                    break;
+
+                case 0x0D:    // VAL = VAL<<4
                     doSHLReg(R+VAL_OFFSET);
                     break;
 
-                case 0x0B:    //sprintf(out, "PUSH VAL");
+                case 0x0C:    // VAL *= BYTES_PER_REG 
+                    *(R+VAL_OFFSET) *= BYTES_PER_REG;
+                    break;
+
+                case 0x0B:    // PUSH VAL
                     doPushReg(R);
                     break;
 
-                case 0x0A:    //sprintf(out, "POP VAL");
+                case 0x0A:    // POP VAL
                     doPopReg(R);
                     break;
 
-                case 0x09:    // CMP  ||  VAL = (VAL <= PTR)? 1 : 0
-                    doCompare(R);
+                case 0x09:    // VAL = *PTR
+                    *(R+VAL_OFFSET) = *((uint_reg *)*(R+PTR_OFFSET));
                     break;
 
-                case 0x08:    // JMP  ||  SRIP = (VAL==0)? PTR : SRIP+1
+                case 0x08:    // *PTR = VAL
+                    *((uint_reg *)*(R+PTR_OFFSET)) = *(R+VAL_OFFSET);
+                    break;
+
+                case 0x07:    // SWAP ||  PTR <-> VAL
+                    doSwap(R);
+                    break;
+
+                case 0x03:    // JZ   ||  SRIP = (VAL==0)? PTR : SRIP+1
                     if ( *(R+VAL_OFFSET) == 0 ) {
                         doSetIP(R, R+PTR_OFFSET); 
                         return;
                     }
                     break;
 
-                case 0x07:    // CALL 
-                    doCall(R); 
+                case 0x02:    // J    ||  SRIP = PTR
+                    doSetIP(R, R+PTR_OFFSET);
                     return;
 
-                case 0x03:   // PTR = BASE ADDR 
-                    doGetBase(R); 
-                    break;
+                case 0x01:    // CALL || PUSH SRIP+1; SRIP=PTR 
+                    doCall(R);
+                    return;
 
-                case 0x02:    //sprintf(out, "VAL = *PTR");
-                    *(R+VAL_OFFSET) = *((uint_reg *)*(R+PTR_OFFSET));
-                    break;
-
-                case 0x01:    //sprintf(out, "*PTR = VAL");
-                    *((uint_reg *)*(R+PTR_OFFSET)) = *(R+VAL_OFFSET);
-                    break;
-
-                case 0x00:    //sprintf(out, "SWAP   PTR <-> VAL");
-                    doSwap(R);
+                case 0x00:    // CMP  ||  VAL = (VAL <= PTR)? 1 : 0
+                    doCompare(R);
                     break;
 
                 default:
@@ -454,61 +458,55 @@ void update(uint_reg* R, uint8_t instr_i){
                     *(R+VAL_OFFSET) = 1 + ~(*(R+VAL_OFFSET));
                     break;
 
-                case 0x0D:   // VAL *= BYTES_PER_REG 
-                    *(R+VAL_OFFSET) *= BYTES_PER_REG;
+                case 0x0D:    // *PTR += VAL
+                    *((uint_reg*)*(R+PTR_OFFSET)) += *(R+VAL_OFFSET);
                     break;
 
-                case 0x0C:   // PTR *= VAL
-                    *(R+PTR_OFFSET) *= *(R+VAL_OFFSET);
+                case 0x0C:   // *PTR *= VAL
+                    *((uint_reg*)*(R+PTR_OFFSET)) *= *(R+VAL_OFFSET);
                     break;
 
-                case 0x0B:   // PTR /= VAL
-                    *(R+PTR_OFFSET) /= *(R+VAL_OFFSET);
+                case 0x0B:   // *PTR /= VAL
+                    *((uint_reg*)*(R+PTR_OFFSET)) /= *(R+VAL_OFFSET);
                     break;
 
-                case 0x0A:   // PTR << VAL
-                    *(R+PTR_OFFSET) = *(R+PTR_OFFSET) << *(R+VAL_OFFSET);
+                case 0x09:   // *PTR << VAL
+                    *((uint_reg*)*(R+PTR_OFFSET)) = *((uint_reg*)*(R+PTR_OFFSET)) << *(R+VAL_OFFSET);
                     break;
 
-                case 0x09:   // PTR &= VAL
-                    *(R+PTR_OFFSET) &= *(R+VAL_OFFSET);
+                case 0x08:   // *PTR >> VAL  
+                    *((uint_reg*)*(R+PTR_OFFSET)) = *((uint_reg*)*(R+PTR_OFFSET)) >> *(R+VAL_OFFSET);
                     break;
 
-                case 0x08:   // VAL = NOT VAL
-                    *(R+VAL_OFFSET) = ~BYTES_PER_REG;
+                case 0x07:   // *PTR &= VAL
+                    *((uint_reg*)*(R+PTR_OFFSET)) &= *(R+VAL_OFFSET);   
                     break;
 
-                case 0x07:   //sprintf(out, "CLR BOTH REPEAT");
-                    doClrReg(R+PTR_OFFSET);
+                case 0x06:   // *PTR |= VAL
+                    *((uint_reg*)*(R+PTR_OFFSET)) |= *(R+VAL_OFFSET);
+                    break;
+
+                case 0x05:   // *PTR ^= VAL
+                    *((uint_reg*)*(R+PTR_OFFSET)) ^= *(R+VAL_OFFSET);
+                    break;
+
+                case 0x04:   // VAL = NOT VAL
+                    *(R+VAL_OFFSET) = ~*(R+VAL_OFFSET);
+                    break;
+
+                case 0x03:   // CLR VAL REPEAT 
                     doClrReg(R+VAL_OFFSET);
                     return;
 
-                case 0x06:   //sprintf(out, "CLR VAL REPEAT"); 
+                case 0x02:    // CLR VAL
                     doClrReg(R+VAL_OFFSET);
-                    return;
+                    break;
 
-                case 0x05:   //sprintf(out, "CLR PTR REPEAT"); 
-                    doClrReg(R+PTR_OFFSET);
-                    return;
-
-                case 0x04:
+                case 0x01:    // NOP REPEAT
                     //sprintf(out, "NOP REPEAT");
                     return;
 
-                case 0x03:    //sprintf(out, "CLR BOTH");
-                    doClrReg(R+PTR_OFFSET);
-                    doClrReg(R+VAL_OFFSET);
-                    break;
-
-                case 0x02:    //sprintf(out, "CLR VAL");
-                    doClrReg(R+VAL_OFFSET);
-                    break;
-
-                case 0x01:    //sprintf(out, "CLR PTR");
-                    doClrReg(R+PTR_OFFSET);
-                    break;
-
-                case 0x00:  
+                case 0x00:   // NOP 
                     //sprintf(out, "NOP");
                     break;
     

@@ -12,7 +12,7 @@
 #define SP_STATE_REGS  32
 #define SP_STATE_INSTRS  1024
 
-#define SPASM_VERSION "1.1.0"
+#define SPASM_VERSION "1.2.0"
 
 #define DEBUG true
 

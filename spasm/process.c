@@ -20,9 +20,8 @@ void run(int num_instr) {
 
     while (true) {
         rip = *(R+SRIP_OFFSET);
-        // printf("RIP - %X, I - 0x%02X - ", rip, state.instr[ rip ]);
 
-        // if (( state.instr[ rip ] == 0x1A )  || ( state.instr[ rip ] == 0x1B ) || ( state.instr[ rip ] == 0x17 ) || ( state.instr[ rip ] == 0x18 ))  {
+        // if (( state.instr[ rip ] == 0x1A )  || ( state.instr[ rip ] == 0x1B ) || ( state.instr[ rip ] == 0x11 ) || ( state.instr[ rip ] == 0x13 ))  {
         //    printRegs(R, 3);
         // }
         // printReg((R+SRIP_OFFSET),  "SRIP ");

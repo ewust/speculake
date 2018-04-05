@@ -71,7 +71,7 @@ void test_Logocal(){
 }
 
 void test_ControlFlow(){
-    printf("-[ Test Base UPTR SHPTR CMP JMP SETIP ]-\n");
+    printf("-[ Test Base CMP JMP SETIP ]-\n");
     uint_reg R_mock[16] = {0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0};
     
     R_mock[SRAX_OFFSET] = 0x1;
@@ -82,26 +82,12 @@ void test_ControlFlow(){
     printRegs(R_mock, 0);
     
     update(R_mock, 0x01);   // CLR PTR 
-    update(R_mock, 0x2D);   // UPTR D
-    update(R_mock, 0x1C);   // SHPTR 
-    update(R_mock, 0x2E);   // UPTR E
-    update(R_mock, 0x1C);   // SHPTR 
-    update(R_mock, 0x2A);   // UPTR A
-    update(R_mock, 0x1C);   // SHPTR 
-    update(R_mock, 0x2D);   // UPTR D
     update(R_mock, 0x1F);   // SET IP
     
     printRegs(R_mock, 0);
 
     update(R_mock, 0x18);   // JMP
     update(R_mock, 0x01);   // CLR PTR 
-    update(R_mock, 0x2B);   // UPTR B
-    update(R_mock, 0x1C);   // SHPTR 
-    update(R_mock, 0x2E);   // UPTR E
-    update(R_mock, 0x1C);   // SHPTR 
-    update(R_mock, 0x2E);   // UPTR E
-    update(R_mock, 0x1C);   // SHPTR 
-    update(R_mock, 0x2F);   // UPTR F
 
     printRegs(R_mock, 0);
 
