@@ -134,6 +134,7 @@ call_get_rip:
 	nop
     // len("add (rbx), rax") + len("add $9, rax") + len("jmpq *rax") => 9
 
+/*
 // For push/ret
 	// 1
 	push $0x4200b1
@@ -276,34 +277,14 @@ call_get_rip:
 	retq
 	nop
 
-	// 29
-	push $0x420175
-	retq
-	nop
-
-	// 30
-	push $0x42017c
-	retq
-	nop
-
-	// 31
-	push $0x420183
-	retq
-	nop
-
-	// 32
-	push $0x42018a
-	retq
-	nop
-
 
 	nop
 	nop
 	nop
 	nop
 	nop
+*/
 
-/*
     add $0xa, %rax
 		nop
         // 1
@@ -422,14 +403,22 @@ call_get_rip:
         // 29
         jmpq *%rax
         add $7, %rax
+		nop
+
         // 30
         jmpq *%rax
         add $7, %rax
+		nop
+
         // 31
         jmpq *%rax
         add $7, %rax
+		nop
+
         // 32
         jmpq *%rax
+        add $7, %rax
+		nop
 /*
         add $6, %rax
         // 33

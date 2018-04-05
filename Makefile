@@ -1,10 +1,10 @@
 
 all: inject measure
 
-inject: inject.c indirect.S
+inject: inject.c indirect-measure.S
 	$(CC) -Wl,-Tlinker.ld $^ -o $@
 
-measure: target_fn.c measure.c indirect.S decrypt.S
+measure: target_fn.c measure.c indirect-hybrid.S decrypt.S
 	$(CC) -Wl,-Tlinker.ld $^ -o $@
 
 camellia: target_fn.c camellia-triggered.c decrypt.S
