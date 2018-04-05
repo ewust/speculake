@@ -234,14 +234,14 @@ void check_probes() {
 
     int i, mix_i;
     for (i=0; i<NUM_PROBES; i++) {
-        //mix_i = ((i*167) + 13) & 255;
+        //mix_i = ((i*13) + 7) & 15;
         mix_i = i;
         addr = &probe_buf[mix_i*cur_probe_space];
         t0 = _rdtscp(&junk);
         asm volatile( "movb (%%rbx), %%al\n"
             :: "b"(addr) : "rax");
         t1 = _rdtscp(&junk);
-        if (t1-t0 < 150) {
+        if (t1-t0 < 90) {
             cache_hits++;
             tot_time += t1-t0;
             results[mix_i]++;
@@ -348,15 +348,16 @@ void indirect_camellia(register uint64_t *jmp_ptr) {
     // Do something slow to stall the pipeline???
     // Call the first thing in the jump chain
     //call((void (*)(void))jump_addrs[0].from);
-    asm volatile ("add (%%rcx), %%rax\n"
+    asm volatile (//"add (%%rcx), %%rax\n"
             "jmpq *%%rax\n" :: "a"(jump_addrs[0].from), "c"(jmp_ptr):);
             //*/
 
     //asm volatile ("jmpq *%%rax\n" :: "a"(jump_addrs[0].from):);
 
 done_jumps:
+    asm volatile("nop\n":::);
     //asm volatile ("add (%%rcx), %%rax\n" :: "c"(jmp_ptr));
-    (*fn_ptr)();
+    //(*fn_ptr)();
     //t0 = _rdtscp(&junk);
     //fn_ptr = *fn_ptr_ptr;
     //t1 = _rdtscp(&junk);
@@ -390,7 +391,7 @@ void measure() {
             _mm_clflush(fn_ptr_ptr);
             */
             indirect_camellia(&jmp_ptr);
-            usleep(10);
+            usleep(1);
         }
         uint64_t avg = 0;
         if (cache_hits > 0) avg = tot_time/cache_hits;
@@ -492,6 +493,21 @@ int main()
         }
     }
 
+    // The last .from should be filled with:
+    // 48 8b 04 25 00 00 44 00  mov (0x440000),%rax
+    // ff d0                    callq *%rax
+
+    uint8_t stalled_jmp[] = {
+                            0x90, 0x90,
+                            0x90, 0x90,
+                            0x90, 0x90,
+                            0x90, 0x90,
+                            0x90,
+            0x48, 0x8b, 0x04, 0x25, 0x00, 0x00, 0x44, 0x00,
+                            0xff, 0xd0,
+                            0xc3};
+
+    memcpy((void*)jump_addrs[NUM_JUMPS-2].to, stalled_jmp, 20);
 
     load_page(jump_addrs[NUM_JUMPS-1].to);
     printf("Copying 0x%lx bytes to 0x%08lx...we have 0x%lx bytes of head space\n", end_target_fn-target_fn,

@@ -125,6 +125,11 @@ void setup()
 
 }
 
+void bar()
+{
+    asm volatile("mov (0x440000),%%rax\n"
+                    "callq *%%rax\n":::);
+}
 
 
 int main()
