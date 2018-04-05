@@ -477,34 +477,34 @@ call_get_rip:
 //	nop
 
 
-        // 26
-        add $7, %rax
-		nop
-        jmpq *%rax
-//	// 26
-//	push $0x420160
-//	retq
-//	nop
+//        // 26
+//        add $7, %rax
+//		nop
+//        jmpq *%rax
+	// 26
+	push $0x420160
+	retq
+	nop
 
 
-        // 27
-        add $7, %rax
-		nop
-        jmpq *%rax
-//	// 27
-//	push $0x420167
-//	retq
-//	nop
+   //     // 27
+   //     add $7, %rax
+   // 	nop
+   //     jmpq *%rax
+	// 27
+	push $0x420167
+	retq
+	nop
 
 
-        // 28
-        add $7, %rax
-		nop
-        jmpq *%rax
-//    // 28
-//	push $0x42016e
-//	retq
-//	nop
+//        // 28
+//        add $7, %rax
+//		nop
+//        jmpq *%rax
+    // 28
+	push $0x42016e
+	retq
+	nop
 
 
 
