@@ -260,7 +260,7 @@ call_get_rip:
 		// */
 
     // Do indirect jump
-	mov fn_ptr,%rax
+	movabs (fn_ptr),%rax
 	add (%rbx), %rax
 	callq *%rax
 	add	$0x18,%rsp
