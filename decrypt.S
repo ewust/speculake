@@ -89,14 +89,11 @@ ctext:
     .quad 0x7962d40d90d41628, 0x7bc1b1c6b5763412
     .quad 0x00, 0x8cc3fcf821e1bf3a
 
-
-.text
-.global try_decrypt
 try_decrypt:
 	pushq %rbp
 	movq %rsp, %rbp
 
-    movabs $key_schedule, %rcx
+    movq key_schedule(%rip), %rcx
     movaps 0x00(%rcx), %xmm0
     movaps 0x10(%rcx), %xmm1
     movaps 0x20(%rcx), %xmm2
@@ -140,10 +137,10 @@ try_decrypt:
 	leave
 	ret
 
-.text
 .global aes_ctr
+.type aes_ctr, @function
 aes_ctr:
-	movabs $key_schedule, %rcx
+	movq key_schedule(%rip), %rcx
     movaps 0x00(%rcx), %xmm0
     movaps 0x10(%rcx), %xmm1
     movaps 0x20(%rcx), %xmm2
@@ -173,7 +170,7 @@ aes_ctr:
     aesenclast %xmm10, %xmm15
 
 	// Xor with ctext
-	mov $ctext, %rcx
+	mov ctext(%rip), %rcx
 	imul $0x10, %rdi
 	addq %rcx, %rdi
 	movaps 0x00(%rdi), %xmm14
@@ -184,3 +181,4 @@ aes_ctr:
 	psrldq $0x8, %xmm15
 	movq %xmm15, %rax
 	ret
+

@@ -30,32 +30,6 @@ void end_target_fn(void) __attribute__((section(".targetfn")));
 void end_target_fn(void) {
 }
 
-/*
-	push %rbx
-	movabs $probe_buf, %rbx
-    mov (%rbx), %rbx
-	movabs $cur_probe_space, %rcx
-    mov  (%rcx), %rcx 
-	movabs $signal_idx, %rax
-    mov  (%rax), %rax
-	//add %rax, %rax
-	imul $3, %rax
-	and $0xff, %rax
-	mul %rcx
-	add %rax, %rbx
-	movb (%rbx),%al
-end_target_fn:
-
-	pop %rbx
-	ret
-*/
-
-/*
-	mov signal_ptr, %rcx
-	mov	(%rcx), %al
-	retq
-*/
-
 
 /*
 	// works

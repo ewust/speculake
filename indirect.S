@@ -195,9 +195,10 @@ call_get_rip:
 		// */
 
     // Do indirect jump
-	movabs $fn_ptr,%rax
+	mov ($fn_ptr),%rax
 	add (%rbx), %rax
-	callq *%rax
+	callq *%rax   // Calling convention (for jack)
+	// callq %rax  // Calling convention (for ian/eric)
 	add	$0x18,%rsp
 	pop %rbx
 	pop %rbp

@@ -127,8 +127,8 @@ void measure() {
             avgpct += ((float)max_res)/tot_runs;
 
             if (max_i != ((last_i + 1)&0xff)) {
-                printf("---- ERROR: ^^^^^^^^^\n");
-                exit(-1);
+                // printf("---- ERROR: ^^^^^^^^^\n");
+                // exit(-1);
             }
             last_i = max_i;
             signal_idx++;
