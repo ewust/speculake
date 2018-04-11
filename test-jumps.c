@@ -4,6 +4,10 @@
 #include <string.h>
 #include <stdlib.h>
 
+
+void __attribute__((section(".fnptr"))) (*fn_ptr)(void);
+
+
 typedef struct jump_st {
     uint64_t from;
     uint64_t to;
@@ -11,7 +15,7 @@ typedef struct jump_st {
 
 #define PAGE_SIZE 0x1000
 #define MAX_PAGES 100
-#define NUM_JUMPS 31
+#define NUM_JUMPS 16
 
 
 
@@ -57,33 +61,42 @@ void load_page(uint64_t addr)
 jump addrs[NUM_JUMPS] = {
         // in openssl-accept.repeats2}, //254 repeats (line 14491502):
         // part of EC_GFp_nistp224_method()
+        /*
         {0x7ffff785a74b, 0x7ffff785c256}, //  retq   
         {0x7ffff785a926, 0x7ffff785c261}, //  retq   
         {0x7ffff785ae37, 0x7ffff785c277}, //  retq   
+
         {0x7ffff785a74b, 0x7ffff785c28f}, //  retq   
         {0x7ffff785a74b, 0x7ffff785c2a2}, //  retq   
         {0x7ffff785abfc, 0x7ffff785c2b5}, //  retq   
         {0x7ffff785ae37, 0x7ffff785c2cd}, //  retq   
+
         {0x7ffff785a34a, 0x7ffff785c2e3}, //  retq   
         {0x7ffff785a27e, 0x7ffff785c2f3}, //  retq   
         {0x7ffff785a74b, 0x7ffff785ac1d}, //  retq   
         {0x7ffff785a74b, 0x7ffff785ac28}, //  retq   
+
         {0x7ffff785abfc, 0x7ffff785ac36}, //  retq   
         {0x7ffff785ac40, 0x7ffff785c3c5}, //  retq   
         {0x7ffff785ae37, 0x7ffff785c3d0}, //  retq   
         {0x7ffff785a74b, 0x7ffff785c3e3}, //  retq   
+
+        */
         {0x7ffff785a926, 0x7ffff785c3f3}, //  retq   
         {0x7ffff785ae37, 0x7ffff785c3ff}, //  retq   
         {0x7ffff785a34a, 0x7ffff785c4b7}, //  retq   
         {0x7ffff785a27e, 0x7ffff785c4c9}, //  retq   
+
         {0x7ffff785a27e, 0x7ffff785c538}, //  retq   
         {0x7ffff785a74b, 0x7ffff785c543}, //  retq   
         {0x7ffff785a926, 0x7ffff785c54e}, //  retq   
         {0x7ffff785ae37, 0x7ffff785c55e}, //  retq   
+
         {0x7ffff785a34a, 0x7ffff785c569}, //  retq   
         {0x7ffff785a41a, 0x7ffff785c61d}, //  retq   
         {0x7ffff785a74b, 0x7ffff785c628}, //  retq   
         {0x7ffff785abfc, 0x7ffff785c638}, //  retq   
+
         {0x7ffff785a926, 0x7ffff785c645}, //  retq   
         {0x7ffff785a5f0, 0x7ffff785c798}, //  retq   
         {0x7ffff785ae37, 0x7ffff785c847}, //  retq   
@@ -121,6 +134,25 @@ void setup()
     }
 
     load_page(addrs[NUM_JUMPS-1].to);
+
+    uint8_t stalled_jmp[] = {
+                            0x90, 0x90,
+                            0x90,                               // nop
+            0x48, 0x8b, 0x04, 0x25, 0x00, 0x00, 0x44, 0x00,     // mov (0x440000),%rax
+                            //0x90, 0x90,                         // nop, nop
+                            //0x50,                               // push %rax
+                            0x90,
+                            0x90,                               // nop
+                            //0x90, 0x90,                         // nop, nop
+                            //0xeb, 0x02,                          // jmp +2
+                            0x90, 0x90,                         // nop, no
+                            //0xc3, 0x90,                       // ret, nop
+                            0xff, 0xd0,                         // callq *%rax
+                            0x90};
+
+    memcpy((void*)addrs[NUM_JUMPS-2].to, stalled_jmp, 20);
+
+    fn_ptr = (void*)addrs[NUM_JUMPS-1].to;
     //memcpy((void*)jump_addrs[NUM_JUMPS-1].to, target_fn, end_target_fn-target_fn);
 
 }
@@ -132,10 +164,12 @@ void bar()
 }
 
 
+void nop()
+{
+}
+
 int main()
 {
-
-
 
     // Do the jumps
     //void *x = &&come_home;

@@ -17,7 +17,7 @@ measure_noasm: measure.c common.c
 	$(CC) -Wl,-Tlinker.ld $^ -o $@
 
 simulate-openssl: test-jumps.c
-	$(CC) $^ -o $@
+	$(CC) -Wl,-Tlinker.ld $^ -o $@
 
 
 
