@@ -4,5 +4,6 @@
 
 *.swo
 *.swp
+*.hex
 *__pycache__
 automate

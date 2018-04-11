@@ -2,13 +2,13 @@
 all: inject measure
 
 inject: inject.c indirect.S
-	$(CC) -Wl,-Tlinker.ld $^ -o $@
+	$(CC) -Wl,-Tlinker.ld $^ -o $@ -no-pie
 
 trigger: trigger.c indirect.S
-	$(CC) -Wl,-Tlinker.ld $^ -o $@
+	$(CC) -Wl,-Tlinker.ld $^ -o $@ -no-pie
 
 measure: target_fn.c measure.c indirect.S decrypt.S
-	$(CC) -Wl,-Tlinker.ld $^ -o $@
+	$(CC) -Wl,-Tlinker.ld $^ -o $@ -no-pie
 
 turing: turing_target.c turing.c indirect.S
 	$(CC) -Wl,-Tlinker.ld $^ -o $@
