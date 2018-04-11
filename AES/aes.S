@@ -3,10 +3,16 @@ key_schedule:
     .zero 160
 
 plaintext:
-    .quad 0x9397585326594131, 0xefbeadde0df0ad8b # correct ordering, so no swapping necessary in code
+    #.quad 0x9397585326594131, 0xefbeadde0df0ad8b # correct ordering, so no swapping necessary in code
+    .quad 0xefbeadde0df0ad8b, 0x9397585326594131
+	#.quad 0x8badf00ddeadbeef, 0x3141592653589793
+	#.quad 0x3141592653589793, 0x8badf00ddeadbeef
 
 key:
     .quad 0x0706050403020100, 0x0f0e0d0c0b0a0908
+	#.quad 0x08090a0b0c0d0e0f, 0x0001020304050607
+	#.quad 0x0001020304050607, 0x08090a0b0c0d0e0f
+	#.quad 0x08090a0b0c0d0e0f, 0x0001020304050607
 
 format:
     .asciz "0x%08x%08x%08x%08x\n"
@@ -141,6 +147,7 @@ key_expansion_128:
     ret       
 
 swap_chunks:
+	ret
     movq %xmm12, %r8
     psrldq $8, %xmm12
     movq %xmm12, %r9
