@@ -12,7 +12,7 @@
 
 %%\ccsPaper{9999} % TODO: replace with your paper number once obtained
 
-\newcommand{\speculake}{SpecPiler}
+\newcommand{\speculake}{Exspectre}
 
 
 \begin{document}
@@ -34,7 +34,7 @@ program cannot tell how its results were computed.
 We introduce \emph{\speculake}, which compiles arbitrary malicious code into a
 seemingly-benign payload binary. When a separate trigger program performs a specific
 pattern of indirect jumps, it (mis)trains the CPU's branch predictor. Subsequent
-executions of the payload binary with similar jumps leads the CPU to mispredict its
+executions of the payload binary with similar jumps causes the CPU to mispredict its
 branches and speculatively execute the malware's payload, which communicates
 results back to the real world via side channels.
 
@@ -113,12 +113,12 @@ correct branch target.
 When a CPU mispredicts a branch, the speculative execution results are
 discarded, costing the CPU several cycles as the pipeline is flushed. To
 minimize this, CPUs employ \emph{branch predictors} that attempt to guess the
-path of execution. These predictors can maintain a short history of previous
+path of execution. Branch predictors maintain a short history of previous
 branch targets for a particular branch (e.g. whether a certain branch is
-frequently taken or not taken, or if it exhibits a particular pattern), and use
+frequently taken or not taken), and use
 this to inform the CPU's guess for speculative execution.
 
-There are two kinds of branches a CPU must be able to predict: \emph{direct} and
+There are two kinds of branches a CPU handles: \emph{direct} and
 \emph{indirect}. A \emph{direct} branch may either jump to a provided address or
 continue executing straight through depending on the state of the CPU (e.g. condition
 registers). While there are only two potential statically-known targets for a direct
@@ -133,12 +133,20 @@ function pointers, class methods, or case statements.
 %- BHB, BTB
 
 \subsection{Spectre}
+In early 2018, researchers revealed the Spectre vulnerability, which allows an
+attacker to leak information from a victim program.
+
+Spectre uses speculative execution...
 - Basic direct branch
 - Indirect branch predictor
 
 
 %%%%%%%%%%%%%%
 \section{Architecture}
+
+\speculake malware is comprised of two independent programs: a payload program, and a
+trigger program. Both are installed on the victim's computer (e.g. via trojan, remote
+exploit, or phishing), a
 
 Two parts: payload program, and trigger program. Could be combined, but need not
 be. Describe high-level concept of parts
