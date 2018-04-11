@@ -15,8 +15,6 @@ uint_reg *R;
 void run(int num_instr) {
     uint_reg rip = *(R+SRIP_OFFSET);
 
-    Instruction *instr;
-
     while (true) {
         rip = *(R+SRIP_OFFSET);
         // printf("RIP - %X, I - 0x%02X - ", rip, state.instr[ rip ]);
