@@ -6,7 +6,7 @@
 #include <unistd.h>
 #include <sys/mman.h>
 #include <string.h>
-#include "common.h"
+#include "../common.h"
 
 /*
  * This is the target of the indirect call
