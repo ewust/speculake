@@ -17,7 +17,35 @@ key_schedule:
 	.quad 0xc1d38f0297b36395, 0xff5fe2ff496d7f41
 
 
-ctext:
+ctext:      // FizzBuzz Simple (test Control Flow)
+    .quad 0x45c5fba36d9d7b71, 0x80488d9008269fc4
+    .quad 0x1634fb79d2a37956, 0x06b6cf89ac0d446b
+    .quad 0xa9ae83776a6293ec, 0x909e99874890d957
+    .quad 0x4ac8a99e452f524c, 0x0cdc682c1429a2a5
+    .quad 0xbdde75f1cc492387, 0xbfc71514c787613f
+    .quad 0x14ce0186d23f6f5e, 0x4393657e93869aaa
+    .quad 0x6d0a76bfe53ed0d9, 0xf0a0b55050e245c3
+    .quad 0x2f0e4ffbea36eea3, 0xd3251cdb233205bb
+    .quad 0x8b7bbbdf1161c8f5, 0x83c440e559d926bd
+    .quad 0x12092cdef900f040, 0x403b021d55787b7f
+    .quad 0x2fea8fb83340e0e9, 0x235fad9d369c5e76
+    .quad 0xea8c6b93fc8a1f72, 0x981597ffda99078a
+    .quad 0x32e8b6dd6de1026c, 0x2592530587f8927a
+    .quad 0xc0de44937632f497, 0x123380bd148293d7
+    .quad 0x662c3ffc4df4db80, 0xa5d050d5ceb42430
+    .quad 0xa89e794182f46cb8, 0xdfa6c945993e6f8c
+    .quad 0xb7bef8bb7b5be606, 0x3ce5689d2ddf67c4
+    .quad 0xd7598966d85781f4, 0x10e16c30a3ad9344
+    .quad 0x68ae1675daf870de, 0xaa03f06256185935
+    .quad 0x073f6591b128bdda, 0x37a0954c7d565155
+    .quad 0xe78449fe480deab8, 0x2a83bc0c4df6dea4
+    .quad 0x5e84184c9b028acd, 0xaa0b487aaa17f145
+    .quad 0x9eb6a5d82e722bc8, 0xe20840570ae87af3
+    .quad 0x593c47a7ececca83, 0x2f43eecde3d637ca
+
+
+    // HelloWorld (test SPASM)
+    /*
     .quad 0x63d7c5996092547f, 0x8d488295383690d5             
     .quad 0x1719e954fe896673, 0x1cbbcda186104462             
     .quad 0x80849c55754e94d7, 0x919286aa4eb3cb7b             
@@ -26,6 +54,8 @@ ctext:
     .quad 0x0aec00acdf2c5374, 0x52836c7594a88094             
     .quad 0x621642a1e729d2cb, 0xf4beab675fc54dd6             
     .quad 0x19137be6d32bd8be, 0xe9382bc6192f32b9
+    */
+
 
 .text
 .global try_decrypt
