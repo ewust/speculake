@@ -17,41 +17,108 @@ indirect:
 	mov		-0x18(%rbp),%rdx
 	mov		%rdx,%rbx
 
-    mov $2, %rax
-    cmpb  $0x02, %al
-    je .+2
-    je .+2
-    je .+2
-    je .+2
-    je .+2
-    je .+2
-    je .+2
-    je .+2
-    je .+2
-    je .+2
-    je .+2
-    je .+2
-    je .+2
-    je .+2
-    je .+2
-    je .+2
-    je .+2
-    je .+2
-    je .+2
-    je .+2
-    je .+2
-    je .+2
-    je .+2
-    je .+2
-    je .+2
-    je .+2
-    je .+2
-    je .+2
-    je .+2
-    je .+2
-    je .+2
-    je .+2
-    // Do some indirect calls
+            mov $2, %rax
+            //cmpb  $0x08, %al
+			nop
+			nop
+			jmp skip_jumps
+            je do_jmps
+do_jmps:
+            je .+4
+			nop
+			nop
+            je .+4
+			nop
+			nop
+            je .+4
+			nop
+			nop
+            je .+4
+			nop
+			nop
+            je .+4
+			nop
+			nop
+            je .+4
+			nop
+			nop
+            je .+4
+			nop
+			nop
+            je .+4
+			nop
+			nop
+            je .+4
+			nop
+			nop
+            je .+4
+			nop
+			nop
+            je .+4
+			nop
+			nop
+            je .+4
+			nop
+			nop
+            je .+4
+			nop
+			nop
+            je .+4
+			nop
+			nop
+            je .+4
+			nop
+			nop
+            je .+4
+			nop
+			nop
+            je .+4
+			nop
+			nop
+            je .+4
+			nop
+			nop
+            je .+4
+			nop
+			nop
+            je .+4
+			nop
+			nop
+            je .+4
+			nop
+			nop
+            je .+4
+			nop
+			nop
+            je .+4
+			nop
+			nop
+            je .+4
+			nop
+			nop
+            je .+4
+			nop
+			nop
+            je .+4
+			nop
+			nop
+            je .+4
+			nop
+			nop
+            je .+4
+			nop
+			nop
+            je .+4
+			nop
+			nop
+            je .+4
+			nop
+			nop
+            je .+4
+			nop
+			nop
+skip_jumps:
+            // Do some indirect calls
 	jmp call_get_rip
 get_rip:
     pop %rax
@@ -130,10 +197,7 @@ call_get_rip:
         // 21
         jmpq *%rax
         add $6, %rax
-        // 21
-        jmpq *%rax
-        add $6, %rax
-        // 12
+        // 22
         jmpq *%rax
         add $6, %rax
         // 23
@@ -154,6 +218,7 @@ call_get_rip:
         // 28
         jmpq *%rax
         add $6, %rax
+/*
         // 29
         jmpq *%rax
         add $6, %rax
@@ -197,8 +262,7 @@ call_get_rip:
     // Do indirect jump
 	movabs (fn_ptr),%rax
 	add (%rbx), %rax
-	callq *%rax   // Calling convention (for jack)
-	// callq %rax  // Calling convention (for ian/eric)
+	callq *%rax
 	add	$0x18,%rsp
 	pop %rbx
 	pop %rbp
