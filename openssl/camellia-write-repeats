@@ -1,0 +1,65 @@
+Window: 28 jumps
+===========
+3 repeats:
+9  0x7ffff7bb1ecd -> 0x7ffff7b9a230:   jmpq   *%rax
+17  0x7ffff7b8d670 -> 0x7ffff73f8760:   jmpq   *0x24609a(%rip)        # 0x7ffff7dd3710
+20  0x7ffff73f8770 -> 0x7ffff7b9a242:   retq   
+37  0x7ffff7b9a282 -> 0x7ffff7b9c760:   jmpq   *%rax
+53  0x7ffff7bb46e3 -> 0x7ffff7b9c796:   retq   
+99  0x7ffff7b8cc60 -> 0x7ffff7894a70:   jmpq   *0x2465a2(%rip)        # 0x7ffff7dd3208
+103  0x7ffff7894a78 -> 0x7ffff7b9c294:   retq   
+108  0x7ffff7b8cc60 -> 0x7ffff7894a70:   jmpq   *0x2465a2(%rip)        # 0x7ffff7dd3208
+112  0x7ffff7894a78 -> 0x7ffff7b9c2a9:   retq   
+115  0x7ffff7b8dc60 -> 0x7ffff7894a20:   jmpq   *0x245da2(%rip)        # 0x7ffff7dd3a08
+119  0x7ffff7894a28 -> 0x7ffff7b9c2b1:   retq   
+164  0x7ffff7b8d380 -> 0x7ffff78946d0:   jmpq   *0x246212(%rip)        # 0x7ffff7dd3598
+167  0x7ffff78946d7 -> 0x7ffff7b9c622:   retq   
+177  0x7ffff7894716 -> 0x7ffff7b9c6ec:   retq   
+195  0x7ffff7b8dd60 -> 0x7ffff7470a30:   jmpq   *0x245d22(%rip)        # 0x7ffff7dd3a88
+3047  0x7ffff7470a71 -> 0x7ffff7b9c664:   retq   
+3065  0x7ffff7b9c5ab -> 0x7ffff7ba6a50:   callq  *0x8(%rax)
+3089  0x7ffff7b8cc60 -> 0x7ffff7894a70:   jmpq   *0x2465a2(%rip)        # 0x7ffff7dd3208
+3093  0x7ffff7894a78 -> 0x7ffff7ba6ab3:   retq   
+3096  0x7ffff7b8dc60 -> 0x7ffff7894a20:   jmpq   *0x245da2(%rip)        # 0x7ffff7dd3a08
+3100  0x7ffff7894a28 -> 0x7ffff7ba6abb:   retq   
+3112  0x7ffff7b8db20 -> 0x7ffff788a560:   jmpq   *0x245e42(%rip)        # 0x7ffff7dd3968
+3203  0x7ffff788a28b -> 0x7ffff788a3b1:   retq   
+3257  0x7ffff77fedad -> 0x7ffff77fe8f0:   callq  *0x36d5f5(%rip)        # 0x7ffff7b6c3a8
+3259  0x7ffff77fe8f7 -> 0x7ffff7458a80:   jmpq   *%rax
+3336  0x7ffff745687e -> 0x7ffff7458ae0:   retq   
+3356  0x7ffff7458b29 -> 0x7ffff77fedb3:   retq   
+3367  0x7ffff77fede3 -> 0x7ffff789726c:   retq   
+----------
+[1042952, 2086044, 3129090]
+===========
+7 repeats:
+3203  0x7ffff788a28b -> 0x7ffff788a3b1:   retq   
+3257  0x7ffff77fedad -> 0x7ffff77fe8f0:   callq  *0x36d5f5(%rip)        # 0x7ffff7b6c3a8
+3259  0x7ffff77fe8f7 -> 0x7ffff7458a80:   jmpq   *%rax
+3336  0x7ffff745687e -> 0x7ffff7458ae0:   retq   
+3356  0x7ffff7458b29 -> 0x7ffff77fedb3:   retq   
+3367  0x7ffff77fede3 -> 0x7ffff789726c:   retq   
+3418  0x7ffff77fe3f7 -> 0x00418980:   jmpq   *%rax
+3439  0x004189cb -> 0x7ffff77fe877:   retq   
+3464  0x7ffff77fe3f7 -> 0x00418980:   jmpq   *%rax
+3489  0x004189cb -> 0x7ffff77fe896:   retq   
+3496  0x7ffff77fe8a3 -> 0x7ffff78972b0:   retq   
+3510  0x7ffff7897308 -> 0x7ffff780d3f0:   callq  *0x10(%rax)
+3542  0x7ffff77fedad -> 0x7ffff77fe8f0:   callq  *0x36d5f5(%rip)        # 0x7ffff7b6c3a8
+3544  0x7ffff77fe8f7 -> 0x7ffff7458a80:   jmpq   *%rax
+3618  0x7ffff745687e -> 0x7ffff7458ae0:   retq   
+3638  0x7ffff7458b29 -> 0x7ffff77fedb3:   retq   
+3649  0x7ffff77fede3 -> 0x7ffff780d2df:   retq   
+3745  0x7ffff780d32d -> 0x7ffff780d3ff:   retq   
+3934  0x7ffff788a28b -> 0x7ffff788a3b1:   retq   
+3975  0x7ffff77fedad -> 0x7ffff77fe8f0:   callq  *0x36d5f5(%rip)        # 0x7ffff7b6c3a8
+3977  0x7ffff77fe8f7 -> 0x7ffff7458a80:   jmpq   *%rax
+4054  0x7ffff745687e -> 0x7ffff7458ae0:   retq   
+4074  0x7ffff7458b29 -> 0x7ffff77fedb3:   retq   
+4085  0x7ffff77fede3 -> 0x7ffff788a513:   retq   
+4096  0x7ffff77fdb40 -> 0x7ffff7470a30:   jmpq   *0x36e68a(%rip)        # 0x7ffff7b6c1d0
+4128  0x7ffff7470a71 -> 0x7ffff788a40a:   retq   
+4143  0x7ffff788a495 -> 0x7ffff780cc39:   retq   
+4239  0x7ffff788a28b -> 0x7ffff788a3b1:   retq   
+----------
+[258202, 1046146, 1301233, 2089238, 2344287, 3132284, 3387333]

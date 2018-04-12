@@ -53,7 +53,7 @@ void indirect(void *jmp_ptr) {
         "ret\n"
     "call_get_rip:\n"
         "call get_rip\n"
-        "add (%%rcx), %%rax\n"
+        "add (%%rcx), %%rax\n"      // This will stall (assuming jmp_ptr is not in cache)
         // len("add (rbx), rax") + len("add $9, rax") + len("jmpq *rax") => 9
         "add $9, %%rax\n"
         // 1
