@@ -1,0 +1,90 @@
+J [label / address / register]
+
+
+----------------------------------------------
+CMP
+JZ [label / address / register]
+
+
+----------------------------------------------
+CMP
+JNZ [label / address / register]
+
+
+----------------------------------------------
+CMP
+JE [label / address / register]
+
+
+----------------------------------------------
+CMP
+JNE [label / address / register]
+
+
+----------------------------------------------
+CMP
+JL [label / address / register]
+
+
+----------------------------------------------
+CMP
+JLE [label / address / register]
+
+
+----------------------------------------------
+CMP
+JG [label / address / register]
+
+
+----------------------------------------------
+CMP
+JGE [label / address / register]
+
+----------------------------------------------
+CALL [label / address / register]
+0x02        CLR VAL
+[      UVAL      ]  # FILL label / address
+[      GET REG   ]  # FILL Register 
+0x17        SWAP
+0x11        CALL
+
+
+----------------------------------------------
+SET [RAX, RBX, RCX, RDX, RDI, RSI, R8, R9, SRIP, SRSP, SRBP] ['VAL' / 'PTR' / label / value]
+            //mov $0x3c, %rax
+[ 0x17        SWAP ] # IF PTR
+[ 0x1B        PUSH ] # IF PTR OR VAL
+0x02        CLR VAL
+0x1E        PTR = base_addr
+[ 0x3_        UVAL  0x_ ]  # FILL [see registers.h] 
+0x1C        VAL *= REG_SIZE
+0x0F        PTR = PTR + VAL                
+[   UVAL MACRO    ] # FILL if value / label
+
+0x18        *PTR = VAL                     
+
+
+
+----------------------------------------------
+GET [RAX, RBX, RCX, RDX, RDI, RSI, R8, R9, SRIP, SRSP, SRBP] 
+            // VAL = RAX
+0x02        CLR VAL
+0x1E        PTR = base_addr
+[ 0x3_        UVAL  0x_ ]   # FILL [see registers.h] 
+0x1C        VAL *= REG_SIZE
+0x0F        PTR = PTR + VAL                
+0x18        VAL = *PTR                     
+
+
+
+----------------------------------------------
+UVAL [ label / value ]
+    # Note - set max_address size so that labels dont waste instructions. static length
+    # 3 bytes -> 4096 max instructions to jump to 4 wasted instructions if label only one byte
+    # 20 bytes -> lost of instructions to jump to many waster instructions setting short labels
+
+0x02        CLR VAL
+0x3_        UVAL 0x_
+0x1D        SHVAL
+0x3_        UVAL 0x_
+...         ... 
