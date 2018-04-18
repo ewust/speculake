@@ -113,7 +113,7 @@ void measure() {
 
     while (1) {
         
-        for (i=0; i<2000; i++) {
+        for (i=0; i<200; i++) {
             _mm_clflush(&fn_ptr);
             //_mm_clflush(&jmp_ptr);
             indirect(&jmp_ptr);
