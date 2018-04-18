@@ -1,8 +1,7 @@
 *.o
 *.elf
 *.map
-
-
 *.swo
 *.swp
+*.hex
 *__pycache__

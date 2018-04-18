@@ -60,8 +60,18 @@ void test_changeRegs(){
 }
 
 
+void test_Arithmetic(){
+    printf("------[ Test ADD MUL DIV 2'sComp ]------\n");
+    uint_reg R_mock[16] = {0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0};
+}
+
+void test_Logocal(){
+    printf("--------[ Test AND NOT SHIFT ]----------\n");
+    uint_reg R_mock[16] = {0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0};
+}
+
 void test_ControlFlow(){
-    printf("-[ Test Base UPTR SHPTR CMP JMP SETIP ]-\n");
+    printf("-[ Test Base CMP JMP SETIP ]-\n");
     uint_reg R_mock[16] = {0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0};
     
     R_mock[SRAX_OFFSET] = 0x1;
@@ -72,26 +82,12 @@ void test_ControlFlow(){
     printRegs(R_mock, 0);
     
     update(R_mock, 0x01);   // CLR PTR 
-    update(R_mock, 0x2D);   // UPTR D
-    update(R_mock, 0x1C);   // SHPTR 
-    update(R_mock, 0x2E);   // UPTR E
-    update(R_mock, 0x1C);   // SHPTR 
-    update(R_mock, 0x2A);   // UPTR A
-    update(R_mock, 0x1C);   // SHPTR 
-    update(R_mock, 0x2D);   // UPTR D
     update(R_mock, 0x1F);   // SET IP
     
     printRegs(R_mock, 0);
 
     update(R_mock, 0x18);   // JMP
     update(R_mock, 0x01);   // CLR PTR 
-    update(R_mock, 0x2B);   // UPTR B
-    update(R_mock, 0x1C);   // SHPTR 
-    update(R_mock, 0x2E);   // UPTR E
-    update(R_mock, 0x1C);   // SHPTR 
-    update(R_mock, 0x2E);   // UPTR E
-    update(R_mock, 0x1C);   // SHPTR 
-    update(R_mock, 0x2F);   // UPTR F
 
     printRegs(R_mock, 0);
 
@@ -200,6 +196,36 @@ int test_asmSyscall(){
     return ret;
 }
 
+
+void test_CallConventions(){
+    
+    printf("-----[ Test Calling Conventions ]-----\n");
+    uint_reg R_mock[16] = {0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0};
+    
+    R_mock[SRIP_OFFSET] = 0x1234;
+    R_mock[SRSP_OFFSET] = STK_OFFSET;
+    R_mock[SRDX_OFFSET] = 0xC;
+
+    R_mock[PTR_OFFSET] = 0xDEAD;
+
+    
+    printRegs(R_mock, 2 );
+
+    update(R_mock, 0x17);   // CALL 
+
+    printRegs(R_mock, 2 );
+
+    update(R_mock, 0x1A);   // POP VAL
+
+    printRegs(R_mock, 2 );
+
+    update(R_mock, 0x10);   // SWAP
+    update(R_mock, 0x02);   // CLR VAL
+    update(R_mock, 0x18);   // JMP
+
+    printRegs(R_mock, 2 );
+}
+
 int test_generic(){
     bool b[5] = {1,1,1,0,1};
     char s[] = "TEST";
@@ -212,7 +238,9 @@ int test_generic(){
 }
 
 int main(){
+    // printISA();
     printISA_short();
+    //1 test_CallConventions();
     //1 test_ControlFlow();
     //1 printISA();
     //1 test_asmSyscall();

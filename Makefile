@@ -4,6 +4,9 @@ all: inject measure
 inject: inject.c indirect.S
 	$(CC) -Wl,-Tlinker.ld $^ -o $@ -no-pie
 
+trigger: trigger.c indirect.S
+	$(CC) -Wl,-Tlinker.ld $^ -o $@ -no-pie
+
 measure: target_fn.c measure.c indirect.S decrypt.S
 	$(CC) -Wl,-Tlinker.ld $^ -o $@ -no-pie
 
@@ -25,4 +28,4 @@ single: target_fn.S common.c measure.c link-single.ld
 	$(CC) -m64 main.c -lsingle -L./ -o single
 
 clean:
-	$(RM) inject measure *.o
+	$(RM) inject measure *.o trigger

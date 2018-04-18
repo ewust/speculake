@@ -6,7 +6,8 @@
 #include <unistd.h>
 #include <string.h>
 #include <sys/mman.h>
-#include "common.h"
+#include "../common.h"
+#include "../spasm/spasm.h"
 
 // Defines the bandwidth we can communicate
 // from speculative -> von neuman
@@ -44,6 +45,13 @@ uint64_t tot_runs = 0;      // Number of trials (i.e. 10k)
 uint64_t tot_time = 0;      // Number cycles total
 
 unsigned int junk=0;    // For rdtscp
+
+
+// The state that SPASM can use as its virtual registers and stack 
+// For this test text is empty and we use Enc(text) in decrypt.S - ctext
+// See the README
+State state;
+uint_reg *R;
 
 
 void *map;
@@ -100,9 +108,11 @@ void measure() {
     int i;
 
     int misses = 0;
-    uint64_t last_i = 0xff;
+
+    signal_idx = (uint16_t) *(R+SRIP_OFFSET);
 
     while (1) {
+        
         for (i=0; i<2000; i++) {
             _mm_clflush(&fn_ptr);
             //_mm_clflush(&jmp_ptr);
@@ -122,23 +132,16 @@ void measure() {
         }
 
         if (max_res > 10 && avg < 50){
-            printf("[%02lx]: %04lu / %lu = %0.5f%% hits, %lu avg cycles, ps %ld, #%03d, %d misses\n",
-                     max_i, max_res, tot_runs, 100*((float)max_res)/tot_runs, avg, cur_probe_space, signal_idx, misses);
-            avgpct += ((float)max_res)/tot_runs;
+            printf("[%02lX][%02lx]: %04lu / %lu = %0.5f%% hits, %lu avg cycles, ps %ld, #%03d, %d misses\n",
+                     instr, max_i, max_res, tot_runs, 100*((float)max_res)/tot_runs, avg, cur_probe_space, signal_idx, misses);
 
-            last_i = max_i;
-            signal_idx++;
+            // Perform the update to the SPASM VM    
+            update(R, (uint8_t) max_i);
+
             instr++;
             misses = 0;
-            if (signal_idx > DECRYPT_LEN) {
-                avgpct /= DECRYPT_LEN;
-                avgpct *= 100;
-                printf("total avg hit rate = %0.5f%%\n", avgpct);
-                exit(0);
-            }
-
+            signal_idx = (uint16_t) *(R+SRIP_OFFSET);
         } else {
-            // printf("--[%lu]: %lu, %lu avg cycles ps %ld\n", max_i, max_res, avg, cur_probe_space);
             misses++;
             cur_probe_space += 63;
             cur_probe_space %= MAX_PROBE_SPACE;
@@ -175,6 +178,10 @@ int main()
     memcpy(map+600, target_fn, end_target_fn-target_fn);
 
     fn_ptr = check_probes;
+
+    initState(&state);
+    R=state.regs;
+
     measure();
 
 }
