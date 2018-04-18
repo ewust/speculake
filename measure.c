@@ -143,7 +143,7 @@ void measure() {
             }
 
         } else {
-            // printf("--[%lu]: %lu, %lu avg cycles ps %ld\n", max_i, max_res, avg, cur_probe_space);
+            printf("--[%lu]: %lu, %lu avg cycles ps %ld\n", max_i, max_res, avg, cur_probe_space);
             misses++;
             cur_probe_space += 63;
             cur_probe_space %= MAX_PROBE_SPACE;

@@ -143,6 +143,190 @@ try_decrypt:
 .text
 .global aes_ctr
 aes_ctr:
+
+    movq %rdi, %xmm15
+
+    ##########
+    # Round 0
+    ##########
+    pxor %xmm0, %xmm15
+
+    ##########
+    # Round 1
+    ##########
+    aeskeygenassist $0x1, %xmm0, %xmm13
+    #call key_expansion_128
+        pshufd $255,   %xmm13, %xmm13    # copy the upper32 bits to all 32-bit words in xmm13
+        movdqa %xmm0, %xmm14
+        pslldq $4,     %xmm14
+        pxor   %xmm14, %xmm0
+        pslldq $4,     %xmm14
+        pxor   %xmm14, %xmm0
+        pslldq $4,     %xmm14
+        pxor   %xmm14, %xmm0
+        pxor   %xmm13, %xmm0
+
+    aesenc %xmm0, %xmm15
+
+    ##########
+    # Round 2
+    ##########
+    aeskeygenassist $0x2,  %xmm0, %xmm13
+    #call key_expansion_128
+        pshufd $255,   %xmm13, %xmm13    # copy the upper32 bits to all 32-bit words in xmm13
+        movdqa %xmm0, %xmm14
+        pslldq $4,     %xmm14
+        pxor   %xmm14, %xmm0
+        pslldq $4,     %xmm14
+        pxor   %xmm14, %xmm0
+        pslldq $4,     %xmm14
+        pxor   %xmm14, %xmm0
+        pxor   %xmm13, %xmm0
+
+    aesenc %xmm0, %xmm15
+
+    ##########
+    # Round 3
+    ##########
+    aeskeygenassist $0x4,  %xmm0, %xmm13
+    #call key_expansion_128
+        pshufd $255,   %xmm13, %xmm13    # copy the upper32 bits to all 32-bit words in xmm13
+        movdqa %xmm0, %xmm14
+        pslldq $4,     %xmm14
+        pxor   %xmm14, %xmm0
+        pslldq $4,     %xmm14
+        pxor   %xmm14, %xmm0
+        pslldq $4,     %xmm14
+        pxor   %xmm14, %xmm0
+        pxor   %xmm13, %xmm0
+
+    aesenc %xmm0, %xmm15
+
+    ##########
+    # Round 4
+    ##########
+    aeskeygenassist $0x8,  %xmm0, %xmm13
+    #call key_expansion_128
+        pshufd $255,   %xmm13, %xmm13    # copy the upper32 bits to all 32-bit words in xmm13
+        movdqa %xmm0, %xmm14
+        pslldq $4,     %xmm14
+        pxor   %xmm14, %xmm0
+        pslldq $4,     %xmm14
+        pxor   %xmm14, %xmm0
+        pslldq $4,     %xmm14
+        pxor   %xmm14, %xmm0
+        pxor   %xmm13, %xmm0
+
+   aesenc %xmm0, %xmm15
+
+    ##########
+    # Round 5
+    ##########
+    aeskeygenassist $0x10, %xmm0, %xmm13
+    #call key_expansion_128
+        pshufd $255,   %xmm13, %xmm13    # copy the upper32 bits to all 32-bit words in xmm13
+        movdqa %xmm0, %xmm14
+        pslldq $4,     %xmm14
+        pxor   %xmm14, %xmm0
+        pslldq $4,     %xmm14
+        pxor   %xmm14, %xmm0
+        pslldq $4,     %xmm14
+        pxor   %xmm14, %xmm0
+        pxor   %xmm13, %xmm0
+
+    aesenc %xmm0, %xmm15
+
+    ##########
+    # Round 6
+    ##########
+    aeskeygenassist $0x20, %xmm0, %xmm13
+    #call key_expansion_128
+        pshufd $255,   %xmm13, %xmm13    # copy the upper32 bits to all 32-bit words in xmm13
+        movdqa %xmm0, %xmm14
+        pslldq $4,     %xmm14
+        pxor   %xmm14, %xmm0
+        pslldq $4,     %xmm14
+        pxor   %xmm14, %xmm0
+        pslldq $4,     %xmm14
+        pxor   %xmm14, %xmm0
+        pxor   %xmm13, %xmm0
+
+   aesenc %xmm0, %xmm15
+
+    ##########
+    # Round 7
+    ##########
+    aeskeygenassist $0x40, %xmm0, %xmm13
+    #call key_expansion_128
+        pshufd $255,   %xmm13, %xmm13    # copy the upper32 bits to all 32-bit words in xmm13
+        movdqa %xmm0, %xmm14
+        pslldq $4,     %xmm14
+        pxor   %xmm14, %xmm0
+        pslldq $4,     %xmm14
+        pxor   %xmm14, %xmm0
+        pslldq $4,     %xmm14
+        pxor   %xmm14, %xmm0
+        pxor   %xmm13, %xmm0
+
+   aesenc %xmm0, %xmm15
+   /*
+
+    ##########
+    # Round 8
+    ##########
+    aeskeygenassist $0x80, %xmm0, %xmm13
+    #call key_expansion_128
+        pshufd $255,   %xmm13, %xmm13    # copy the upper32 bits to all 32-bit words in xmm13
+        movdqa %xmm0, %xmm14
+        pslldq $4,     %xmm14
+        pxor   %xmm14, %xmm0
+        pslldq $4,     %xmm14
+        pxor   %xmm14, %xmm0
+        pslldq $4,     %xmm14
+        pxor   %xmm14, %xmm0
+        pxor   %xmm13, %xmm0
+
+   aesenc %xmm0, %xmm15
+
+    ##########
+    # Round 9
+    ##########
+    aeskeygenassist $0x1b, %xmm0, %xmm13
+    #call key_expansion_128
+        pshufd $255,   %xmm13, %xmm13    # copy the upper32 bits to all 32-bit words in xmm13
+        movdqa %xmm0, %xmm14
+        pslldq $4,     %xmm14
+        pxor   %xmm14, %xmm0
+        pslldq $4,     %xmm14
+        pxor   %xmm14, %xmm0
+        pslldq $4,     %xmm14
+        pxor   %xmm14, %xmm0
+        pxor   %xmm13, %xmm0
+
+   aesenc %xmm0, %xmm15
+
+    ##########
+    # Round 10
+    ##########
+    aeskeygenassist $0x36, %xmm0, %xmm13
+    #call key_expansion_128
+        pshufd $255,   %xmm13, %xmm13    # copy the upper32 bits to all 32-bit words in xmm13
+        movdqa %xmm0, %xmm14
+        pslldq $4,     %xmm14
+        pxor   %xmm14, %xmm0
+        pslldq $4,     %xmm14
+        pxor   %xmm14, %xmm0
+        pslldq $4,     %xmm14
+        pxor   %xmm14, %xmm0
+        pxor   %xmm13, %xmm0
+
+    aesenclast %xmm0, %xmm15
+
+
+	// */
+
+
+	/*
 	mov $key_schedule, %rcx
     movaps 0x00(%rcx), %xmm0
     movaps 0x10(%rcx), %xmm1
@@ -171,13 +355,20 @@ aes_ctr:
     aesenc %xmm8, %xmm15
     aesenc %xmm9, %xmm15
     aesenclast %xmm10, %xmm15
+	*/
 
+	/*
 	// Xor with ctext
 	mov $ctext, %rcx
 	imul $0x10, %rdi
 	addq %rcx, %rdi
 	movaps 0x00(%rdi), %xmm14
 	pxor %xmm14, %xmm15
+	*/
+    imul $0x10, %rdi
+    movaps ctext(%rdi), %xmm14
+    pxor %xmm14, %xmm15
+
 
 	// return __uint128_t in rax,rdx
 	movq %xmm15, %rdx
