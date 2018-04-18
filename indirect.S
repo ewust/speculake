@@ -18,9 +18,9 @@ indirect:
 	mov		%rdx,%rbx
 
             mov $2, %rax
-            //cmpb  $0x08, %al
-			nop
-			nop
+            cmpb  $0x02, %al
+			//nop
+			//nop
 			jmp skip_jumps
             je do_jmps
 do_jmps:

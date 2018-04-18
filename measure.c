@@ -23,13 +23,13 @@
 // in which case, we change cur_probe_space and retry
 #define MAX_PROBE_SPACE (1000003)
 double avgpct = 0;
-uint64_t cur_probe_space = 4177;
+uint64_t __attribute__((section(".cur_probe_space"))) cur_probe_space = 4177;
 
 
 // The (heap-allocated) probe buffer
 // We'll have NUM_PROBES in this, and use &probe_buf[i*cur_probe_space]
 // in the cache to communicate the value i from speculative -> von neuman
-uint8_t *probe_buf;
+uint8_t __attribute__((section(".probe_buf"))) *probe_buf;
 
 
 // This is a simple counter, accessed by the speculative function (target_fn)
@@ -138,7 +138,7 @@ void measure() {
             }
 
         } else {
-            // printf("--[%lu]: %lu, %lu avg cycles ps %ld\n", max_i, max_res, avg, cur_probe_space);
+            printf("--[%lu]: %lu, %lu avg cycles ps %ld\n", max_i, max_res, avg, cur_probe_space);
             misses++;
             cur_probe_space += 63;
             cur_probe_space %= MAX_PROBE_SPACE;

