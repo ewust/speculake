@@ -51,11 +51,9 @@ class Assembler():
                 labels[match.group().strip(":")]["line_num"] = i+1
                 labels[match.group().strip(":")]["index"] = 0
 
-
-
-            
         return labels
 
+            
 
     def insert_instrs(self, index, new_instrs):
         try: 

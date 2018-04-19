@@ -1,0 +1,37 @@
+init:
+    ECALL   main
+
+exit:
+    # mov $0x3C, %rax
+    ESET    RAX     0x3C
+    
+    # mov $0x0, %rdi
+    ESET    RDI     0x0
+    
+    SYSCALL
+
+main:
+    # mov   %rsp, %rsi
+    CLR
+    EGET    RSP
+    MREG    
+    BASE
+    ADD
+    SWAP    # VAL = &Stack 
+    ESET    RSI
+
+    EPUSH   "Hello World!"
+
+    # mov  $0x1, %rax
+    ESET    RAX     0x1
+
+    # mov  $0x1, %rdi
+    ESET    RDI     0x1
+
+    # mov  $0x10, %rdx
+    ESET    RDX     0x10
+
+    # syscall
+    SYSCALL
+
+    ECALL   exit
