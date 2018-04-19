@@ -17,7 +17,7 @@
 
 %%\ccsPaper{9999} % TODO: replace with your paper number once obtained
 
-\newcommand{\speculake}{Exspectre}
+\newcommand{\speculake}{Exspectre }
 
 
 \begin{document}
@@ -32,7 +32,7 @@ information via side channels to an attacker.
 
 In this paper, we extend these ideas in a different direction, and leverage speculative
 execution in order to \emph{hide malware} from both static and dynamic analysis. Using this
-technique, large portions of a malware's computation can be shielded from view,
+technique, critical portions of a malicious program's computation can be shielded from view,
 such that even a debugger following an instruction-level trace of the
 program cannot tell how its results were computed.
 
@@ -40,7 +40,7 @@ We introduce \emph{\speculake}, which compiles arbitrary malicious code into a
 seemingly-benign payload binary. When a separate trigger program performs a specific
 pattern of indirect jumps, it (mis)trains the CPU's branch predictor. Subsequent
 executions of the payload binary with similar jumps causes the CPU to mispredict its
-branches and speculatively execute the malware's payload, which communicates
+branches and speculatively execute a malicious payload, which communicates
 results back to the real world via side channels.
 
 We study the extent and types of execution that can be performed in the
@@ -55,6 +55,15 @@ trigger program.
 
 Finally, we describe defenses, but in all honesty, you're probably not going to like
 them.
+
+We consider this to be a new thrust in attack vector research that harkens to work 
+done on hardware red-pills and weird machines. We demonstrate that unintended 
+functionality of architechture can be used to compose malicious programs with 
+new and different properties. This technique poses novel and unique challenges for 
+malware modeling efforts, as it forces an environment to either
+faithfully reproduce all hardware behaviors, or overcome a much larger burden of 
+reverse engineering. 
+
 
 \end{abstract}
 
@@ -73,7 +82,7 @@ them.
 %\ccsdesc{Security and privacy~Use https://dl.acm.org/ccs.cfm to generate actual concepts section for your paper}
 % -- end of section to replace with generated code
 
-\keywords{Malware; TK; TK} % TODO: replace with your keywords
+\keywords{Malware; Covert Channel; Weird Machines; TK} % TODO: replace with your keywords
 
 \maketitle
 
@@ -84,7 +93,7 @@ them.
 Modern CPU designs use speculative execution to maintain high instruction
 throughput, with the goal of improving performance. In speculative execution,
 CPUs execute likely future instructions while they wait for other slower
-results to complete. When the CPU's guess of future instructions is correct, the
+instructions to complete. When the CPU's guess of future instructions is correct, the
 benefit is faster execution performance. When its guess is wrong, the CPU
 simply discards the speculated results and continues executing along the true path.
 
@@ -117,8 +126,8 @@ from both static and dynamic analysis.
 
 
 Existing malware use several techniques to evade detection and
-make it difficult for analysts to determine payload behavior of
-reported malware. For example, binary \emph{packers} encode an executable payload as
+make it difficult for analysts to determine payload behavior of reported malware. 
+For example, binary \emph{packers} or \emph{crypters} encode an executable payload as
 data that must be ``unpacked'' at runtime, making it difficult to tell
 statically what a program will do~\cite{malware-packers}. Malware may also use
 \emph{triggers} that only run the payload when certain conditions are present, preventing
@@ -126,9 +135,9 @@ it from executing when it is inside an analysis sandbox or debugger.
 
 However, with some effort, these existing techniques can be defeated. Analysts can use
 dynamic execution to unpack malware and reveal its
-behavior~\cite{defeating-packers}, and can use symbolic execution or code
+behavior~\cite{balzarotti2010efficient}, and can use symbolic execution or code
 coverage fuzzers to determine the inputs or triggers that will reveal malicious
-behavior~\cite{symbolic-execution,afl,etc}.
+behavior~\cite{moser2007exploring,schwartz2010all,wang2017angr,egele2012survey}.
 
 
 \speculake provides a new technique to malware authors, allowing them to hide
@@ -350,6 +359,7 @@ be. Describe high-level concept of parts
 \subsection{Speculative Primitive}
 - Primitive: Perform several hundred arbitrary instructions in the speculative
 world, then return fixed-length value to the real world.
+- Trade off number of bits for speed when performing cache side channel.
 
 
 
@@ -367,7 +377,7 @@ Finite state machine...
 \subsection{Unpacking and Decryption}
 - AES instructions
 
-\subsection{Virtual Machine}
+\subsection{Virtual Machines}
 
 
 %%%%%%%%%%%%%%
