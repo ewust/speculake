@@ -1,5 +1,10 @@
 \documentclass[sigconf, anonymous]{acmart}
 
+
+
+\usepackage{listings}
+\input{figures}
+
 \fancyhf{} % Remove fancy page headers 
 \fancyhead[C]{Paper \#XXX} % TODO: replace 9999 with your paper number
 \fancyfoot[C]{\thepage}
@@ -280,13 +285,51 @@ function pointers, class methods, or case statements.
 %- BHB, BTB
 
 \subsection{Spectre}
+
 In early 2018, researchers revealed the Spectre vulnerability, which allows an
-attacker to leak information from a victim program.
+attacker to leak information from a victim program~\cite{specte}. Spectre uses
+the fact that speculative execution can influence system state via side
+channel. In Spectre, an attacker mistrains the branch predictor of a CPU running
+a victim program by providing inputs to it. Once mistrained, the attacker then
+sends a new input that will cause a different in-order execution path. However,
+because the CPU's branch predictor has been mistrained, it will still
+speculatively execute the previous path.
 
-Spectre uses speculative execution...
-- Basic direct branch
-- Indirect branch predictor
+Consider the following code snippet from the Spectre
+paper~\cite{spectre}:
 
+\begin{lstlisting}
+    if (x < array1_size)
+        y = array2[array1[x] * 256];
+\end{lstlisting}
+
+The \texttt{if} statement correctly protects an out-of-bounds reads from \texttt{array1}.
+But if the branch predictor makes an incorrect guess on the branch's direction
+and speculatively executes inside the \texttt{if} statement, it may
+cause a read beyond the boundary of \texttt{array1}. The result of this will
+then (speculatively) be multiplied by 256 and used as an index into
+\texttt{array2}. Although the CPU will not commit
+the speculative update to \texttt{y}, it will still issue a memory read to
+\texttt{array2[array1[x]*256]}, which will be cached. Importantly, even after
+the CPU realizes the branch misprediction, it does not rollback the
+state of the cache, as this does not directly influence program correctness.
+However, the set of cached values is observable to the program via a
+side-channel: by timing reads to \texttt{array2[i]}, the fastest read will
+reveal the speculative value of \texttt{array1[x]*256}, for any value of
+\texttt{x}. An attacker that is able to perform such a side-channel inference on
+the cache can learn the speculative result of an out-of-bounds read from
+\texttt{array1}.
+
+
+Spectre can also be applied to indirect branches. Branch predictors use the
+history of previous branches to predict the destination of an indirect jump when
+the destination is not yet known. For direct branches, only one of two
+destinations (taken or not taken) are possible to speculatively execute. But for
+indirect branches, a mistrained branch predictor can potentially be coerced into
+speculatively executing from \emph{any} target instruction in the binary.
+
+
+TODO more on why this is crucial...
 
 %%%%%%%%%%%%%%
 \section{Architecture}
