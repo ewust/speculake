@@ -141,12 +141,18 @@ Free Instructions: 20
 ---------------------------------------- 
 MACROS :
 ---------------------------------------- 
-EUVAL
-EPUSH 
-EGET
-ESET
+EUVAL   [ label | hex ] 
+ECALL   [ label | hex | reg ]
+EPUSH   [ reg | hex | str ] 
+EGET    [ reg ]
+ESET    [ reg ] [ reg | hex |   ] 
 ---------------------------------------- 
 ```
 
+### Examples
+
+See the example programs in the `examples/` directory. All files that end `.spa` 
+are spasm assembly files (probably written by hand), and all .sp files are spasm
+binary files to be run through an emulator.
 
 
