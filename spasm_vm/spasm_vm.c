@@ -7,7 +7,7 @@
 #include <string.h>
 #include <sys/mman.h>
 #include "../common.h"
-#include "../spasm/spasm.h"
+#include "../spasm/emulator/spasm.h"
 
 // Defines the bandwidth we can communicate
 // from speculative -> von neuman

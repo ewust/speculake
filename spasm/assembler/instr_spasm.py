@@ -64,10 +64,10 @@ class Instr:
         elif op == "POP":
             self.opstr = op
             self.opcode = 0x1A
-        elif op == "APTR":
+        elif op == "DPTR":
             self.opstr = op
             self.opcode = 0x19
-        elif op == "DPTR":
+        elif op == "APTR":
             self.opstr = op
             self.opcode = 0x18
         elif op == "SWAP":
@@ -133,6 +133,7 @@ class Instr:
         else: 
             self.opstr = op
             raise InstrError("Op String Not Recognized!", self)
+                
 
     def get_opcode(self):
         if self.use_immed == True:
@@ -141,11 +142,11 @@ class Instr:
             else: 
                 self.opcode = 0x30 | (0x0F & self.immed)
 
-        return format(self.opcode, 'x')
+        return chr(self.opcode)
     
     def __repr__(self):
         if self.use_label:
-            return "Instr: {} {}".format(self.opstr, self.label_str)
+            return 'Instr: {} {} {} - {}'.format(self.opstr, self.immed, self.label_str, self.label_index)
         elif self.use_immed:
             return 'Instr: {} {}'.format(self.opstr, self.immed)
         else:
@@ -153,7 +154,7 @@ class Instr:
         
     def __str__(self):
         if self.use_label:
-            return 'Instr: {} {}'.format(self.opstr, self.label_str)
+            return 'Instr: {} {} {} - {}'.format(self.opstr, self.immed, self.label_str, self.label_index)
         elif self.use_immed:
             return 'Instr: {} {}'.format(self.opstr, self.immed)
         else:
@@ -162,8 +163,9 @@ class Instr:
 
 class InstrError(Exception):
     def __init__(self, message, instr):
+        self.print_summary(instr)
         super().__init__(message)
 
-    def print_summary(self):
+    def print_summary(self, instr):
         print(instr)
         

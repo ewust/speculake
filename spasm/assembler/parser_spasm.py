@@ -10,7 +10,9 @@ REGISTERS = {"SRIP":0, "SRSP":1, "SRAX":4, "SRBX":5, "SRCX":6, "SRDX":7,
              "SRSI":8, "SRDI":9, "SRBP":10, "SR8":11, "SR9":12,
              "RSI":8, "RDI":9, "RBP":10, "R8":11, "R9":12}
 
-MAX_ADDR_LEN = 10
+
+# 8 Half words gives 32 bits for addressing - should be plenty
+MAX_ADDR_LEN = 8
 
 class Parser:
     
@@ -79,7 +81,7 @@ class Parser:
         #   If the opstring is a MACRO handle it 
         # Return 
         #   result          True / False whether the line has a macro 
-        if instr[0].upper() in self.MACROS:
+        if instr[0].upper() in MACROS:
             return True
         else:
              return False
@@ -106,7 +108,7 @@ class Parser:
         elif op == "EGET":   # GET [reg] 
             n, expanded_instrs = self.expand_EGET(instr)
         else:
-            raise ParseMacroError("Attempting to exapand undefined Macro", instr)
+            raise ParseMacroError("Attempting to expand undefined Macro", instr)
     
         return (n, expanded_instrs)
 
@@ -116,7 +118,7 @@ class Parser:
             raise ParseMacroError("Not enough arguments to EPUSH", instr)
         elif instr[1] in REGISTERS:
             # USING REGISTER
-            n, eget_instrs = expand_EGET(["EGET", instr[1]])
+            n, eget_instrs = self.expand_EGET(["EGET", instr[1]])
             expanded_instrs = eget_instrs
             expanded_instrs.extend([
                 Instr(["PUSH"])])
@@ -124,12 +126,12 @@ class Parser:
             try:
                 # USING HEX
                 immed = format(int(instr[1], 16), 'x')
-                n, expanded_instrs = expand_EUVAL(["EUVAL", instr[1])
+                n, expanded_instrs = self.expand_EUVAL(["EUVAL", instr[1]])
                 expanded_instrs.append(Instr(["PUSH"]))
             except ValueError as e:
                 # not HEX => USING STRING
                 immed = "0x{}".format(str2hex(instr[1])) 
-                n, expanded_instrs = expand_EUVAL(["EUVAL", immed])
+                n, expanded_instrs = self.expand_EUVAL(["EUVAL", immed])
                 expanded_instrs.append(Instr(["PUSH"]))
         return (len(expanded_instrs), expanded_instrs)
 
@@ -140,7 +142,7 @@ class Parser:
 
         elif instr[1] in REGISTERS:
             #USING REG
-            n, eget_instrs = expand_EGET(["EGET", instr[1]])
+            n, eget_instrs = self.expand_EGET(["EGET", instr[1]])
             expanded_instrs = eget_instrs
             expanded_instrs.extend([
                 Instr(["SWAP"]),
@@ -150,13 +152,13 @@ class Parser:
             n, expanded_instrs = self.expand_EUVAL(["EUVAL", instr[1]])
             expanded_instrs.extend([
                 Instr(["SWAP"]),
-                Instr(["CALL"])]
+                Instr(["CALL"])])
         else:
             # using hex value as ADDR
             n, expanded_instrs = self.expand_EUVAL(["EUVAL", instr[1]])
             expanded_instrs.extend([
                 Instr(["SWAP"]),
-                Instr(["CALL"])]
+                Instr(["CALL"])])
 
         return (len(expanded_instrs), expanded_instrs)
 
@@ -173,7 +175,7 @@ class Parser:
                 Instr(["MREG"]),
                 Instr(["ADD"]),
                 Instr(["DPTR"]) ]
-            return (len(exapanded_instrs), expanded_instrs) 
+            return (len(expanded_instrs), expanded_instrs) 
         
 
     def expand_ESET(self, instr):
@@ -183,8 +185,9 @@ class Parser:
             raise ParseMacroError("Unknown Register", instr)
 
         else:   
+            expanded_instrs = []
             rdst_idx = REGISTERS[instr[1]]
-            if len(instr == 2):
+            if len(instr) == 2:
                 # NO SECOND ARG - SET R_DST to VAL
                 expanded_instrs = [
                     Instr(["PUSH"]),
@@ -197,14 +200,14 @@ class Parser:
                     Instr(["APTR"]) ]
             elif instr[2] in REGISTERS:
                 # USING REGISTER
-                n, eget_instrs = expand_EGET(["EGET", instr[2]])
+                n, eget_instrs = self.expand_EGET(["EGET", instr[2]])
                 expanded_instrs = eget_instrs
-                n, eset_instrs = expand_EGET(["ESET", instr[1]])
+                n, eset_instrs = self.expand_ESET(["ESET", instr[1]])
                 expanded_instrs.extend(eset_instrs)
             else: 
                 # USING HEX VALUE
                 try:
-                    immed = format(int(instr[1], 16), 'x')
+                    immed = format(int(instr[2], 16), 'x')
                 except ValueError as e:
                     raise ParseMacroError("ESET parse error - not REG or hex value", instr)
                     return (0, [])
@@ -214,28 +217,32 @@ class Parser:
                     Instr(["UVAL", "0x{}".format(format(rdst_idx, 'x'))]),
                     Instr(["MREG"]),
                     Instr(["ADD"])]
-                n, euval_instrs = self.expand_euval(["EUVAL", instr[1]])
+                n, euval_instrs = self.expand_EUVAL(["EUVAL", instr[2]])
                 expanded_instrs.extend(euval_instrs)
                 expanded_instrs.append(Instr(["APTR"]))
                 
-            return (len(exapanded_instrs), expanded_instrs)
+            return (len(expanded_instrs), expanded_instrs)
         
 
     def expand_EUVAL(self, instr):
-        expanded_instrs = []
-
-        instr = Instr(["CLR"])
-        expanded_instrs.append(instr)
+        expanded_instrs = [Instr(["CLR"])]
 
         if instr[1] in self.labels: 
             # USING A LABEL
-            for i in range(MAX_ADDR_LEN):
-                instr = Instr()
-                instr.use_label = True
-                instr.label_str = instr[1]
-                instr.label_index = MAX_ADDR_LEN-1 - i
-                expanded_instrs.append(instr)
-                instr = Instr(["SHVAL"])
+            for i in range(MAX_ADDR_LEN - 1):
+                new_instr = Instr(["UVAL", "0x0"])
+                new_instr.use_label = True
+                new_instr.label_str = instr[1]
+                new_instr.label_index = MAX_ADDR_LEN-1 - i
+                expanded_instrs.append(new_instr)
+                expanded_instrs.append(Instr(["SHVAL"]))
+
+            # Add last hex digit and don't Shift it.
+            new_instr = Instr(["UVAL", "0x0"])
+            new_instr.use_label = True
+            new_instr.label_str = instr[1]
+            new_instr.label_index = 0
+            expanded_instrs.append(new_instr)
 
         else:
             # USING A HEX VALUE
@@ -245,11 +252,15 @@ class Parser:
                 raise ParseMacroError("EUVAL parse error - not label or hex value", instr)
                 return (0, [])
 
-            for i in range(len(immed)):
-                instr = Instr(["UVAL", "0x{}".format(format(immed[len(immed)-1 - i ] ,'x'))] )
-                expanded_instrs.append(instr)
-                instr = Instr(["SHVAL"])
-                expanded_instrs.append(instr)
+            if len(immed) == 1:
+                expanded_instrs.append(Instr(["UVAL", "0x{}".format(immed[0])] ))
+
+            else:
+                expanded_instrs.append(Instr(["UVAL", "0x{}".format(immed[0])] ))
+                for i in range(1, len(immed)):
+                    expanded_instrs.append(Instr(["SHVAL"]))
+                    expanded_instrs.append(Instr(["UVAL", "0x{}".format(immed[i])] ))
+
         
         return(len(expanded_instrs), expanded_instrs)
                 
@@ -257,7 +268,11 @@ class Parser:
 def str2hex(string):
     # Purpose 
     #   take a string and return an ascii string of hex to go into instrs
-    return ''.join([format(ord(c), 'x') for c in string])                                                                                 
+    string_d = bytes(string, "utf-8").decode("unicode_escape") 
+    out = []
+    for c in string_d[::-1]:
+        out.append(format(ord(c), 'x'))
+    return  ''.join(out)
     
 
 class ParseError(Exception):
