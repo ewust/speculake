@@ -17,7 +17,19 @@ key_schedule:
 	.quad 0xc1d38f0297b36395, 0xff5fe2ff496d7f41
 
 
-ctext:      // FizzBuzz Simple (test Control Flow)
+ctext: // HelloWorld (test SPASM)
+    .quad 0x63d7d499609f5478, 0x8d45939e382790d8
+    .quad 0x171ce951fe877946, 0x0280de978211446b
+    .quad 0x80859c54754e94d7, 0x919586ad4eb5cb7d
+    .quad 0x4de7ae9342024352, 0x20f57700331db08d
+    .quad 0xa1c958c4dd4d2b9b, 0xa8ea2e05c3827d32
+    .quad 0x06e31f90c1174042, 0x5e996f558b969eac
+    .quad 0x621642a1e723cdd9, 0xe8a0b5514cfe46e8
+    .quad 0x19137be6d32bd8be, 0xe9382bc6192f32b9
+
+
+     // FizzBuzz Simple (test Control Flow)
+    /*
     .quad 0x45c5fba36d9d7b71, 0x80488d9008269fc4
     .quad 0x1634fb79d2a37956, 0x06b6cf89ac0d446b
     .quad 0xa9ae83776a6293ec, 0x909e99874890d957
@@ -42,19 +54,8 @@ ctext:      // FizzBuzz Simple (test Control Flow)
     .quad 0x5e84184c9b028acd, 0xaa0b487aaa17f145
     .quad 0x9eb6a5d82e722bc8, 0xe20840570ae87af3
     .quad 0x593c47a7ececca83, 0x2f43eecde3d637ca
-
-
-    // HelloWorld (test SPASM)
-    /*
-    .quad 0x63d7c5996092547f, 0x8d488295383690d5             
-    .quad 0x1719e954fe896673, 0x1cbbcda186104462             
-    .quad 0x80849c55754e94d7, 0x919286aa4eb3cb7b             
-    .quad 0x45feac874c395064, 0x2bc07b03331fb08f             
-    .quad 0xb2e67ad7e3531d88, 0x89c83d3bddb96e04             
-    .quad 0x0aec00acdf2c5374, 0x52836c7594a88094             
-    .quad 0x621642a1e729d2cb, 0xf4beab675fc54dd6             
-    .quad 0x19137be6d32bd8be, 0xe9382bc6192f32b9
     */
+
 
 
 .text
