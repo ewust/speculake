@@ -13,7 +13,7 @@ all: trigger spasm_vm
 trigger: trigger.c indirect.S
 	$(CC) -Wl,-Tlinker.ld $^ -o $@ ${NO_PIE}
 
-spasm_vm: target_fn.c indirect.S decrypt.S ../spasm/spasm.c spasm_vm.c
+spasm_vm: target_fn.c indirect.S decrypt.S ../spasm/emulator/spasm.c spasm_vm.c
 	$(CC) -Wl,-Tlinker.ld $^ -o $@ ${NO_PIE}
 
 clean:

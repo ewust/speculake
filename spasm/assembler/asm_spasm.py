@@ -20,6 +20,8 @@ class Assembler():
         self.instrs = []
         if fname_o == None: 
             self.fname_o = ''.join([fname.split(".")[0], ".sp"])
+        else:
+            self.fname_o = fname_o
             
        
     def assemble(self):
@@ -51,11 +53,9 @@ class Assembler():
                 labels[match.group().strip(":")]["line_num"] = i+1
                 labels[match.group().strip(":")]["index"] = 0
 
-
-
-            
         return labels
 
+            
 
     def insert_instrs(self, index, new_instrs):
         try: 
@@ -72,7 +72,11 @@ class Assembler():
         for instr in self.instrs:
             if instr.use_label == True:
                 # Fill label address from labels using label index etc.
-                instr.immed = format(self.labels[instr.label]["index"], 'x')[instr.label_index]
+                label_index_str = format(self.labels[instr.label_str]["index"], 'x')
+                if instr.label_index >= len(label_index_str):
+                    instr.immed = 0
+                else:
+                    instr.immed = int(label_index_str[len(label_index_str)-1-instr.label_index], 16)
 
 
     def get_instrs(self, parser):
@@ -97,7 +101,13 @@ class Assembler():
     # Write the Full SPASM executable to output file
     def write_bin(self):
         print("Output File: {}".format(self.fname_o))
-        print("TODO") 
+        out = []
+        for i, instr in enumerate(self.instrs):
+            print("{0:08X} - {1:02X} - {2}".format(i, ord(instr.get_opcode()), instr))
+            out.append(instr.get_opcode())
+
+        with open(self.fname_o, "w") as fout:
+            fout.write("".join(out))
 
 
     # Write the Full SPASM executable to output file
