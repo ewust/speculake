@@ -2,7 +2,7 @@
 all: payload
 
 
-payload: target_fn.c payload.c decrypt.S
+payload: target_fn.c payload.c
 	$(CC) -Wl,-Tlinker.ld $^ -o $@
 
 trigger: trigger.c
