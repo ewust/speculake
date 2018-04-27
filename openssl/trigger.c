@@ -105,9 +105,10 @@ void setup()
     memset(loaded_pages, 0, sizeof(uint64_t)*MAX_PAGES);
 
     uint8_t callq_rax[] = {
-        0x48, 0x03, 0x03,   // add (%rbx),%rax
-        //0xff, 0xd0,         //  callq *%rax
-         0xff, 0xe0,  // jmpq *%rax
+         //0x48, 0x03, 0x03,    // add (%rbx),%rax
+         //0xff, 0xe0,          // jmpq *%rax
+        0x90, 0x90, 0x90,       // nop, nop, nop
+        0x90, 0xc3,             // nop, ret
     };
     int callq_offset = 2;
 
@@ -212,6 +213,7 @@ int main()
         fn_ptr2 = (void (*)(void))addrs[NUM_JUMPS-1].to;
         //(*fn_ptr)();
         //printf("calling...\n");
+        asm volatile ("push %%rax\n" :: "a"(fn_ptr2));
         asm volatile ("jmpq *%%rcx\n" :: "c"(fn_ptr), "a"(fn_ptr2), "b"(&jmp_ptr) :);
         //call(fn_ptr);
 done_jumps:
