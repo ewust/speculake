@@ -15,7 +15,7 @@ typedef struct jump_st {
 
 #define PAGE_SIZE 0x1000
 #define MAX_PAGES 100
-#define NUM_JUMPS 16
+#define NUM_JUMPS 32
 
 
 
@@ -59,6 +59,24 @@ void load_page(uint64_t addr)
 }
 
 jump addrs[NUM_JUMPS] = {
+        {0x7ffff77d304c, 0x7ffff77dc0d4}, // :   retq   
+        {0x7ffff77d314c, 0x7ffff77dc1d4}, // :   retq   
+        {0x7ffff77d324c, 0x7ffff77dc2d4}, // :   retq   
+        {0x7ffff77d334c, 0x7ffff77dc3d4}, // :   retq   
+        {0x7ffff77d344c, 0x7ffff77dc4d4}, // :   retq   
+        {0x7ffff77d354c, 0x7ffff77dc5d4}, // :   retq   
+        {0x7ffff77d364c, 0x7ffff77dc6d4}, // :   retq   
+        {0x7ffff77d374c, 0x7ffff77dc7d4}, // :   retq   
+        {0x7ffff77d384c, 0x7ffff77dc8d4}, // :   retq   
+        {0x7ffff77d394c, 0x7ffff77dc9d4}, // :   retq   
+        {0x7ffff77d3a4c, 0x7ffff77dcad4}, // :   retq   
+        {0x7ffff77d3b4c, 0x7ffff77dcbd4}, // :   retq   
+        {0x7ffff77d3c4c, 0x7ffff77dccd4}, // :   retq   
+        {0x7ffff77d3d4c, 0x7ffff77dcdd4}, // :   retq   
+        {0x7ffff77d3e4c, 0x7ffff77dced4}, // :   retq   
+        {0x7ffff77d3f4c, 0x7ffff77dcfd4}, // :   retq   
+
+
         {0x7ffff77e3a4c, 0x7ffff77eccd4}, // :   retq   
         {0x7ffff77e7bf9, 0x7ffff77e9421}, // :   retq   
         {0x7ffff77ee8a0, 0x7ffff77e836f}, // :   retq   
@@ -84,6 +102,13 @@ void setup()
 {
     memset(loaded_pages, 0, sizeof(uint64_t)*MAX_PAGES);
 
+    uint8_t callq_rax[] = {
+        0x48, 0x03, 0x03,   // add (%rbx),%rax
+        //0xff, 0xd0,         //  callq *%rax
+         0xff, 0xe0,  // jmpq *%rax
+    };
+    int callq_offset = 2;
+
     int i;
     for (i=0; i<NUM_JUMPS-1; i++) {
         load_page(addrs[i].from);
@@ -102,6 +127,9 @@ void setup()
             // Fill with a jump
             *p++ = 0xe9; // jumpq
             int32_t from = diff - 5;
+            if (i == (NUM_JUMPS - 2)) {
+                from -= (sizeof(callq_rax) - callq_offset);
+            }
             memcpy(p, &from, 4);
         }
     }
@@ -125,18 +153,11 @@ void setup()
 
     //memcpy((void*)addrs[NUM_JUMPS-1].to, stalled_jmp, 20);
 
-    fn_ptr = (void*)addrs[NUM_JUMPS-1].to;
+    //fn_ptr = (void*)addrs[NUM_JUMPS-1].to;
     //memcpy((void*)jump_addrs[NUM_JUMPS-1].to, target_fn, end_target_fn-target_fn);
 
-/*
-    uint8_t callq_rax[] = {
-        0x48, 0x03, 0x03,   // add (%rbx),%rax
-        //0xff, 0xd0,         //  callq *%rax
-         0xff, 0xe0,  // jmpq *%rax
-    };
     // -3 or -5?
-    memcpy((void*)jump_addrs[NUM_JUMPS-1].from-3, callq_rax, 5);
-*/
+    memcpy((void*)addrs[NUM_JUMPS-1].from - (sizeof(callq_rax) - callq_offset), callq_rax, sizeof(callq_rax));
 
 }
 
@@ -150,6 +171,7 @@ void bar()
 void nop()
 {
 }
+
 
 int main()
 {
@@ -171,6 +193,7 @@ int main()
     printf("setup done\n");
 
     int i;
+    uint64_t jmp_ptr = 0;
     while (1) {
 
         asm volatile ("push %%rax\n" :: "a"(&&done_jumps):);
@@ -182,10 +205,13 @@ int main()
 
         // Call the first thing in the chain. See ya!
         void (*fn_ptr)(void);
+        void (*fn_ptr2)(void);
         fn_ptr = (void (*)(void))addrs[0].from;
+        fn_ptr2 = (void (*)(void))addrs[NUM_JUMPS-1].to;
         //(*fn_ptr)();
         //printf("calling...\n");
-        call(fn_ptr);
+        asm volatile ("jmpq *%%rcx\n" :: "c"(fn_ptr), "a"(fn_ptr2), "b"(&jmp_ptr) :);
+        //call(fn_ptr);
 done_jumps:
         //printf("returned\n");
         i = 0;

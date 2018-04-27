@@ -59,7 +59,7 @@ typedef struct jump_st {
 
 #define PAGE_SIZE 0x1000
 #define MAX_PAGES 100
-#define NUM_JUMPS 16
+#define NUM_JUMPS 32
 
 
 inline void call(void *fn_ptr) __attribute__((always_inline));
@@ -188,6 +188,24 @@ jump jump_addrs[NUM_JUMPS] = {
         {0x7ffff780d407, 0x7ffff789730b}, //  retq   
         {0x7ffff7897318, 0x7ffff788a420}, //  retq  
         //*/
+
+        {0x7ffff77d304c, 0x7ffff77dc0d4}, // :   retq   
+        {0x7ffff77d314c, 0x7ffff77dc1d4}, // :   retq   
+        {0x7ffff77d324c, 0x7ffff77dc2d4}, // :   retq   
+        {0x7ffff77d334c, 0x7ffff77dc3d4}, // :   retq   
+        {0x7ffff77d344c, 0x7ffff77dc4d4}, // :   retq   
+        {0x7ffff77d354c, 0x7ffff77dc5d4}, // :   retq   
+        {0x7ffff77d364c, 0x7ffff77dc6d4}, // :   retq   
+        {0x7ffff77d374c, 0x7ffff77dc7d4}, // :   retq   
+        {0x7ffff77d384c, 0x7ffff77dc8d4}, // :   retq   
+        {0x7ffff77d394c, 0x7ffff77dc9d4}, // :   retq   
+        {0x7ffff77d3a4c, 0x7ffff77dcad4}, // :   retq   
+        {0x7ffff77d3b4c, 0x7ffff77dcbd4}, // :   retq   
+        {0x7ffff77d3c4c, 0x7ffff77dccd4}, // :   retq   
+        {0x7ffff77d3d4c, 0x7ffff77dcdd4}, // :   retq   
+        {0x7ffff77d3e4c, 0x7ffff77dced4}, // :   retq   
+        {0x7ffff77d3f4c, 0x7ffff77dcfd4}, // :   retq   
+
         {0x7ffff77e3a4c, 0x7ffff77eccd4}, // :   retq   
         {0x7ffff77e7bf9, 0x7ffff77e9421}, // :   retq   
         {0x7ffff77ee8a0, 0x7ffff77e836f}, // :   retq   
@@ -455,6 +473,7 @@ int main()
         //0xff, 0xd0,         //  callq *%rax
          0xff, 0xe0,  // jmpq *%rax
     };
+    int callq_offset = 2;
 
     memset(loaded_pages, 0, sizeof(uint64_t)*MAX_PAGES);
     for (i=0; i<NUM_JUMPS-1; i++) {
@@ -480,7 +499,7 @@ int main()
             *p++ = 0xe9; // jumpq
             int32_t from = diff - 5;    // -5 to account for the length of jmpq (32-bit relative)
             if (i == (NUM_JUMPS - 2)) {
-                from -= (sizeof(callq_rax) - 2);  
+                from -= (sizeof(callq_rax) - callq_offset);
                 // -2 so we can have the jmpq *%rax be right at the actual target
             }
             memcpy(p, &from, 4);
@@ -514,7 +533,7 @@ int main()
     // This will hopefully be speculatively called...
     memcpy((void*)jump_addrs[NUM_JUMPS-1].to, target_fn, end_target_fn-target_fn);
 
-    memcpy((void*)jump_addrs[NUM_JUMPS-1].from - (sizeof(callq_rax) - 2), callq_rax, sizeof(callq_rax));
+    memcpy((void*)jump_addrs[NUM_JUMPS-1].from - (sizeof(callq_rax) - callq_offset), callq_rax, sizeof(callq_rax));
 
 
     /*
