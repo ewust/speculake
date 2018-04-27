@@ -2,7 +2,7 @@
 set term png
 set output "Speculative_capacity-i5-max.png"
 set xlabel "Number of Instructions"
-set ylabel "Speculative Hit Percentage (avg)"
+set ylabel "Speculative Hit Percentage (max)"
 set y2label "Cycles Between Cache Misses"
 set ytics 0.1 nomirror tc lt 1
 set y2tics 50 nomirror tc lt 2
