@@ -15,7 +15,7 @@ typedef struct jump_st {
 
 #define PAGE_SIZE 0x1000
 #define MAX_PAGES 100
-#define NUM_JUMPS 32
+#define NUM_JUMPS 16
 
 
 
@@ -59,6 +59,7 @@ void load_page(uint64_t addr)
 }
 
 jump addrs[NUM_JUMPS] = {
+    /*
         {0x7ffff77d304c, 0x7ffff77dc0d4}, // :   retq   
         {0x7ffff77d314c, 0x7ffff77dc1d4}, // :   retq   
         {0x7ffff77d324c, 0x7ffff77dc2d4}, // :   retq   
@@ -75,6 +76,7 @@ jump addrs[NUM_JUMPS] = {
         {0x7ffff77d3d4c, 0x7ffff77dcdd4}, // :   retq   
         {0x7ffff77d3e4c, 0x7ffff77dced4}, // :   retq   
         {0x7ffff77d3f4c, 0x7ffff77dcfd4}, // :   retq   
+    */
 
 
         {0x7ffff77e3a4c, 0x7ffff77eccd4}, // :   retq   

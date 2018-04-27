@@ -1,5 +1,5 @@
 
-all: payload
+all: payload trigger
 
 
 payload: target_fn.c payload.c
