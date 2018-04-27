@@ -23,4 +23,4 @@ spasm32: emulator/spasm32_emulator.c emulator/spasm.c emulator/spasm.h
 	$(CC) -m32 $^ -o $@
 
 clean:
-	$(RM) sub_vm emulator spasm spasm32 process process32 
+	$(RM) sub_vm spasm spasm32 process process32 

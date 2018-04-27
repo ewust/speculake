@@ -1,0 +1,19 @@
+#!/usr/bin/gnuplot -persist
+set term png
+set output "Speculative_capacity-i5-max.png"
+set xlabel "Number of Instructions"
+set ylabel "Speculative Hit Percentage (max)"
+set y2label "Cycles Between Cache Misses"
+set ytics 0.1 nomirror tc lt 1
+set y2tics 50 nomirror tc lt 2
+set xrange [50:250]
+plot './data/sorted_aesdec.dat' u 1:3 w lines title "aesdec", \
+'./data/sorted_aesenc.dat' u 1:3 w lines title "aesenc", \
+'./data/sorted_add.dat' u 1:3 w lines title "add", \
+'./data/sorted_dec.dat' u 1:3 w lines title "dec", \
+'./data/sorted_inc.dat' u 1:3 w lines title "inc", \
+'./data/sorted_mul.dat' u 1:3 w lines title "mul", \
+'./data/sorted_shl.dat' u 1:3 w lines title "shl", \
+'./data/sorted_xor.dat' u 1:3 w lines title "xor", \
+'./data/data_50_250' u 1:2 w lines title "ROB capacity" axes x1y2
+
