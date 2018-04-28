@@ -1,4 +1,3 @@
-
 374202	=> 0x7ffff77eb240 <BN_rshift+192>:	retq   
 374203	=> 0x7ffff77e3d82 <BN_div+1186>:	mov    0x8(%rbp),%edx
 374204	=> 0x7ffff77e3d85 <BN_div+1189>:	test   %edx,%edx
