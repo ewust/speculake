@@ -62,13 +62,76 @@ to a certain extent...need to document/quantify how much mixing can be done
 still.
 
 
+\begin{figure}[t]
+    \centering
+        \includegraphics[width=0.5\textwidth]{figures/Speculative_capacity.png}
+    \caption{}
+    \label{fig:spec-capacity}
+\end{figure}
+
 \subsection{Limits of Speculative Execution}
 We performed several experiments to investigate how much computation can be done
-speculatively. We performed these experiments on an Intel~(TODO: Jack fill in).
-TODO: Jack describe experiment and results:
+speculatively. We performed these experiments on an Intel Xeon-1270, as well as 
+an intel i5-7200U to verify the results across processor generations. 
 
-- Experiment w/ graph of number of instructions
-- Limitation is in the ROB (cite other work that supports this)
+Speculative branching is not a new feature in processors~\cite{branching-hist}, 
+and it has been integrated in multiple generations of commodity processors today. 
+Accordingly speculative instruction capacity has fairly well defined limits, in 
+line with known features of processor designs. We have determined that features 
+like reorder buffers (ROB), physical register file (PRF), and cache miss timing
+determines a strong limit on the number of instructions that can be accomplished
+speculatively. 
+
+\subsubsection{Reorder Buffer Capacity} \label{sssec:ROB}
+To determine these limits we first measured the capacity of the reorder buffer
+using the method outlined by~\cite{intel-rob-capacity}. By performing two cache loads
+with a variable number or instructions between them and watching the amount of 
+time taked to complete this loop we can find a definitive number of instructions
+at which the second cache access is outside of the ROB. Figure~\ref{fig:spec-capacity}
+shows this step function at ~220 instructions for both Sandy Lake and Kaby Lake 
+generation processors. 
+
+\subsubsection{Cache Miss Duration}
+When executing instructions speculatively we rely on a load from a cache line that
+has recently been evicted. We have examined the number of cycles a
+cache miss takes to return by artificially evicting an item from cache and timing 
+a request for that specific item. The distribution of cycle counts can be seen in
+Figure~\ref{fig:cache-miss}, along with the CDF. For a large majority of cases, 
+an item evicted from cache will have 300 clock cycles and often much more. 
+
+\subsubsection{Speculative Instruction Capacity}
+To verify that the ROB defines an upper limit for speculative instruction capacity
+we instrumented the trigger and payload to test variable length target functions. 
+In addition we tested whether instruction complexity or data dependencies impact
+the maximum work that can be completed. We found that the processor can identify 
+some operations that have no effect on output registers and allows them to use the 
+entire size provided by the ROB, as determined in section~\ref{sssec:ROB}. This includes 
+idomatic no-ops, which have no effect on the registers, for example the instruction 
+"xchg \%rax \%rax" or similarly "xor \%rax, \%rax". However, if an instruction
+has the potential to cause data dependencies, it must use an entry in the PRF
+until it reaches the correct stage in the execution pipeline. In this case, the number 
+of instructions is limited by the PRF entries available 
+
+Most notably instructions making use of the extended x86 registers are still
+valid within speculative context. Specifically Intel's hardware accelerated AES-NI
+encryption and decryption instructions, which make use of the 128 bit registers.
+As shown in Figure~\ref{fig:spec-capacity}, speculative environments can complete
+a significant number of AES rounds -- more than enough to decrypt a full block 
+using AES-CBC. We investigate the use of AES instructions in the spculative environment
+further in Sections~\ref{subsec:decryption}.
+
+\medskip
+
+When executing speculatively, the number of instrutions completed 
+will almost never be limited by cache miss duration. Instead
+ROB size and processor mechanisms for resolving 
+data dependencies define an upper boundary. 
+
+% TODO: 
+% - Highlist instruction signal variablity (add v mul v aesdec v nop)?
+% - Limitation is in the ROB (cite other work that supports this)
+% - MORE PROCESSORS for testing?
+% - ARM?
 
 
 \begin{figure}[h]
