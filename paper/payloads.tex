@@ -33,7 +33,30 @@ are controlled by code executed speculatively.
 
 \subsection{Unpacking and Decryption}
 \label{subsec:decryption}
-- AES instructions
+While Section \ref{subsec:turing} demonstrates that arbitary computation is
+possible, if a reverse engineer can discover the \emph{speculative instructions}
+they can determine the execution of this program by simply reading the
+instructions that are passed along. To avoid this we can encrypt the
+\emph{speculative instructions}, meaning that a reverse engineer can never
+determine these instructions by examining the ELF file, or generating source
+code. 
+
+The encrypted code must be decrypted so that the instructions can be executed.
+In order to obscure this information from the ``real world'' the speculative
+world must do the decryption. As such we have built a prototype capable of
+decrypting messages in the speculative world and passing the results back to the
+real world in pieces.
+
+The speculative world is able to take advantage of the AES-NI instructions to
+decrypt messages. In order to avoid detection (as well as reduce the computation
+that needs to be done in the speculative world) the key expansion can be done
+ahead of time. However, the key schedule does have a structure that could be
+detected by a reverse engineer. Thus 11 random round keys are selected. This
+obfuscated key schedule makes it more difficult for a reverse engineer to
+determine that there is encrypted content. Additionally since the content is
+only accessed when the correct trigger program is running the challenges facing
+a reverse engineer are great.
+
 
 % 
 % Argument for obfuscating keyschedule
@@ -43,12 +66,12 @@ are controlled by code executed speculatively.
 %   - Find the correct trigger program
 
 \subsection{Virtual Machines}
-Given the specific constraints that the speculative environment enforces on these 
-paylods, general purpose compuatation []. We demonstrated in section~\ref{subsec:turing} that 
-general purpose computation is possible using computation performed in the 
-speculative environment. However, a turing machine is not a user friendly model,
-nor is it an efficient model for computation when attempting to accomplish tasks
-on modern processors. 
+Given the specific constraints that the speculative environment enforces on
+these paylods, general purpose compuatation []. We demonstrated in
+section~\ref{subsec:turing} that general purpose computation is possible using
+computation performed in the speculative environment. However, a turing machine
+is not a user friendly model, nor is it an efficient model for computation when
+attempting to accomplish tasks on modern processors. 
 
 Using emulators in the "real world" allows for crafted binary programs to be 
 instrumented in dead code and, as demonstrated in secton~\ref{subsec:decryption} 
