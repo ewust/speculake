@@ -5,3 +5,7 @@
 *.swp
 *.hex
 *__pycache__
+*.aux
+*.bbl
+*.log
+*.pdf
