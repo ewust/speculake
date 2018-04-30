@@ -1,7 +1,7 @@
 #ifndef SERVER_H 
 #define SERVER_H
 #include <unicorn/unicorn.h>
-#define BUFFSIZE 5
+#define BUFFSIZE 9
 #define CODESIZE 3
 
 void initializeUnicorn(uc_engine *);
