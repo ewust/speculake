@@ -477,6 +477,20 @@ addr_0x7ffff77e38e0:
 
 # Speculative entry point!!!!
 spec_entry:
+ mov $0x480000,%eax
+ mov (%rax),%r12
+ mov $0x480010,%eax
+ mov (%rax),%rbx
+ mov %rbx,%rax
+ add %rax,%rax
+ add %rbx,%rax
+ shl $0x2,%rax
+ add %rbx,%rax
+ lea (%r12,%rax,1),%rdx
+ mov %rdx,%rcx
+ mov (%rcx),%rax
+
+
  nop   # 0x7ffff77e3978 
  nop   # 0x7ffff77e3979 
  nop   # 0x7ffff77e397a 

