@@ -770,7 +770,9 @@ addr_0x7ffff77e7cc0:
  nop   # 0x7ffff77e7cea 
  nop   # 0x7ffff77e7ceb 
  nop   # 0x7ffff77e7cec 
- mov 8(%rsi),%eax   # 0x7ffff77e7ced Bitmask jump[2]: 0x7ffff77e7cf6  0 sources, dests: 0x7ffff77e7cf8,0x7ffff77e7cf8,0x7ffff77e7cf8,0x7ffff77e7d18 je     0x7ffff77e7d18 <BN_CTX_end+88>
+ nop   # ed
+ nop   # ee
+ nop   # ef
  sarl 8(%rsi)   # 0x7ffff77e7cf0 
  and  $0x1,%eax   # 0x7ffff77e7cf3 
  jne .+34   # 0x7ffff77e7cf6 
@@ -800,9 +802,8 @@ addr_0x7ffff77e7d18:
 .global addr_0x7ffff77e7d28
 .type addr_0x7ffff77e7d28, @function
 addr_0x7ffff77e7d28:
- nop   # 0x7ffff77e7d28 
- nop   # 0x7ffff77e7d29 
- nop   # 0x7ffff77e7d2a 
+
+ mov 8(%rsi),%eax   # 0x7ffff77e7ced Bitmask jump[2]: 0x7ffff77e7cf6  0 sources, dests: 0x7ffff77e7cf8,0x7ffff77e7cf8,0x7ffff77e7cf8,0x7ffff77e7d18 je     0x7ffff77e7d18 <BN_CTX_end+88>
  jmp  .-59   # 0x7ffff77e7d2b 
 
 
