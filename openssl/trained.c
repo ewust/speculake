@@ -248,14 +248,14 @@ int main()
     struct node *n2 = malloc(sizeof(struct node));
 
     n2->next = NULL;
-    n2->jmp = &ptr_space[10324];
+    n2->jmp = check_probes; //&ptr_space[10324];
     // TODO: uncache n2->jmp
 
     struct node n1;
     n1.next = n2;
     // This is the address of our first indirect jump (quick)
     the_ptr = (void*)0x7ffff77e396d;
-    n1.jmp = &the_ptr;    // TODO: make this less ugly?
+    n1.jmp = the_ptr;    // TODO: make this less ugly?
 
 
     //void *ptr = &the_ptr;
@@ -265,7 +265,8 @@ int main()
         for (i=0; i<10000; i++) {
             //_mm_clflush(n2->jmp);
             //_mm_clflush(&n2->jmp);
-            //_mm_clflush(&n2);
+            _mm_clflush(n2);
+            //_mm_clflush(n1.next);
             //spec_entry();
             //check_probes();
             t0 = _rdtscp(&junk2);
@@ -290,7 +291,7 @@ int main()
             }
         }
 
-        if ((max_res > 10 && avg < 50) || (max_res > 2 && avg < 30)){
+        if ((max_res > 10 && avg < 55) || (max_res > 2 && avg < 30)){
             printf("[%02lx]: %04lu / %lu = %0.5f%% hits, %lu avg cycles, ps %ld\n",
             max_i, max_res, tot_runs, 100*((float)max_res)/tot_runs, avg, cur_probe_space);
 

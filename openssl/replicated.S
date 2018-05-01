@@ -922,10 +922,10 @@ addr_0x7ffff77e7d72:
  nop   # 0x7ffff77e7d99 
  nop   # 0x7ffff77e7d9a 
  nop   # 0x7ffff77e7d9b 
+ nop   # 0x7ffff77e7d9c 
+ nop   # 0x7ffff77e7d9d 
+ nop   # 0x7ffff77e7d9e 
 /*
- #nop   # 0x7ffff77e7d9c 
- #nop   # 0x7ffff77e7d9d 
- #nop   # 0x7ffff77e7d9e 
  ##nop   # 0x7ffff77e7d9f 
  ##nop   # 0x7ffff77e7da0 
  ##nop   # 0x7ffff77e7da1 
@@ -937,7 +937,7 @@ addr_0x7ffff77e7d72:
  # uncached read from *arg
  mov 8(%rdi), %rax
  mov (%rdi), %rdi
- mov (%rax), %rax
+ #mov (%rax), %rax
  jmpq *%rax
  #ret   # 0x7ffff77e7da6 0x7ffff77e7da6  0 sources, dests: 0x7ffff77e396d,0x7ffff77e3978 retq   
 
