@@ -170,7 +170,7 @@ addr_0x7ffff77e33ac:
  nop   # 0x7ffff77e33ae 
  nop   # 0x7ffff77e33af 
  nop   # 0x7ffff77e33b0 
- jo  .+231   # 0x7ffff77e33b1 0x7ffff77e33b1  0 sources, dests: 0x7ffff77e33b7 jge    0x7ffff77e3498 <BN_uadd+280>
+ jo  .+231   # 0x7ffff77e33b1 0x7ffff77e33b1  0 sources, dests: 0x7ffff77e33b7 jge    0x7ffff77e3498 <BN_uadd+280>+6 bytes
  nop   # 0x7ffff77e33b7 
  nop   # 0x7ffff77e33b8 
  nop   # 0x7ffff77e33b9 
@@ -378,7 +378,7 @@ addr_0x7ffff77e38e0:
  nop   # 0x7ffff77e3913 
  nop   # 0x7ffff77e3914 
  nop   # 0x7ffff77e3915 
- jo  .+17   # 0x7ffff77e3916 0x7ffff77e3916  0 sources, dests: 0x7ffff77e3918 jle    0x7ffff77e3927 <BN_div+71>
+ jo  .+17   # 0x7ffff77e3916 0x7ffff77e3916  0 sources, dests: 0x7ffff77e3918 jle    0x7ffff77e3927 <BN_div+71>+2 bytes
  nop   # 0x7ffff77e3918 
  nop   # 0x7ffff77e3919 
  nop   # 0x7ffff77e391a 
@@ -388,14 +388,14 @@ addr_0x7ffff77e38e0:
  nop   # 0x7ffff77e391e 
  nop   # 0x7ffff77e391f 
  nop   # 0x7ffff77e3920 
- jo  .+223   # 0x7ffff77e3921 0x7ffff77e3921  0 sources, dests: 0x7ffff77e3927 je     0x7ffff77e3a00 <BN_div+288>
+ jo  .+223   # 0x7ffff77e3921 0x7ffff77e3921  0 sources, dests: 0x7ffff77e3927 je     0x7ffff77e3a00 <BN_div+288>+6 bytes
  nop   # 0x7ffff77e3927 
  nop   # 0x7ffff77e3928 
  nop   # 0x7ffff77e3929 
  nop   # 0x7ffff77e392a 
  nop   # 0x7ffff77e392b 
  nop   # 0x7ffff77e392c 
- jo  .+21   # 0x7ffff77e392d 0x7ffff77e392d  0 sources, dests: 0x7ffff77e392f jle    0x7ffff77e3942 <BN_div+98>
+ jo  .+21   # 0x7ffff77e392d 0x7ffff77e392d  0 sources, dests: 0x7ffff77e392f jle    0x7ffff77e3942 <BN_div+98>+2 bytes
  nop   # 0x7ffff77e392f 
  nop   # 0x7ffff77e3930 
  nop   # 0x7ffff77e3931 
@@ -409,16 +409,16 @@ addr_0x7ffff77e38e0:
  nop   # 0x7ffff77e3939 
  nop   # 0x7ffff77e393a 
  nop   # 0x7ffff77e393b 
- jo  .+196   # 0x7ffff77e393c 0x7ffff77e393c  0 sources, dests: 0x7ffff77e3942 je     0x7ffff77e3a00 <BN_div+288>
+ jo  .+196   # 0x7ffff77e393c 0x7ffff77e393c  0 sources, dests: 0x7ffff77e3942 je     0x7ffff77e3a00 <BN_div+288>+6 bytes
  nop   # 0x7ffff77e3942 
  nop   # 0x7ffff77e3943 
  nop   # 0x7ffff77e3944 
  nop   # 0x7ffff77e3945 
  nop   # 0x7ffff77e3946 
- jo  .+265   # 0x7ffff77e3947 0x7ffff77e3947  0 sources, dests: 0x7ffff77e394d je     0x7ffff77e3a50 <BN_div+368>
+ jo  .+265   # 0x7ffff77e3947 0x7ffff77e3947  0 sources, dests: 0x7ffff77e394d je     0x7ffff77e3a50 <BN_div+368>+6 bytes
  nop   # 0x7ffff77e394d 
  nop   # 0x7ffff77e394e 
- jo  .+353   # 0x7ffff77e394f 0x7ffff77e394f  0 sources, dests: 0x7ffff77e3955 je     0x7ffff77e3ab0 <BN_div+464>
+ jo  .+353   # 0x7ffff77e394f 0x7ffff77e394f  0 sources, dests: 0x7ffff77e3955 je     0x7ffff77e3ab0 <BN_div+464>+6 bytes
  nop   # 0x7ffff77e3955 
  nop   # 0x7ffff77e3956 
  nop   # 0x7ffff77e3957 
@@ -474,7 +474,7 @@ addr_0x7ffff77e3a24:
  nop   # 0x7ffff77e3a32 
  nop   # 0x7ffff77e3a33 
  nop   # 0x7ffff77e3a34 
- jo  .+1542   # 0x7ffff77e3a35 0x7ffff77e3a35  0 sources, dests: 0x7ffff77e3a3b jne    0x7ffff77e403b <BN_div+1883>
+ jo  .+1542   # 0x7ffff77e3a35 0x7ffff77e3a35  0 sources, dests: 0x7ffff77e3a3b jne    0x7ffff77e403b <BN_div+1883>+6 bytes
  nop   # 0x7ffff77e3a3b 
  nop   # 0x7ffff77e3a3c 
  nop   # 0x7ffff77e3a3d 
@@ -504,7 +504,7 @@ addr_0x7ffff77e3d82:
  nop   # 0x7ffff77e3d84 
  nop   # 0x7ffff77e3d85 
  nop   # 0x7ffff77e3d86 
- jo  .+6   # 0x7ffff77e3d87 0x7ffff77e3d87  0 sources, dests: 0x7ffff77e3d89 je     0x7ffff77e3d8d <BN_div+1197>
+ jo  .+6   # 0x7ffff77e3d87 0x7ffff77e3d87  0 sources, dests: 0x7ffff77e3d89 je     0x7ffff77e3d8d <BN_div+1197>+2 bytes
  nop   # 0x7ffff77e3d89 
  nop   # 0x7ffff77e3d8a 
  nop   # 0x7ffff77e3d8b 
@@ -515,14 +515,14 @@ addr_0x7ffff77e3d82:
  nop   # 0x7ffff77e3d90 
  nop   # 0x7ffff77e3d91 
  nop   # 0x7ffff77e3d92 
- jo  .+43   # 0x7ffff77e3d93 0x7ffff77e3d93  0 sources, dests: 0x7ffff77e3d95 je     0x7ffff77e3dbe <BN_div+1246>
+ jo  .+43   # 0x7ffff77e3d93 0x7ffff77e3d93  0 sources, dests: 0x7ffff77e3d95 je     0x7ffff77e3dbe <BN_div+1246>+2 bytes
  nop   # 0x7ffff77e3d95 
  nop   # 0x7ffff77e3d96 
  nop   # 0x7ffff77e3d97 
  nop   # 0x7ffff77e3d98 
  nop   # 0x7ffff77e3d99 
  nop   # 0x7ffff77e3d9a 
- jo  .+35   # 0x7ffff77e3d9b 0x7ffff77e3d9b  0 sources, dests: 0x7ffff77e3d9d jle    0x7ffff77e3dbe <BN_div+1246>
+ jo  .+35   # 0x7ffff77e3d9b 0x7ffff77e3d9b  0 sources, dests: 0x7ffff77e3d9d jle    0x7ffff77e3dbe <BN_div+1246>+2 bytes
  nop   # 0x7ffff77e3d9d 
  nop   # 0x7ffff77e3d9e 
  nop   # 0x7ffff77e3d9f 
@@ -550,7 +550,11 @@ addr_0x7ffff77e3daf:
  nop   # 0x7ffff77e3db5 
  nop   # 0x7ffff77e3db6 
  nop   # 0x7ffff77e3db7 
- jo  .-14   # 0x7ffff77e3db8 0x7ffff77e3db8  0 sources, dests: 0x7ffff77e3dba je     0x7ffff77e3daa <BN_div+1226>
+ jo  .-14   # 0x7ffff77e3db8 0x7ffff77e3db8  0 sources, dests: 0x7ffff77e3dba je     0x7ffff77e3daa <BN_div+1226>+2 bytes
+ nop   # 0x7ffff77e3dba 
+ nop   # 0x7ffff77e3dbb 
+ nop   # 0x7ffff77e3dbc 
+ nop   # 0x7ffff77e3dbd 
  nop   # 0x7ffff77e3dbe 
  nop   # 0x7ffff77e3dbf 
  nop   # 0x7ffff77e3dc0 
@@ -585,7 +589,7 @@ addr_0x7ffff77e7130:
  nop   # 0x7ffff77e713e 
  nop   # 0x7ffff77e713f 
  nop   # 0x7ffff77e7140 
- jo  .+47   # 0x7ffff77e7141 0x7ffff77e7141  0 sources, dests: 0x7ffff77e7143,0x7ffff77e7143 jle    0x7ffff77e7170 <BN_set_word+64>
+ jo  .+47   # 0x7ffff77e7141 0x7ffff77e7141  0 sources, dests: 0x7ffff77e7143,0x7ffff77e7143 jle    0x7ffff77e7170 <BN_set_word+64>+2 bytes
  nop   # 0x7ffff77e7143 
  nop   # 0x7ffff77e7144 
  nop   # 0x7ffff77e7145 
@@ -633,7 +637,7 @@ addr_0x7ffff77e7bb0:
  nop   # 0x7ffff77e7bb2 
  nop   # 0x7ffff77e7bb3 
  nop   # 0x7ffff77e7bb4 
- jo  .+9   # 0x7ffff77e7bb5 0x7ffff77e7bb5  0 sources, dests: 0x7ffff77e7bb7,0x7ffff77e7bb7 jne    0x7ffff77e7bbe <BN_CTX_start+14>
+ jo  .+9   # 0x7ffff77e7bb5 0x7ffff77e7bb5  0 sources, dests: 0x7ffff77e7bb7,0x7ffff77e7bb7 jne    0x7ffff77e7bbe <BN_CTX_start+14>+2 bytes
  nop   # 0x7ffff77e7bb7 
  nop   # 0x7ffff77e7bb8 
  nop   # 0x7ffff77e7bb9 
@@ -669,7 +673,7 @@ addr_0x7ffff77e7bc8:
  nop   # 0x7ffff77e7bdc 
  nop   # 0x7ffff77e7bdd 
  nop   # 0x7ffff77e7bde 
- jo  .+33   # 0x7ffff77e7bdf 0x7ffff77e7bdf  0 sources, dests: 0x7ffff77e7be1,0x7ffff77e7be1 je     0x7ffff77e7c00 <BN_CTX_start+80>
+ jo  .+33   # 0x7ffff77e7bdf 0x7ffff77e7bdf  0 sources, dests: 0x7ffff77e7be1,0x7ffff77e7be1 je     0x7ffff77e7c00 <BN_CTX_start+80>+2 bytes
  nop   # 0x7ffff77e7be1 
  nop   # 0x7ffff77e7be2 
  nop   # 0x7ffff77e7be3 
@@ -706,7 +710,7 @@ addr_0x7ffff77e7cc0:
  nop   # 0x7ffff77e7cc2 
  nop   # 0x7ffff77e7cc3 
  nop   # 0x7ffff77e7cc4 
- jo  .+107   # 0x7ffff77e7cc5 0x7ffff77e7cc5  0 sources, dests: 0x7ffff77e7cc7,0x7ffff77e7cc7 jne    0x7ffff77e7d30 <BN_CTX_end+112>
+ jo  .+107   # 0x7ffff77e7cc5 0x7ffff77e7cc5  0 sources, dests: 0x7ffff77e7cc7,0x7ffff77e7cc7 jne    0x7ffff77e7d30 <BN_CTX_end+112>+2 bytes
  nop   # 0x7ffff77e7cc7 
  nop   # 0x7ffff77e7cc8 
  nop   # 0x7ffff77e7cc9 
@@ -738,9 +742,11 @@ addr_0x7ffff77e7cc0:
  nop   # 0x7ffff77e7cea 
  nop   # 0x7ffff77e7ceb 
  nop   # 0x7ffff77e7cec 
+
  nop   # ed
  nop   # ee
  nop   # ef
+
  sarl 8(%rsi)   # 0x7ffff77e7cf0 
  and  $0x1,%eax   # 0x7ffff77e7cf3 
  jne .+34   # 0x7ffff77e7cf6 
@@ -772,6 +778,7 @@ addr_0x7ffff77e7d18:
 addr_0x7ffff77e7d28:
 
  mov 8(%rsi),%eax   # 0x7ffff77e7ced Bitmask jump[2]: 0x7ffff77e7cf6  0 sources, dests: 0x7ffff77e7cf8,0x7ffff77e7cf8,0x7ffff77e7cf8,0x7ffff77e7d18 je     0x7ffff77e7d18 <BN_CTX_end+88>
+
  jmp  .-59   # 0x7ffff77e7d2b 
 
 
@@ -796,13 +803,13 @@ addr_0x7ffff77e7d40:
  nop   # 0x7ffff77e7d4e 
  nop   # 0x7ffff77e7d4f 
  nop   # 0x7ffff77e7d50 
- jo  .+72   # 0x7ffff77e7d51 0x7ffff77e7d51  0 sources, dests: 0x7ffff77e7d53,0x7ffff77e7d53 jne    0x7ffff77e7d99 <BN_CTX_get+89>
+ jo  .+72   # 0x7ffff77e7d51 0x7ffff77e7d51  0 sources, dests: 0x7ffff77e7d53,0x7ffff77e7d53 jne    0x7ffff77e7d99 <BN_CTX_get+89>+2 bytes
  nop   # 0x7ffff77e7d53 
  nop   # 0x7ffff77e7d54 
  nop   # 0x7ffff77e7d55 
  nop   # 0x7ffff77e7d56 
  nop   # 0x7ffff77e7d57 
- jo  .+65   # 0x7ffff77e7d58 0x7ffff77e7d58  0 sources, dests: 0x7ffff77e7d5a,0x7ffff77e7d5a jne    0x7ffff77e7d99 <BN_CTX_get+89>
+ jo  .+65   # 0x7ffff77e7d58 0x7ffff77e7d58  0 sources, dests: 0x7ffff77e7d5a,0x7ffff77e7d5a jne    0x7ffff77e7d99 <BN_CTX_get+89>+2 bytes
  nop   # 0x7ffff77e7d5a 
  nop   # 0x7ffff77e7d5b 
  nop   # 0x7ffff77e7d5c 
@@ -812,7 +819,7 @@ addr_0x7ffff77e7d40:
  nop   # 0x7ffff77e7d60 
  nop   # 0x7ffff77e7d61 
  nop   # 0x7ffff77e7d62 
- jo  .+109   # 0x7ffff77e7d63 0x7ffff77e7d63  0 sources, dests: 0x7ffff77e7d65,0x7ffff77e7d65 je     0x7ffff77e7dd0 <BN_CTX_get+144>
+ jo  .+109   # 0x7ffff77e7d63 0x7ffff77e7d63  0 sources, dests: 0x7ffff77e7d65,0x7ffff77e7d65 je     0x7ffff77e7dd0 <BN_CTX_get+144>+2 bytes
  nop   # 0x7ffff77e7d65 
  nop   # 0x7ffff77e7d66 
  jno  .+73   # 0x7ffff77e7d67 0x7ffff77e7d67  0 sources, dests: 0x7ffff77e7db0,0x7ffff77e7db0 jne    0x7ffff77e7db0 <BN_CTX_get+112>
@@ -841,7 +848,7 @@ addr_0x7ffff77e7d72:
  nop   # 0x7ffff77e7d82 
  nop   # 0x7ffff77e7d83 
  nop   # 0x7ffff77e7d84 
- jo  .+209   # 0x7ffff77e7d85 0x7ffff77e7d85  0 sources, dests: 0x7ffff77e7d8b,0x7ffff77e7d8b je     0x7ffff77e7e56 <BN_CTX_get+278>
+ jo  .+209   # 0x7ffff77e7d85 0x7ffff77e7d85  0 sources, dests: 0x7ffff77e7d8b,0x7ffff77e7d8b je     0x7ffff77e7e56 <BN_CTX_get+278>+6 bytes
  nop   # 0x7ffff77e7d8b 
  nop   # 0x7ffff77e7d8c 
  nop   # 0x7ffff77e7d8d 
@@ -937,7 +944,7 @@ addr_0x7ffff77e834d:
  nop   # 0x7ffff77e8354 
  nop   # 0x7ffff77e8355 
  nop   # 0x7ffff77e8356 
- jo  .+185   # 0x7ffff77e8357 0x7ffff77e8357  0 sources, dests: 0x7ffff77e835d jle    0x7ffff77e8410 <bn_mul_normal+240>
+ jo  .+185   # 0x7ffff77e8357 0x7ffff77e8357  0 sources, dests: 0x7ffff77e835d jle    0x7ffff77e8410 <bn_mul_normal+240>+6 bytes
  nop   # 0x7ffff77e835d 
  nop   # 0x7ffff77e835e 
  nop   # 0x7ffff77e835f 
@@ -959,7 +966,7 @@ addr_0x7ffff77e834d:
  nop   # 0x7ffff77e8373 
  nop   # 0x7ffff77e8374 
  nop   # 0x7ffff77e8375 
- jo  .+108   # 0x7ffff77e8376 0x7ffff77e8376  0 sources, dests: 0x7ffff77e8378 jne    0x7ffff77e83e2 <bn_mul_normal+194>
+ jo  .+108   # 0x7ffff77e8376 0x7ffff77e8376  0 sources, dests: 0x7ffff77e8378 jne    0x7ffff77e83e2 <bn_mul_normal+194>+2 bytes
  jmp  .+135   # 0x7ffff77e8378 
 
 
@@ -1013,10 +1020,10 @@ addr_0x7ffff77e93e0:
  nop   # 0x7ffff77e93f6 
  nop   # 0x7ffff77e93f7 
  nop   # 0x7ffff77e93f8 
- jo  .+431   # 0x7ffff77e93f9 0x7ffff77e93f9  0 sources, dests: 0x7ffff77e93ff je     0x7ffff77e95a8 <BN_mul+456>
+ jo  .+431   # 0x7ffff77e93f9 0x7ffff77e93f9  0 sources, dests: 0x7ffff77e93ff je     0x7ffff77e95a8 <BN_mul+456>+6 bytes
  nop   # 0x7ffff77e93ff 
  nop   # 0x7ffff77e9400 
- jo  .+423   # 0x7ffff77e9401 0x7ffff77e9401  0 sources, dests: 0x7ffff77e9407 je     0x7ffff77e95a8 <BN_mul+456>
+ jo  .+423   # 0x7ffff77e9401 0x7ffff77e9401  0 sources, dests: 0x7ffff77e9407 je     0x7ffff77e95a8 <BN_mul+456>+6 bytes
  nop   # 0x7ffff77e9407 
  nop   # 0x7ffff77e9408 
  nop   # 0x7ffff77e9409 
@@ -1047,14 +1054,14 @@ addr_0x7ffff77e93e0:
  nop   # 0x7ffff77e9426 
  nop   # 0x7ffff77e9427 
  nop   # 0x7ffff77e9428 
- jo  .+471   # 0x7ffff77e9429 0x7ffff77e9429  0 sources, dests: 0x7ffff77e942f je     0x7ffff77e9600 <BN_mul+544>
+ jo  .+471   # 0x7ffff77e9429 0x7ffff77e9429  0 sources, dests: 0x7ffff77e942f je     0x7ffff77e9600 <BN_mul+544>+6 bytes
  nop   # 0x7ffff77e942f 
  nop   # 0x7ffff77e9430 
  nop   # 0x7ffff77e9431 
  nop   # 0x7ffff77e9432 
  nop   # 0x7ffff77e9433 
  nop   # 0x7ffff77e9434 
- jo  .+459   # 0x7ffff77e9435 0x7ffff77e9435  0 sources, dests: 0x7ffff77e943b je     0x7ffff77e9600 <BN_mul+544>
+ jo  .+459   # 0x7ffff77e9435 0x7ffff77e9435  0 sources, dests: 0x7ffff77e943b je     0x7ffff77e9600 <BN_mul+544>+6 bytes
  nop   # 0x7ffff77e943b 
  nop   # 0x7ffff77e943c 
  nop   # 0x7ffff77e943d 
@@ -1071,11 +1078,11 @@ addr_0x7ffff77e93e0:
  nop   # 0x7ffff77e9448 
  nop   # 0x7ffff77e9449 
  nop   # 0x7ffff77e944a 
- jo  .+11   # 0x7ffff77e944b 0x7ffff77e944b  0 sources, dests: 0x7ffff77e944d jne    0x7ffff77e9456 <BN_mul+118>
+ jo  .+11   # 0x7ffff77e944b 0x7ffff77e944b  0 sources, dests: 0x7ffff77e944d jne    0x7ffff77e9456 <BN_mul+118>+2 bytes
  nop   # 0x7ffff77e944d 
  nop   # 0x7ffff77e944e 
  nop   # 0x7ffff77e944f 
- jo  .+384   # 0x7ffff77e9450 0x7ffff77e9450  0 sources, dests: 0x7ffff77e9456 je     0x7ffff77e95d0 <BN_mul+496>
+ jo  .+384   # 0x7ffff77e9450 0x7ffff77e9450  0 sources, dests: 0x7ffff77e9456 je     0x7ffff77e95d0 <BN_mul+496>+6 bytes
  nop   # 0x7ffff77e9456 
  nop   # 0x7ffff77e9457 
  nop   # 0x7ffff77e9458 
@@ -1093,7 +1100,7 @@ addr_0x7ffff77e9520:
  nop   # 0x7ffff77e9524 
  nop   # 0x7ffff77e9525 
  nop   # 0x7ffff77e9526 
- jo  .+257   # 0x7ffff77e9527 0x7ffff77e9527  0 sources, dests: 0x7ffff77e952d jg     0x7ffff77e9628 <BN_mul+584>
+ jo  .+257   # 0x7ffff77e9527 0x7ffff77e9527  0 sources, dests: 0x7ffff77e952d jg     0x7ffff77e9628 <BN_mul+584>+6 bytes
  nop   # 0x7ffff77e952d 
  nop   # 0x7ffff77e952e 
  nop   # 0x7ffff77e952f 
@@ -1123,7 +1130,7 @@ addr_0x7ffff77e9520:
  nop   # 0x7ffff77e954b 
  nop   # 0x7ffff77e954c 
  nop   # 0x7ffff77e954d 
- jo  .+38   # 0x7ffff77e954e 0x7ffff77e954e  0 sources, dests: 0x7ffff77e9550 jle    0x7ffff77e9574 <BN_mul+404>
+ jo  .+38   # 0x7ffff77e954e 0x7ffff77e954e  0 sources, dests: 0x7ffff77e9550 jle    0x7ffff77e9574 <BN_mul+404>+2 bytes
  nop   # 0x7ffff77e9550 
  nop   # 0x7ffff77e9551 
  nop   # 0x7ffff77e9552 
@@ -1148,6 +1155,10 @@ addr_0x7ffff77e9520:
  nop   # 0x7ffff77e956c 
  nop   # 0x7ffff77e956d 
  jno  .-14   # 0x7ffff77e956e 0x7ffff77e956e  0 sources, dests: 0x7ffff77e9560 jne    0x7ffff77e9560 <BN_mul+384>
+ nop   # 0x7ffff77e9570 
+ nop   # 0x7ffff77e9571 
+ nop   # 0x7ffff77e9572 
+ nop   # 0x7ffff77e9573 
  nop   # 0x7ffff77e9574 
  nop   # 0x7ffff77e9575 
  nop   # 0x7ffff77e9576 
@@ -1214,7 +1225,7 @@ addr_0x7ffff77ecc38:
  jmp  .-14438   # 0x7ffff77ecc46 
  nop   # 0x7ffff77ecc4b 
  nop   # 0x7ffff77ecc4c 
- jo  .+143   # 0x7ffff77ecc4d 0x7ffff77ecc4d  0 sources, dests: 0x7ffff77ecc53 je     0x7ffff77eccdc <BN_mod_inverse+556>
+ jo  .+143   # 0x7ffff77ecc4d 0x7ffff77ecc4d  0 sources, dests: 0x7ffff77ecc53 je     0x7ffff77eccdc <BN_mod_inverse+556>+6 bytes
  nop   # 0x7ffff77ecc53 
  nop   # 0x7ffff77ecc54 
  nop   # 0x7ffff77ecc55 
@@ -1227,7 +1238,7 @@ addr_0x7ffff77ecc38:
  jmp  .-38268   # 0x7ffff77ecc5c 
  nop   # 0x7ffff77ecc61 
  nop   # 0x7ffff77ecc62 
- jo  .+121   # 0x7ffff77ecc63 0x7ffff77ecc63  0 sources, dests: 0x7ffff77ecc65 je     0x7ffff77eccdc <BN_mod_inverse+556>
+ jo  .+121   # 0x7ffff77ecc63 0x7ffff77ecc63  0 sources, dests: 0x7ffff77ecc65 je     0x7ffff77eccdc <BN_mod_inverse+556>+2 bytes
  nop   # 0x7ffff77ecc65 
  nop   # 0x7ffff77ecc66 
  nop   # 0x7ffff77ecc67 
@@ -1243,7 +1254,7 @@ addr_0x7ffff77ecc38:
  nop   # 0x7ffff77ecc71 
  nop   # 0x7ffff77ecc72 
  nop   # 0x7ffff77ecc73 
- jo  .+1068   # 0x7ffff77ecc74 0x7ffff77ecc74  0 sources, dests: 0x7ffff77ecc7a je     0x7ffff77ed0a0 <BN_mod_inverse+1520>
+ jo  .+1068   # 0x7ffff77ecc74 0x7ffff77ecc74  0 sources, dests: 0x7ffff77ecc7a je     0x7ffff77ed0a0 <BN_mod_inverse+1520>+6 bytes
  nop   # 0x7ffff77ecc7a 
  nop   # 0x7ffff77ecc7b 
  nop   # 0x7ffff77ecc7c 
@@ -1344,7 +1355,7 @@ addr_0x7ffff77ee7c0:
  nop   # 0x7ffff77ee7c2 
  nop   # 0x7ffff77ee7c3 
  nop   # 0x7ffff77ee7c4 
- jo  .+227   # 0x7ffff77ee7c5 0x7ffff77ee7c5  0 sources, dests: 0x7ffff77ee7cb jle    0x7ffff77ee8a8 <bn_mul_words+232>
+ jo  .+227   # 0x7ffff77ee7c5 0x7ffff77ee7c5  0 sources, dests: 0x7ffff77ee7cb jle    0x7ffff77ee8a8 <bn_mul_words+232>+6 bytes
  nop   # 0x7ffff77ee7cb 
  nop   # 0x7ffff77ee7cc 
  nop   # 0x7ffff77ee7cd 
@@ -1403,7 +1414,7 @@ addr_0x7ffff77ee89d:
 addr_0x7ffff77ee980:
  nop   # 0x7ffff77ee980 
  nop   # 0x7ffff77ee981 
- jo  .+46   # 0x7ffff77ee982 0x7ffff77ee982  0 sources, dests: 0x7ffff77ee984 jle    0x7ffff77ee9b0 <bn_add_words+48>
+ jo  .+46   # 0x7ffff77ee982 0x7ffff77ee982  0 sources, dests: 0x7ffff77ee984 jle    0x7ffff77ee9b0 <bn_add_words+48>+2 bytes
  nop   # 0x7ffff77ee984 
  nop   # 0x7ffff77ee985 
  nop   # 0x7ffff77ee986 
@@ -1482,7 +1493,7 @@ load_page(0x7ffff77e3000);
 memcpy((void*)0x7ffff77e339c, addr_0x7ffff77e339c, 2);
 memcpy((void*)0x7ffff77e33ac, addr_0x7ffff77e33ac, 64);
 memcpy((void*)0x7ffff77e343d, addr_0x7ffff77e343d, 27);
-memcpy((void*)0x7ffff77e3466, addr_0x7ffff77e3466, 9);
+memcpy((void*)0x7ffff77e3466, addr_0x7ffff77e3466, 5);
 memcpy((void*)0x7ffff77e36e0, addr_0x7ffff77e36e0, 33);
 memcpy((void*)0x7ffff77e37a0, addr_0x7ffff77e37a0, 20);
 memcpy((void*)0x7ffff77e38e0, addr_0x7ffff77e38e0, 165);
@@ -1495,10 +1506,10 @@ memcpy((void*)0x7ffff77e7bb0, addr_0x7ffff77e7bb0, 14);
 memcpy((void*)0x7ffff77e7bc8, addr_0x7ffff77e7bc8, 50);
 memcpy((void*)0x7ffff77e7cc0, addr_0x7ffff77e7cc0, 60);
 memcpy((void*)0x7ffff77e7d18, addr_0x7ffff77e7d18, 11);
-memcpy((void*)0x7ffff77e7d28, addr_0x7ffff77e7d28, 8);
+memcpy((void*)0x7ffff77e7d28, addr_0x7ffff77e7d28, 5);
 memcpy((void*)0x7ffff77e7d40, addr_0x7ffff77e7d40, 41);
 memcpy((void*)0x7ffff77e7d72, addr_0x7ffff77e7d72, 53);
-memcpy((void*)0x7ffff77e7db0, addr_0x7ffff77e7db0, 15);
+memcpy((void*)0x7ffff77e7db0, addr_0x7ffff77e7db0, 11);
 load_page(0x7ffff77e8000);
 memcpy((void*)0x7ffff77e8320, addr_0x7ffff77e8320, 34);
 memcpy((void*)0x7ffff77e834d, addr_0x7ffff77e834d, 48);

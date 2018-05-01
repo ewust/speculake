@@ -95,7 +95,8 @@ class Instructions(object):
         l = 2
         if off < 0:
             sign = ''
-            l = 6 if conditional else 5
+            if off < -126:
+                l = 6 if conditional else 5
         elif off > 127:
             l = 6 if conditional else 5  # TODO: check?
         return ('.%s%d' % (sign, off), l)
@@ -110,7 +111,7 @@ class Instructions(object):
         # to get a not-taken branch, we check for OF=1 (jo).
         # Taken branches are with OF=0 (jno).
         offset, instr_len = self.get_offset(dest)
-        self.add_instr('jo  %s' % offset, instr_len=instr_len, comment=comment)
+        self.add_instr('jo  %s' % offset, instr_len=instr_len, comment=comment + '+%d bytes'%instr_len)
 
     def add_taken(self, dest, comment=''):
         offset, l = self.get_offset(dest)
