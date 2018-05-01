@@ -207,7 +207,7 @@ int main()
     struct node *n2 = malloc(sizeof(struct node));
 
     n2->next = NULL;
-    n2->jmp = nop;
+    n2->jmp = check_probes;
 
     // TODO: uncache n2->jmp
 
@@ -232,6 +232,7 @@ int main()
         //_mm_clflush(n2->jmp);
         for (i=0; i<15000; i++) {
             _mm_clflush(&n2);
+            //spec_entry();
             do_pattern(&n1);
             usleep(1);
         }
