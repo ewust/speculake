@@ -105,11 +105,12 @@ class Instructions(object):
         offset, l = self.get_offset(dest, False)
         self.add_instr('jmp  %s' % (offset), instr_len=l)
 
-    def add_not_taken(self, instr_len=2, comment=''):
+    def add_not_taken(self, dest, instr_len=2, comment=''):
         # We use the overflow flag, which we always assume to be zero.
         # to get a not-taken branch, we check for OF=1 (jo).
         # Taken branches are with OF=0 (jno).
-        self.add_instr('jo  .+2', instr_len=instr_len, comment=comment)
+        offset, instr_len = self.get_offset(dest)
+        self.add_instr('jo  %s' % offset, instr_len=instr_len, comment=comment)
 
     def add_taken(self, dest, comment=''):
         offset, l = self.get_offset(dest)
@@ -268,7 +269,9 @@ while code.addr <= addrs[-1]:
             code.add_taken(jumps[addr][0][2], info)
     elif all([not(indirect) and not(taken) for (indirect, taken, dest) in jumps[addr]]):
         # If all direct and NOT taken branches
-        code.add_not_taken(comment=info)
+        # get what the target WOULD have been from the instruction
+        target = int(instrs[addr].split()[1][2:],16)
+        code.add_not_taken(target, comment=info)
     elif all([indirect for (indirect, taken, dest) in jumps[addr]]):
         # All indirect
         code.add_ret(jumps[addr][0][2], info)
