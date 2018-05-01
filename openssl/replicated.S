@@ -89,10 +89,10 @@
 .section .text
 .global do_pattern
 do_pattern:
-    add   $0xf0, %rsp
+    sub   $0x120, %rsp
     mov   %rsp,  %rsi
     callq pattern_setup
-    sub   $0xf0, %rsp
+    add   $0x120, %rsp
     retq
 /*
 # We're going to assume that pattern_setup gets called with rsi set to
@@ -476,7 +476,11 @@ addr_0x7ffff77e38e0:
  jmp  .+17357   # 0x7ffff77e3973 
 
 # Speculative entry point!!!!
+.global spec_entry
 spec_entry:
+ push %r12
+ push %rbx
+
  mov $0x480000,%eax
  mov (%rax),%r12
  mov $0x480010,%eax
@@ -489,6 +493,10 @@ spec_entry:
  lea (%r12,%rax,1),%rdx
  mov %rdx,%rcx
  mov (%rcx),%rax
+ 
+ pop %rbx
+ pop %r12
+ retq
 
 
  nop   # 0x7ffff77e3978 
@@ -914,10 +922,10 @@ addr_0x7ffff77e7d72:
  nop   # 0x7ffff77e7d99 
  nop   # 0x7ffff77e7d9a 
  nop   # 0x7ffff77e7d9b 
- nop   # 0x7ffff77e7d9c 
- nop   # 0x7ffff77e7d9d 
- nop   # 0x7ffff77e7d9e 
 /*
+ #nop   # 0x7ffff77e7d9c 
+ #nop   # 0x7ffff77e7d9d 
+ #nop   # 0x7ffff77e7d9e 
  ##nop   # 0x7ffff77e7d9f 
  ##nop   # 0x7ffff77e7da0 
  ##nop   # 0x7ffff77e7da1 
@@ -929,6 +937,7 @@ addr_0x7ffff77e7d72:
  # uncached read from *arg
  mov 8(%rdi), %rax
  mov (%rdi), %rdi
+ mov (%rax), %rax
  jmpq *%rax
  #ret   # 0x7ffff77e7da6 0x7ffff77e7da6  0 sources, dests: 0x7ffff77e396d,0x7ffff77e3978 retq   
 

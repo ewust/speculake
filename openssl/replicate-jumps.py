@@ -329,10 +329,10 @@ print '''
 .section .text
 .global do_pattern
 do_pattern:
-    add   $0xf0, %rsp
+    sub   $0x120, %rsp
     mov   %rsp,  %rsi
     callq pattern_setup
-    sub   $0xf0, %rsp
+    add   $0x120, %rsp
     retq
 /*
 # We're going to assume that pattern_setup gets called with rsi set to
