@@ -15,7 +15,7 @@ simulate-openssl: test-jumps.c
 replicated.S: loop1.cut replicate-jumps.py
 	python indirect.py < loop1.cut | python replicate-jumps.py > replicated.S
 
-trained: trained.c
+trained: trained.c replicated.S
 	$(CC) replicated.S trained.c -o $@
 
 
