@@ -757,10 +757,11 @@ addr_0x7ffff77e7cc0:
  nop   # 0x7ffff77e7cce 
  nop   # 0x7ffff77e7ccf 
  nop   # 0x7ffff77e7cd0 
- mov 4(%rsi),%eax   # 0x7ffff77e7cd1 Bitmask jump[1]: 0x7ffff77e7cdc  0 sources, dests: 0x7ffff77e7cde,0x7ffff77e7d18 jbe    0x7ffff77e7d18 <BN_CTX_end+88>
- sarl 4(%rsi)   # 0x7ffff77e7cd4 
- and  $0x1,%eax   # 0x7ffff77e7cd7 
- test %eax,%eax   # 0x7ffff77e7cda 
+ nop   # 0x7ffff77e7cd1 
+ nop   # 0x7ffff77e7cd2 
+ mov 4(%rsi),%eax   # 0x7ffff77e7cd3 Bitmask jump[1]: 0x7ffff77e7cdc  0 sources, dests: 0x7ffff77e7cde,0x7ffff77e7d18 jbe    0x7ffff77e7d18 <BN_CTX_end+88>
+ sarl 4(%rsi)   # 0x7ffff77e7cd6 
+ and  $0x1,%eax   # 0x7ffff77e7cd9 
  jne .+60   # 0x7ffff77e7cdc 
  nop   # 0x7ffff77e7cde 
  nop   # 0x7ffff77e7cdf 
@@ -775,10 +776,11 @@ addr_0x7ffff77e7cc0:
  nop   # 0x7ffff77e7ce8 
  nop   # 0x7ffff77e7ce9 
  nop   # 0x7ffff77e7cea 
- mov 8(%rsi),%eax   # 0x7ffff77e7ceb Bitmask jump[2]: 0x7ffff77e7cf6  0 sources, dests: 0x7ffff77e7cf8,0x7ffff77e7cf8,0x7ffff77e7cf8,0x7ffff77e7d18 je     0x7ffff77e7d18 <BN_CTX_end+88>
- sarl 8(%rsi)   # 0x7ffff77e7cee 
- and  $0x1,%eax   # 0x7ffff77e7cf1 
- test %eax,%eax   # 0x7ffff77e7cf4 
+ nop   # 0x7ffff77e7ceb 
+ nop   # 0x7ffff77e7cec 
+ mov 8(%rsi),%eax   # 0x7ffff77e7ced Bitmask jump[2]: 0x7ffff77e7cf6  0 sources, dests: 0x7ffff77e7cf8,0x7ffff77e7cf8,0x7ffff77e7cf8,0x7ffff77e7d18 je     0x7ffff77e7d18 <BN_CTX_end+88>
+ sarl 8(%rsi)   # 0x7ffff77e7cf0 
+ and  $0x1,%eax   # 0x7ffff77e7cf3 
  jne .+34   # 0x7ffff77e7cf6 
  nop   # 0x7ffff77e7cf8 
  nop   # 0x7ffff77e7cf9 
@@ -1223,10 +1225,11 @@ addr_0x7ffff77e952d:
  nop   # 0x7ffff77e955b 
  nop   # 0x7ffff77e955c 
  nop   # 0x7ffff77e955d 
- mov 12(%rsi),%eax   # 0x7ffff77e955e Bitmask jump[3]: 0x7ffff77e9569  0 sources, dests: 0x7ffff77e956b,0x7ffff77e9570 jne    0x7ffff77e9570 <BN_mul+400>
- sarl 12(%rsi)   # 0x7ffff77e9561 
- and  $0x1,%eax   # 0x7ffff77e9564 
- test %eax,%eax   # 0x7ffff77e9567 
+ nop   # 0x7ffff77e955e 
+ nop   # 0x7ffff77e955f 
+ mov 12(%rsi),%eax   # 0x7ffff77e9560 Bitmask jump[3]: 0x7ffff77e9569  0 sources, dests: 0x7ffff77e956b,0x7ffff77e9570 jne    0x7ffff77e9570 <BN_mul+400>
+ sarl 12(%rsi)   # 0x7ffff77e9563 
+ and  $0x1,%eax   # 0x7ffff77e9566 
  jne .+7   # 0x7ffff77e9569 
  nop   # 0x7ffff77e956b 
  nop   # 0x7ffff77e956c 

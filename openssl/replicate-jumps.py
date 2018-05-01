@@ -122,11 +122,12 @@ class Instructions(object):
     # calls trim for you...
     def bitmask_jump(self, dest, idx, comment=''):
         offset, jmp_len = self.get_offset(dest)
-        self.trim(11)
+        self.trim(9)
         self.add_instr('mov %d(%%rsi),%%eax' % (idx*4), instr_len=3, comment=comment)
         self.add_instr('sarl %d(%%rsi)' % (idx*4),      instr_len=3)
         self.add_instr('and  $0x1,%eax',                instr_len=3)
-        self.add_instr('test %eax,%eax',                instr_len=2)
+        # and already sets ZF the way we want
+        #self.add_instr('test %eax,%eax',                instr_len=2)
         self.add_instr('jne %s' % (offset),             instr_len=jmp_len)
 
 
