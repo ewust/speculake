@@ -74,6 +74,59 @@ SECTIONS
   .cur_probe_space 0x480010: { KEEP(*(.cur_probe_space)) }
 
 
+  .addr_0x7ffff77e339c   0x5e339c: { *addr_0x7ffff77e339c.* }
+  .addr_0x7ffff77e33ac   0x5e33ac: { *addr_0x7ffff77e33ac.* }
+  .addr_0x7ffff77e33b7   0x5e33b7: { *addr_0x7ffff77e33b7.* }
+  .addr_0x7ffff77e343d   0x5e343d: { *addr_0x7ffff77e343d.* }
+  .addr_0x7ffff77e3466   0x5e3466: { *addr_0x7ffff77e3466.* }
+  .addr_0x7ffff77e36e0   0x5e36e0: { *addr_0x7ffff77e36e0.* }
+  .addr_0x7ffff77e37a0   0x5e37a0: { *addr_0x7ffff77e37a0.* }
+  .addr_0x7ffff77e38e0   0x5e38e0: { *addr_0x7ffff77e38e0.* }
+  .addr_0x7ffff77e3927   0x5e3927: { *addr_0x7ffff77e3927.* }
+  .addr_0x7ffff77e3942   0x5e3942: { *addr_0x7ffff77e3942.* }
+  .addr_0x7ffff77e394d   0x5e394d: { *addr_0x7ffff77e394d.* }
+  .addr_0x7ffff77e3955   0x5e3955: { *addr_0x7ffff77e3955.* }
+  .addr_0x7ffff77e3a24   0x5e3a24: { *addr_0x7ffff77e3a24.* }
+  .addr_0x7ffff77e3a3b   0x5e3a3b: { *addr_0x7ffff77e3a3b.* }
+  .addr_0x7ffff77e3d82   0x5e3d82: { *addr_0x7ffff77e3d82.* }
+  .addr_0x7ffff77e3daf   0x5e3daf: { *addr_0x7ffff77e3daf.* }
+  .addr_0x7ffff77e7130   0x5e7130: { *addr_0x7ffff77e7130.* }
+  .addr_0x7ffff77e7bb0   0x5e7bb0: { *addr_0x7ffff77e7bb0.* }
+  .addr_0x7ffff77e7bc8   0x5e7bc8: { *addr_0x7ffff77e7bc8.* }
+  .addr_0x7ffff77e7cc0   0x5e7cc0: { *addr_0x7ffff77e7cc0.* }
+  .addr_0x7ffff77e7cde   0x5e7cde: { *addr_0x7ffff77e7cde.* }
+  .addr_0x7ffff77e7cf8   0x5e7cf8: { *addr_0x7ffff77e7cf8.* }
+  .addr_0x7ffff77e7d18   0x5e7d18: { *addr_0x7ffff77e7d18.* }
+  .addr_0x7ffff77e7d28   0x5e7d28: { *addr_0x7ffff77e7d28.* }
+  .addr_0x7ffff77e7d40   0x5e7d40: { *addr_0x7ffff77e7d40.* }
+  .addr_0x7ffff77e7d72   0x5e7d72: { *addr_0x7ffff77e7d72.* }
+  .addr_0x7ffff77e7d8b   0x5e7d8b: { *addr_0x7ffff77e7d8b.* }
+  .addr_0x7ffff77e7db0   0x5e7db0: { *addr_0x7ffff77e7db0.* }
+  .addr_0x7ffff77e8320   0x5e8320: { *addr_0x7ffff77e8320.* }
+  .addr_0x7ffff77e834d   0x5e834d: { *addr_0x7ffff77e834d.* }
+  .addr_0x7ffff77e835d   0x5e835d: { *addr_0x7ffff77e835d.* }
+  .addr_0x7ffff77e83ff   0x5e83ff: { *addr_0x7ffff77e83ff.* }
+  .addr_0x7ffff77e93e0   0x5e93e0: { *addr_0x7ffff77e93e0.* }
+  .addr_0x7ffff77e93ff   0x5e93ff: { *addr_0x7ffff77e93ff.* }
+  .addr_0x7ffff77e9407   0x5e9407: { *addr_0x7ffff77e9407.* }
+  .addr_0x7ffff77e942f   0x5e942f: { *addr_0x7ffff77e942f.* }
+  .addr_0x7ffff77e943b   0x5e943b: { *addr_0x7ffff77e943b.* }
+  .addr_0x7ffff77e9456   0x5e9456: { *addr_0x7ffff77e9456.* }
+  .addr_0x7ffff77e9520   0x5e9520: { *addr_0x7ffff77e9520.* }
+  .addr_0x7ffff77e952d   0x5e952d: { *addr_0x7ffff77e952d.* }
+  .addr_0x7ffff77e956b   0x5e956b: { *addr_0x7ffff77e956b.* }
+  .addr_0x7ffff77e9589   0x5e9589: { *addr_0x7ffff77e9589.* }
+  .addr_0x7ffff77eb240   0x5eb240: { *addr_0x7ffff77eb240.* }
+  .addr_0x7ffff77ecc38   0x5ecc38: { *addr_0x7ffff77ecc38.* }
+  .addr_0x7ffff77ecc53   0x5ecc53: { *addr_0x7ffff77ecc53.* }
+  .addr_0x7ffff77ecc7a   0x5ecc7a: { *addr_0x7ffff77ecc7a.* }
+  .addr_0x7ffff77ee7c0   0x5ee7c0: { *addr_0x7ffff77ee7c0.* }
+  .addr_0x7ffff77ee7cb   0x5ee7cb: { *addr_0x7ffff77ee7cb.* }
+  .addr_0x7ffff77ee851   0x5ee851: { *addr_0x7ffff77ee851.* }
+  .addr_0x7ffff77ee89d   0x5ee89d: { *addr_0x7ffff77ee89d.* }
+  .addr_0x7ffff77ee980   0x5ee980: { *addr_0x7ffff77ee980.* }
+
+
   .fini           :
   {
     KEEP (*(SORT_NONE(.fini)))
