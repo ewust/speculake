@@ -22,6 +22,7 @@ entries = {} # addr => [list of source addresses that jump here]
 #line_nums = {} # addr => [line_numbers]
 
 hit_instructions = set() # list of addresses that are actually run
+min_addr = None
 
 p = re.compile('(\d+) \(([ID])([tn\.])\) (0x[0-9a-f]+)->(0x[0-9a-f]+):\s+(.*)')
 
@@ -46,6 +47,9 @@ for line in sys.stdin:
 
     prev_addr = next_addr
 
+    if min_addr is None or next_addr < min_addr:
+        min_addr = next_addr
+
     instrs[addr] = instr
     if addr not in jumps:
         jumps[addr] = []
@@ -57,6 +61,9 @@ for line in sys.stdin:
     if next_addr not in entries:
         entries[next_addr] = []
     entries[next_addr].append(addr)
+
+
+
 
 
 addrs = sorted(instrs.keys())
@@ -240,7 +247,7 @@ class Instructions(object):
 
 
 
-code = Instructions(addrs[0], hit_instructions)
+code = Instructions(min(addrs[0], min_addr), hit_instructions)
 
 bitmask_jumps = {}  # addr => (bitmask, index)
 
@@ -352,7 +359,7 @@ print 'jmp begin_pattern'
 
 # Print the code
 print ''
-print 'begin_pattern:  # please link @0x%08x' % (addrs[0])
+print 'begin_pattern:  # please link @0x%08x' % (min(addrs[0], min_addr))
 print str(code)
 
 

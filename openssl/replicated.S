@@ -151,13 +151,41 @@ movl $0x00000008,8(%rsi)
 test %eax,%eax
 jmp begin_pattern
 
-begin_pattern:  # please link @0x7ffff77e339c
+begin_pattern:  # please link @0x7ffff77e3380
 
 
-.section .addr_0x7ffff77e339c, "ax"
-.global addr_0x7ffff77e339c
-.type addr_0x7ffff77e339c, @function
-addr_0x7ffff77e339c:
+.section .addr_0x7ffff77e3380, "ax"
+.global addr_0x7ffff77e3380
+.type addr_0x7ffff77e3380, @function
+addr_0x7ffff77e3380:
+ nop   # 0x7ffff77e3380 
+ nop   # 0x7ffff77e3381 
+ nop   # 0x7ffff77e3382 
+ nop   # 0x7ffff77e3383 
+ nop   # 0x7ffff77e3384 
+ nop   # 0x7ffff77e3385 
+ nop   # 0x7ffff77e3386 
+ nop   # 0x7ffff77e3387 
+ nop   # 0x7ffff77e3388 
+ nop   # 0x7ffff77e3389 
+ nop   # 0x7ffff77e338a 
+ nop   # 0x7ffff77e338b 
+ nop   # 0x7ffff77e338c 
+ nop   # 0x7ffff77e338d 
+ nop   # 0x7ffff77e338e 
+ nop   # 0x7ffff77e338f 
+ nop   # 0x7ffff77e3390 
+ nop   # 0x7ffff77e3391 
+ nop   # 0x7ffff77e3392 
+ nop   # 0x7ffff77e3393 
+ nop   # 0x7ffff77e3394 
+ nop   # 0x7ffff77e3395 
+ nop   # 0x7ffff77e3396 
+ nop   # 0x7ffff77e3397 
+ nop   # 0x7ffff77e3398 
+ nop   # 0x7ffff77e3399 
+ nop   # 0x7ffff77e339a 
+ nop   # 0x7ffff77e339b 
  jno  .+16   # 0x7ffff77e339c 0x7ffff77e339c  0 sources, dests: 0x7ffff77e33ac jge    0x7ffff77e33ac <BN_uadd+44>
 
 
@@ -742,11 +770,7 @@ addr_0x7ffff77e7cc0:
  nop   # 0x7ffff77e7cea 
  nop   # 0x7ffff77e7ceb 
  nop   # 0x7ffff77e7cec 
-
- nop   # ed
- nop   # ee
- nop   # ef
-
+ mov 8(%rsi),%eax   # 0x7ffff77e7ced Bitmask jump[2]: 0x7ffff77e7cf6  0 sources, dests: 0x7ffff77e7cf8,0x7ffff77e7cf8,0x7ffff77e7cf8,0x7ffff77e7d18 je     0x7ffff77e7d18 <BN_CTX_end+88>
  sarl 8(%rsi)   # 0x7ffff77e7cf0 
  and  $0x1,%eax   # 0x7ffff77e7cf3 
  jne .+34   # 0x7ffff77e7cf6 
@@ -776,9 +800,9 @@ addr_0x7ffff77e7d18:
 .global addr_0x7ffff77e7d28
 .type addr_0x7ffff77e7d28, @function
 addr_0x7ffff77e7d28:
-
- mov 8(%rsi),%eax   # 0x7ffff77e7ced Bitmask jump[2]: 0x7ffff77e7cf6  0 sources, dests: 0x7ffff77e7cf8,0x7ffff77e7cf8,0x7ffff77e7cf8,0x7ffff77e7d18 je     0x7ffff77e7d18 <BN_CTX_end+88>
-
+ nop   # 0x7ffff77e7d28 
+ nop   # 0x7ffff77e7d29 
+ nop   # 0x7ffff77e7d2a 
  jmp  .-59   # 0x7ffff77e7d2b 
 
 
@@ -1456,7 +1480,7 @@ addr_0x7ffff77ee990:
 
 
 /*
-void addr_0x7ffff77e339c();
+void addr_0x7ffff77e3380();
 void addr_0x7ffff77e33ac();
 void addr_0x7ffff77e343d();
 void addr_0x7ffff77e3466();
@@ -1490,7 +1514,7 @@ void addr_0x7ffff77ee980();
 
 
 load_page(0x7ffff77e3000);
-memcpy((void*)0x7ffff77e339c, addr_0x7ffff77e339c, 2);
+memcpy((void*)0x7ffff77e3380, addr_0x7ffff77e3380, 30);
 memcpy((void*)0x7ffff77e33ac, addr_0x7ffff77e33ac, 64);
 memcpy((void*)0x7ffff77e343d, addr_0x7ffff77e343d, 27);
 memcpy((void*)0x7ffff77e3466, addr_0x7ffff77e3466, 5);
