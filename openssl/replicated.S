@@ -802,7 +802,6 @@ addr_0x7ffff77e7d18:
 .global addr_0x7ffff77e7d28
 .type addr_0x7ffff77e7d28, @function
 addr_0x7ffff77e7d28:
-
  mov 8(%rsi),%eax   # 0x7ffff77e7ced Bitmask jump[2]: 0x7ffff77e7cf6  0 sources, dests: 0x7ffff77e7cf8,0x7ffff77e7cf8,0x7ffff77e7cf8,0x7ffff77e7d18 je     0x7ffff77e7d18 <BN_CTX_end+88>
  jmp  .-59   # 0x7ffff77e7d2b 
 
@@ -1512,6 +1511,7 @@ void addr_0x7ffff77ee7c0();
 void addr_0x7ffff77ee851();
 void addr_0x7ffff77ee89d();
 void addr_0x7ffff77ee980();
+void addr_0x7ffff77ee990();
 
 
 load_page(0x7ffff77e3000);
@@ -1552,5 +1552,6 @@ memcpy((void*)0x7ffff77ee7c0, addr_0x7ffff77ee7c0, 22);
 memcpy((void*)0x7ffff77ee851, addr_0x7ffff77ee851, 25);
 memcpy((void*)0x7ffff77ee89d, addr_0x7ffff77ee89d, 4);
 memcpy((void*)0x7ffff77ee980, addr_0x7ffff77ee980, 12);
+memcpy((void*)0x7ffff77ee990, addr_0x7ffff77ee990, 25);
 
 */

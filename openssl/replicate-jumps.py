@@ -210,6 +210,15 @@ class Instructions(object):
 
             last_in = True
             this_len += 1
+
+        if this_addr is not None:
+            page = this_addr & ~(4096-1)
+            if page not in loaded_pages:
+                out += 'load_page(0x%08x);\n' % (this_addr & ~(4096-1))
+            out += 'memcpy((void*)0x%08x, addr_0x%08x, %d);\n' % \
+                (this_addr, this_addr, self.addr - this_addr)
+            prototypes += 'void addr_0x%08x();\n' % this_addr
+
         return prototypes + '\n\n' + out
 
     # Returns a list of series of linker script directives
