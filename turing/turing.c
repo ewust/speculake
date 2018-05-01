@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <signal.h>
+#include <time.h>
 #include <x86intrin.h>
 #include <unistd.h>
 #include <string.h>
@@ -44,6 +45,12 @@ uint64_t tot_time = 0;      // Number cycles total
 unsigned int junk=0;    // For rdtscp
 
 
+uint8_t rand_xor;
+void init_rand() {
+    srand(time(0));
+    rand_xor = (uint8_t) rand() & 0xff;
+}
+
 void *map;
 #define TARGET_FN_ADDR 0x414100401000
 
@@ -67,6 +74,7 @@ void check_probes() {
     int i;
     for (i=0; i<NUM_PROBES; i++) {
         addr = &probe_buf[i*cur_probe_space];
+        *addr = *addr ^ rand_xor;
         t0 = _rdtscp(&junk);
         asm volatile( "movb (%%rbx), %%al\n"
             :: "b"(addr) : "rax");
@@ -93,6 +101,7 @@ uint64_t jmp_ptr;
 #define TURING_TAPE_LEN 1024*512
 uint8_t *turing_tape;
 uint8_t turing_state;
+
 
 void measure() {
     fn_ptr = check_probes;
@@ -184,6 +193,7 @@ void measure() {
 
 int main()
 {
+    init_rand();
     probe_buf = malloc(MAX_PROBE_SPACE*NUM_PROBES);
     if (probe_buf == NULL) {
         perror("malloc");

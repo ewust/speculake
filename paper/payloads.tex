@@ -35,7 +35,13 @@ This method makes it appear as though the program is generating its own code.
 \subsection{Turing Machine}
 \label{subsec:turing}
 To demonstrate that arbitrary computation can be done in the speculative world
-we create a Turing Machine to compute a 6 state Busy Beaver Turing Machine. 
+we create a Turing Machine to compute a 5 state Busy Beaver Turing Machine. The
+Busy Beaver game is tasked with creating a Turing Machine which writes the most
+1s on the tape with only a limited number of states and still halts.
+
+The computation of the Turing Machine is done speculatively, meaning that while
+the real world keeps track of the state, tape, and symbols of the turing machine
+all logic used to update the above is done in the speculative world.
 
 \subsection{Unpacking and Decryption}
 \label{subsec:decryption}
@@ -95,11 +101,11 @@ attackers as traditional reverse engineering methods will reveal only that
 emulation is being done. It reveals nothing about the ultimate goal of the
 program. 
 
-To accomodate both developers as well as the unique constraints 
+To accommodate both developers as well as the unique constraints 
 enforced by the speculative primitive, a custom emulation solution is required. We 
 have approached this challenge from both directions. First we demonstrate 
 general purpose emulation using a custom instruction set -- SPASM -- which
-accomodates the speculative primitive specifically. Next we investigate custom 
+accommodates the speculative primitive specifically. Next we investigate custom 
 wrappers on traditional emulators allow for similar payload construction,
 with a much more developer friendly 
 
