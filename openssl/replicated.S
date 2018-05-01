@@ -89,10 +89,11 @@
 .section .text
 .global do_pattern
 do_pattern:
-    add   $0x50, %rsp
+    add   $0xf0, %rsp
     mov   %rsp,  %rsi
     callq pattern_setup
-    sub   $0x50, %rsp
+    sub   $0xf0, %rsp
+    retq
 /*
 # We're going to assume that pattern_setup gets called with rsi set to
 # an array of bitfields for the direct jumps that aren't statically taken
@@ -112,8 +113,9 @@ do_pattern:
 
 pattern_setup:
 # Push indirect jumps to the stack
-movabs $0x7ffff77e3978, %rax
-pushq %rax
+# This is our speculative jump: (oops probably should've done 17 :/)
+# movabs $0x7ffff77e3978, %rax
+# pushq %rax
 movabs $0x7ffff77e7d95, %rax
 pushq %rax
 movabs $0x7ffff77e396d, %rax
@@ -149,7 +151,9 @@ movl $0x00000002,12(%rsi)
 movl $0x00000002,4(%rsi)
 movl $0x00000008,8(%rsi)
 test %eax,%eax
-jmp begin_pattern
+
+movabs  $0x7ffff77eb240, %rax
+jmpq *%rax
 
 begin_pattern:  # please link @0x7ffff77e3380
 
@@ -470,6 +474,9 @@ addr_0x7ffff77e38e0:
  nop   # 0x7ffff77e3971 
  nop   # 0x7ffff77e3972 
  jmp  .+17357   # 0x7ffff77e3973 
+
+# Speculative entry point!!!!
+spec_entry:
  nop   # 0x7ffff77e3978 
  nop   # 0x7ffff77e3979 
  nop   # 0x7ffff77e397a 
@@ -478,6 +485,8 @@ addr_0x7ffff77e38e0:
  nop   # 0x7ffff77e397d 
  nop   # 0x7ffff77e397e 
  nop   # 0x7ffff77e397f 
+
+# This jump is spurious (we don't need to do it if we don't want...)
  jmp  .+17344   # 0x7ffff77e3980 
 
 
@@ -879,6 +888,11 @@ addr_0x7ffff77e7d72:
  nop   # 0x7ffff77e7d8e 
  nop   # 0x7ffff77e7d8f 
  jmp  .-3168   # 0x7ffff77e7d90 
+
+# setup for stalling the pipeline:
+# Stall the pipeline
+
+
  nop   # 0x7ffff77e7d95 
  nop   # 0x7ffff77e7d96 
  nop   # 0x7ffff77e7d97 
@@ -889,14 +903,20 @@ addr_0x7ffff77e7d72:
  nop   # 0x7ffff77e7d9c 
  nop   # 0x7ffff77e7d9d 
  nop   # 0x7ffff77e7d9e 
- nop   # 0x7ffff77e7d9f 
- nop   # 0x7ffff77e7da0 
- nop   # 0x7ffff77e7da1 
- nop   # 0x7ffff77e7da2 
- nop   # 0x7ffff77e7da3 
- nop   # 0x7ffff77e7da4 
- nop   # 0x7ffff77e7da5 
- ret   # 0x7ffff77e7da6 0x7ffff77e7da6  0 sources, dests: 0x7ffff77e396d,0x7ffff77e3978 retq   
+/*
+ ##nop   # 0x7ffff77e7d9f 
+ ##nop   # 0x7ffff77e7da0 
+ ##nop   # 0x7ffff77e7da1 
+ ##nop   # 0x7ffff77e7da2 
+ #nop   # 0x7ffff77e7da3 
+ #nop   # 0x7ffff77e7da4 
+ #nop   # 0x7ffff77e7da5 
+*/
+ # uncached read from *arg
+ mov 8(%rdi), %rax
+ mov (%rdi), %rdi
+ jmpq *%rax
+ #ret   # 0x7ffff77e7da6 0x7ffff77e7da6  0 sources, dests: 0x7ffff77e396d,0x7ffff77e3978 retq   
 
 
 .section .addr_0x7ffff77e7db0, "ax"

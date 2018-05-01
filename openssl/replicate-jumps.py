@@ -28,6 +28,8 @@ p = re.compile('(\d+) \(([ID])([tn\.])\) (0x[0-9a-f]+)->(0x[0-9a-f]+):\s+(.*)')
 
 prev_addr = None
 
+entry_point = None
+
 for line in sys.stdin:
     m = p.match(line)
     if m is None:
@@ -39,6 +41,10 @@ for line in sys.stdin:
     addr = int(m.group(4),16)
     next_addr = int(m.group(5),16)
     instr = m.group(6)
+
+    # first address we jump from
+    if entry_point is None:
+        entry_point = addr
 
     hit_instructions.add(addr)
     if prev_addr is not None:
@@ -323,10 +329,11 @@ print '''
 .section .text
 .global do_pattern
 do_pattern:
-    add   $0x50, %rsp
+    add   $0xf0, %rsp
     mov   %rsp,  %rsi
     callq pattern_setup
-    sub   $0x50, %rsp
+    sub   $0xf0, %rsp
+    retq
 /*
 # We're going to assume that pattern_setup gets called with rsi set to
 # an array of bitfields for the direct jumps that aren't statically taken
@@ -363,7 +370,10 @@ print 'test %eax,%eax'
 
 
 # begin!
-print 'jmp begin_pattern'
+print '''
+movabs  $0x%08x, %%rax
+jmpq *%%rax''' % (entry_point)
+
 
 
 # Print the code

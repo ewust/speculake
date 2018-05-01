@@ -39,20 +39,14 @@ void load_page(uint64_t addr)
     memset(map, '\xc3', PAGE_SIZE);
 }
 
-void addr_0x7ffff77e339c();
+void addr_0x7ffff77e3380();
 void addr_0x7ffff77e33ac();
-void addr_0x7ffff77e33b7();
 void addr_0x7ffff77e343d();
 void addr_0x7ffff77e3466();
 void addr_0x7ffff77e36e0();
 void addr_0x7ffff77e37a0();
 void addr_0x7ffff77e38e0();
-void addr_0x7ffff77e3927();
-void addr_0x7ffff77e3942();
-void addr_0x7ffff77e394d();
-void addr_0x7ffff77e3955();
 void addr_0x7ffff77e3a24();
-void addr_0x7ffff77e3a3b();
 void addr_0x7ffff77e3d82();
 void addr_0x7ffff77e3daf();
 void addr_0x7ffff77e7130();
@@ -63,49 +57,35 @@ void addr_0x7ffff77e7d18();
 void addr_0x7ffff77e7d28();
 void addr_0x7ffff77e7d40();
 void addr_0x7ffff77e7d72();
-void addr_0x7ffff77e7d8b();
 void addr_0x7ffff77e7db0();
 void addr_0x7ffff77e8320();
 void addr_0x7ffff77e834d();
-void addr_0x7ffff77e835d();
 void addr_0x7ffff77e83ff();
 void addr_0x7ffff77e93e0();
-void addr_0x7ffff77e93ff();
-void addr_0x7ffff77e9407();
-void addr_0x7ffff77e942f();
-void addr_0x7ffff77e943b();
-void addr_0x7ffff77e9456();
 void addr_0x7ffff77e9520();
-void addr_0x7ffff77e952d();
 void addr_0x7ffff77e9589();
 void addr_0x7ffff77eb240();
 void addr_0x7ffff77ecc38();
-void addr_0x7ffff77ecc53();
-void addr_0x7ffff77ecc7a();
 void addr_0x7ffff77ee7c0();
-void addr_0x7ffff77ee7cb();
 void addr_0x7ffff77ee851();
 void addr_0x7ffff77ee89d();
 void addr_0x7ffff77ee980();
+void addr_0x7ffff77ee990();
+
 
 
 void setup()
 {
+
     load_page(0x7ffff77e3000);
-    memcpy((void*)0x7ffff77e339c, addr_0x7ffff77e339c, 2);
-    memcpy((void*)0x7ffff77e33ac, addr_0x7ffff77e33ac, 7);
-    memcpy((void*)0x7ffff77e33b7, addr_0x7ffff77e33b7, 53);
+    memcpy((void*)0x7ffff77e3380, addr_0x7ffff77e3380, 30);
+    memcpy((void*)0x7ffff77e33ac, addr_0x7ffff77e33ac, 64);
     memcpy((void*)0x7ffff77e343d, addr_0x7ffff77e343d, 27);
     memcpy((void*)0x7ffff77e3466, addr_0x7ffff77e3466, 9);
     memcpy((void*)0x7ffff77e36e0, addr_0x7ffff77e36e0, 33);
     memcpy((void*)0x7ffff77e37a0, addr_0x7ffff77e37a0, 20);
-    memcpy((void*)0x7ffff77e38e0, addr_0x7ffff77e38e0, 67);
-    memcpy((void*)0x7ffff77e3927, addr_0x7ffff77e3927, 23);
-    memcpy((void*)0x7ffff77e3942, addr_0x7ffff77e3942, 7);
-    memcpy((void*)0x7ffff77e394d, addr_0x7ffff77e394d, 4);
-    memcpy((void*)0x7ffff77e3955, addr_0x7ffff77e3955, 48);
-    memcpy((void*)0x7ffff77e3a24, addr_0x7ffff77e3a24, 19);
-    memcpy((void*)0x7ffff77e3a3b, addr_0x7ffff77e3a3b, 18);
+    memcpy((void*)0x7ffff77e38e0, addr_0x7ffff77e38e0, 165);
+    memcpy((void*)0x7ffff77e3a24, addr_0x7ffff77e3a24, 41);
     memcpy((void*)0x7ffff77e3d82, addr_0x7ffff77e3d82, 40);
     memcpy((void*)0x7ffff77e3daf, addr_0x7ffff77e3daf, 34);
     load_page(0x7ffff77e7000);
@@ -116,44 +96,82 @@ void setup()
     memcpy((void*)0x7ffff77e7d18, addr_0x7ffff77e7d18, 11);
     memcpy((void*)0x7ffff77e7d28, addr_0x7ffff77e7d28, 8);
     memcpy((void*)0x7ffff77e7d40, addr_0x7ffff77e7d40, 41);
-    memcpy((void*)0x7ffff77e7d72, addr_0x7ffff77e7d72, 21);
-    memcpy((void*)0x7ffff77e7d8b, addr_0x7ffff77e7d8b, 28);
+    memcpy((void*)0x7ffff77e7d72, addr_0x7ffff77e7d72, 54);
     memcpy((void*)0x7ffff77e7db0, addr_0x7ffff77e7db0, 15);
     load_page(0x7ffff77e8000);
     memcpy((void*)0x7ffff77e8320, addr_0x7ffff77e8320, 34);
-    memcpy((void*)0x7ffff77e834d, addr_0x7ffff77e834d, 12);
-    memcpy((void*)0x7ffff77e835d, addr_0x7ffff77e835d, 32);
+    memcpy((void*)0x7ffff77e834d, addr_0x7ffff77e834d, 48);
     memcpy((void*)0x7ffff77e83ff, addr_0x7ffff77e83ff, 15);
     load_page(0x7ffff77e9000);
-    memcpy((void*)0x7ffff77e93e0, addr_0x7ffff77e93e0, 27);
-    memcpy((void*)0x7ffff77e93ff, addr_0x7ffff77e93ff, 4);
-    memcpy((void*)0x7ffff77e9407, addr_0x7ffff77e9407, 36);
-    memcpy((void*)0x7ffff77e942f, addr_0x7ffff77e942f, 8);
-    memcpy((void*)0x7ffff77e943b, addr_0x7ffff77e943b, 23);
-    memcpy((void*)0x7ffff77e9456, addr_0x7ffff77e9456, 9);
-    memcpy((void*)0x7ffff77e9520, addr_0x7ffff77e9520, 9);
-    memcpy((void*)0x7ffff77e952d, addr_0x7ffff77e952d, 81);
+    memcpy((void*)0x7ffff77e93e0, addr_0x7ffff77e93e0, 127);
+    memcpy((void*)0x7ffff77e9520, addr_0x7ffff77e9520, 94);
     memcpy((void*)0x7ffff77e9589, addr_0x7ffff77e9589, 25);
     load_page(0x7ffff77eb000);
     memcpy((void*)0x7ffff77eb240, addr_0x7ffff77eb240, 1);
     load_page(0x7ffff77ec000);
-    memcpy((void*)0x7ffff77ecc38, addr_0x7ffff77ecc38, 23);
-    memcpy((void*)0x7ffff77ecc53, addr_0x7ffff77ecc53, 35);
-    memcpy((void*)0x7ffff77ecc7a, addr_0x7ffff77ecc7a, 98);
+    memcpy((void*)0x7ffff77ecc38, addr_0x7ffff77ecc38, 164);
     load_page(0x7ffff77ee000);
-    memcpy((void*)0x7ffff77ee7c0, addr_0x7ffff77ee7c0, 7);
-    memcpy((void*)0x7ffff77ee7cb, addr_0x7ffff77ee7cb, 11);
+    memcpy((void*)0x7ffff77ee7c0, addr_0x7ffff77ee7c0, 22);
     memcpy((void*)0x7ffff77ee851, addr_0x7ffff77ee851, 25);
     memcpy((void*)0x7ffff77ee89d, addr_0x7ffff77ee89d, 4);
     memcpy((void*)0x7ffff77ee980, addr_0x7ffff77ee980, 12);
+    memcpy((void*)0x7ffff77ee990, addr_0x7ffff77ee990, 25);
+
 
 }
 
-void do_pattern();
+// single-linked list
+struct node {
+    void *next;  // list pointer
+    void *jmp;   // "data" (indirect jump location)
+};
+
+
+void *the_ptr;
+
+
+void do_pattern(void *);
+
+void nop()
+{
+
+}
+
 
 int main()
 {
+    // Our speculative jump has two in-order targets:
+    // We would like the first one to be quick,
+    // and the second one slow (so it gets mispeculated)
+    // Solution: (hack) make a single linked list
+    // of targets. Cache the first one, uncache the second element.
+    // each time we hit the indirect jump we ultimately want to stall
+    // (at address 0x7ffff77e7da6), we walk the singly-linked list
+    // pointer forward, and call that function
+    //
+    // this is the second pointer (where we will ACTUALLY jump to),
+    // which we will stall by making n2->jmp uncached.
+    struct node *n2 = malloc(sizeof(struct node));
+
+    n2->next = NULL;
+    n2->jmp = nop;
+
+    // TODO: uncache n2->jmp
+
+    struct node n1;
+    n1.next = n2;
+    // This is the address of our first indirect jump (quick)
+    n1.jmp = (void*)0x7ffff77e396d;    // TODO: make this less ugly?
+
+
+
+
+
+    the_ptr = nop;
+    void *ptr = &the_ptr;
+
+
     setup();
-    do_pattern();
+    do_pattern(&n1);
 }
 
