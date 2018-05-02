@@ -4,7 +4,7 @@
 extern uint8_t *probe_buf;
 extern uint64_t cur_probe_space;
 extern uint64_t signal_idx;
-
+extern uint8_t rand_xor;
 
 extern uint8_t *turing_tape;
 extern uint8_t turing_state;
@@ -21,7 +21,8 @@ void update_state(uint8_t write, uint8_t move_right, uint8_t state)
     // write is either 0 or 1 (for 2-symbol)
     // move_right is 1 for R, 0 for L
     // state is 0=A, 1=B, etc
-    signal((state << 2) | ((move_right&0x1) << 1) | (write & 0x1));
+    // signal(((state << 2) | ((move_right&0x1) << 1) | (write & 0x1)) ^ rand_xor);
+    signal(((state << 2) | ((move_right&0x1) << 1) | (write & 0x1)));
 }
 
 #define L 0

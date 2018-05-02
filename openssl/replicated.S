@@ -114,12 +114,14 @@ do_pattern:
 pattern_setup:
 # Push indirect jumps to the stack
 # This is our speculative jump: (oops probably should've done 17 :/)
-# movabs $0x7ffff77e3978, %rax
-# pushq %rax
+ #movabs $0x7ffff77e3978, %rax
+ #pushq %rax
 movabs $0x7ffff77e7d95, %rax
 pushq %rax
-movabs $0x7ffff77e396d, %rax
-pushq %rax
+# We remove this one, because we do it with a jmp *%rax instead
+#movabs $0x7ffff77e396d, %rax
+#pushq %rax
+
 movabs $0x7ffff77e7d95, %rax
 pushq %rax
 movabs $0x7ffff77e3965, %rax
@@ -467,6 +469,7 @@ addr_0x7ffff77e38e0:
  nop   # 0x7ffff77e3966 
  nop   # 0x7ffff77e3967 
  jmp  .+17368   # 0x7ffff77e3968 
+
  nop   # 0x7ffff77e396d 
  nop   # 0x7ffff77e396e 
  nop   # 0x7ffff77e396f 
@@ -922,10 +925,13 @@ addr_0x7ffff77e7d72:
  nop   # 0x7ffff77e7d99 
  nop   # 0x7ffff77e7d9a 
  nop   # 0x7ffff77e7d9b 
+
 /*
- #nop   # 0x7ffff77e7d9c 
- #nop   # 0x7ffff77e7d9d 
- #nop   # 0x7ffff77e7d9e 
+ #mov (%rax), %rax
+ nop   # 0x7ffff77e7d9c 
+ nop   # 0x7ffff77e7d9d 
+ nop   # 0x7ffff77e7d9e 
+
  ##nop   # 0x7ffff77e7d9f 
  ##nop   # 0x7ffff77e7da0 
  ##nop   # 0x7ffff77e7da1 
@@ -940,6 +946,11 @@ addr_0x7ffff77e7d72:
  mov (%rax), %rax
  jmpq *%rax
  #ret   # 0x7ffff77e7da6 0x7ffff77e7da6  0 sources, dests: 0x7ffff77e396d,0x7ffff77e3978 retq   
+
+ nop
+ nop
+ nop
+
 
 
 .section .addr_0x7ffff77e7db0, "ax"

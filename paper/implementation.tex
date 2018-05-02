@@ -12,7 +12,15 @@
 % against reference python implementation?
 
 \subsection{AES Decryption}
-
+The speculative world is able to take advantage of the AES-NI instructions to
+decrypt messages. In order to avoid detection (as well as reduce the computation
+that needs to be done in the speculative world) the key expansion can be done
+ahead of time. However, the key schedule does have a structure that could be
+detected by a reverse engineer. Thus 11 random round keys are selected. This
+obfuscated key schedule makes it more difficult for a reverse engineer to
+determine that there is encrypted content. Additionally since the content is
+only accessed when the correct trigger program is running the challenges facing
+a reverse engineer are great.
 % implementation 
 %   Key Schedule expansion / obfuscation
 %
