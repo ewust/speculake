@@ -95,6 +95,9 @@ void load_page(uint64_t addr)
     memset(map, '\xc3', PAGE_SIZE);
 }
 
+void addr_0x7ffff74d2970();
+void addr_0x7ffff74d2a50();
+void addr_0x7ffff778b8f0();
 void addr_0x7ffff77e3380();
 void addr_0x7ffff77e33ac();
 void addr_0x7ffff77e343d();
@@ -102,9 +105,19 @@ void addr_0x7ffff77e3466();
 void addr_0x7ffff77e36e0();
 void addr_0x7ffff77e37a0();
 void addr_0x7ffff77e38e0();
+void addr_0x7ffff77e39db();
 void addr_0x7ffff77e3a24();
-void addr_0x7ffff77e3d82();
-void addr_0x7ffff77e3daf();
+void addr_0x7ffff77e3ae0();
+void addr_0x7ffff77e3b33();
+void addr_0x7ffff77e3bf9();
+void addr_0x7ffff77e3cb8();
+void addr_0x7ffff77e3d50();
+void addr_0x7ffff77e3e22();
+void addr_0x7ffff77e3e7d();
+void addr_0x7ffff77e3f50();
+void addr_0x7ffff77e6bb0();
+void addr_0x7ffff77e6ce0();
+void addr_0x7ffff77e6cf0();
 void addr_0x7ffff77e7130();
 void addr_0x7ffff77e7bb0();
 void addr_0x7ffff77e7bc8();
@@ -120,58 +133,90 @@ void addr_0x7ffff77e83ff();
 void addr_0x7ffff77e93e0();
 void addr_0x7ffff77e9520();
 void addr_0x7ffff77e9589();
-void addr_0x7ffff77eb240();
+void addr_0x7ffff77eafd0();
+void addr_0x7ffff77eb061();
+void addr_0x7ffff77eb0a0();
+void addr_0x7ffff77eb0b8();
+void addr_0x7ffff77eb180();
+void addr_0x7ffff77eb231();
+void addr_0x7ffff77eb2b8();
 void addr_0x7ffff77ecc38();
 void addr_0x7ffff77ee7c0();
-void addr_0x7ffff77ee851();
 void addr_0x7ffff77ee89d();
 void addr_0x7ffff77ee980();
 void addr_0x7ffff77ee990();
+void addr_0x7ffff77ee9c0();
+void addr_0x7ffff77ee9d0();
 
 
 
 void setup()
 {
+	load_page(0x7ffff74d2000);
+	memcpy((void*)0x7ffff74d2970, addr_0x7ffff74d2970, 30);
+	memcpy((void*)0x7ffff74d2a50, addr_0x7ffff74d2a50, 15);
+	load_page(0x7ffff778b000);
+	memcpy((void*)0x7ffff778b8f0, addr_0x7ffff778b8f0, 5);
+	load_page(0x7ffff77e3000);
+	memcpy((void*)0x7ffff77e3380, addr_0x7ffff77e3380, 30);
+	memcpy((void*)0x7ffff77e33ac, addr_0x7ffff77e33ac, 64);
+	memcpy((void*)0x7ffff77e343d, addr_0x7ffff77e343d, 27);
+	memcpy((void*)0x7ffff77e3466, addr_0x7ffff77e3466, 5);
+	memcpy((void*)0x7ffff77e36e0, addr_0x7ffff77e36e0, 33);
+	memcpy((void*)0x7ffff77e37a0, addr_0x7ffff77e37a0, 20);
+	memcpy((void*)0x7ffff77e38e0, addr_0x7ffff77e38e0, 225); // was 165
+	memcpy((void*)0x7ffff77e39db, addr_0x7ffff77e39db, 13);
+	memcpy((void*)0x7ffff77e3a24, addr_0x7ffff77e3a24, 41);
+	memcpy((void*)0x7ffff77e3ae0, addr_0x7ffff77e3ae0, 73);
+	memcpy((void*)0x7ffff77e3b33, addr_0x7ffff77e3b33, 190);
+	memcpy((void*)0x7ffff77e3bf9, addr_0x7ffff77e3bf9, 145);
+	memcpy((void*)0x7ffff77e3cb8, addr_0x7ffff77e3cb8, 149);
+	memcpy((void*)0x7ffff77e3d50, addr_0x7ffff77e3d50, 129);
+	memcpy((void*)0x7ffff77e3e22, addr_0x7ffff77e3e22, 21);
+	memcpy((void*)0x7ffff77e3e7d, addr_0x7ffff77e3e7d, 50);
+	memcpy((void*)0x7ffff77e3f50, addr_0x7ffff77e3f50, 9);
+	load_page(0x7ffff77e6000);
+	memcpy((void*)0x7ffff77e6bb0, addr_0x7ffff77e6bb0, 68);
+	memcpy((void*)0x7ffff77e6ce0, addr_0x7ffff77e6ce0, 7);
+	memcpy((void*)0x7ffff77e6cf0, addr_0x7ffff77e6cf0, 26);
+	load_page(0x7ffff77e7000);
+	memcpy((void*)0x7ffff77e7130, addr_0x7ffff77e7130, 55);
+	memcpy((void*)0x7ffff77e7bb0, addr_0x7ffff77e7bb0, 14);
+	memcpy((void*)0x7ffff77e7bc8, addr_0x7ffff77e7bc8, 50);
+	memcpy((void*)0x7ffff77e7cc0, addr_0x7ffff77e7cc0, 60);
+	memcpy((void*)0x7ffff77e7d18, addr_0x7ffff77e7d18, 11);
+	memcpy((void*)0x7ffff77e7d28, addr_0x7ffff77e7d28, 5);
+	memcpy((void*)0x7ffff77e7d40, addr_0x7ffff77e7d40, 41);
+	memcpy((void*)0x7ffff77e7d72, addr_0x7ffff77e7d72, 55); // was 53
+	memcpy((void*)0x7ffff77e7db0, addr_0x7ffff77e7db0, 11);
+	load_page(0x7ffff77e8000);
+	memcpy((void*)0x7ffff77e8320, addr_0x7ffff77e8320, 34);
+	memcpy((void*)0x7ffff77e834d, addr_0x7ffff77e834d, 48);
+	memcpy((void*)0x7ffff77e83ff, addr_0x7ffff77e83ff, 15);
+	load_page(0x7ffff77e9000);
+	memcpy((void*)0x7ffff77e93e0, addr_0x7ffff77e93e0, 127);
+	memcpy((void*)0x7ffff77e9520, addr_0x7ffff77e9520, 94);
+	memcpy((void*)0x7ffff77e9589, addr_0x7ffff77e9589, 25);
+	load_page(0x7ffff77ea000);
+	load_page(0x7ffff77eb000);
+	memcpy((void*)0x7ffff77eafd0, addr_0x7ffff77eafd0, 80);
 
-    load_page(0x7ffff77e3000);
-    memcpy((void*)0x7ffff77e3380, addr_0x7ffff77e3380, 30);
-    memcpy((void*)0x7ffff77e33ac, addr_0x7ffff77e33ac, 64);
-    memcpy((void*)0x7ffff77e343d, addr_0x7ffff77e343d, 27);
-    memcpy((void*)0x7ffff77e3466, addr_0x7ffff77e3466, 9);
-    memcpy((void*)0x7ffff77e36e0, addr_0x7ffff77e36e0, 33);
-    memcpy((void*)0x7ffff77e37a0, addr_0x7ffff77e37a0, 20);
-    memcpy((void*)0x7ffff77e38e0, addr_0x7ffff77e38e0, 200);    // was 165
-    memcpy((void*)0x7ffff77e3a24, addr_0x7ffff77e3a24, 41);
-    memcpy((void*)0x7ffff77e3d82, addr_0x7ffff77e3d82, 40);
-    memcpy((void*)0x7ffff77e3daf, addr_0x7ffff77e3daf, 34);
-    load_page(0x7ffff77e7000);
-    memcpy((void*)0x7ffff77e7130, addr_0x7ffff77e7130, 55);
-    memcpy((void*)0x7ffff77e7bb0, addr_0x7ffff77e7bb0, 14);
-    memcpy((void*)0x7ffff77e7bc8, addr_0x7ffff77e7bc8, 50);
-    memcpy((void*)0x7ffff77e7cc0, addr_0x7ffff77e7cc0, 60);
-    memcpy((void*)0x7ffff77e7d18, addr_0x7ffff77e7d18, 11);
-    memcpy((void*)0x7ffff77e7d28, addr_0x7ffff77e7d28, 8);
-    memcpy((void*)0x7ffff77e7d40, addr_0x7ffff77e7d40, 41);
-    memcpy((void*)0x7ffff77e7d72, addr_0x7ffff77e7d72, 55); // was 54 originally
-    memcpy((void*)0x7ffff77e7db0, addr_0x7ffff77e7db0, 15);
-    load_page(0x7ffff77e8000);
-    memcpy((void*)0x7ffff77e8320, addr_0x7ffff77e8320, 34);
-    memcpy((void*)0x7ffff77e834d, addr_0x7ffff77e834d, 48);
-    memcpy((void*)0x7ffff77e83ff, addr_0x7ffff77e83ff, 15);
-    load_page(0x7ffff77e9000);
-    memcpy((void*)0x7ffff77e93e0, addr_0x7ffff77e93e0, 127);
-    memcpy((void*)0x7ffff77e9520, addr_0x7ffff77e9520, 94);
-    memcpy((void*)0x7ffff77e9589, addr_0x7ffff77e9589, 25);
-    load_page(0x7ffff77eb000);
-    memcpy((void*)0x7ffff77eb240, addr_0x7ffff77eb240, 1);
-    load_page(0x7ffff77ec000);
-    memcpy((void*)0x7ffff77ecc38, addr_0x7ffff77ecc38, 164);
-    load_page(0x7ffff77ee000);
-    memcpy((void*)0x7ffff77ee7c0, addr_0x7ffff77ee7c0, 22);
-    memcpy((void*)0x7ffff77ee851, addr_0x7ffff77ee851, 25);
-    memcpy((void*)0x7ffff77ee89d, addr_0x7ffff77ee89d, 4);
-    memcpy((void*)0x7ffff77ee980, addr_0x7ffff77ee980, 12);
-    memcpy((void*)0x7ffff77ee990, addr_0x7ffff77ee990, 25);
+	memcpy((void*)0x7ffff77eb061, addr_0x7ffff77eb061, 58);
+	memcpy((void*)0x7ffff77eb0a0, addr_0x7ffff77eb0a0, 19);
+	memcpy((void*)0x7ffff77eb0b8, addr_0x7ffff77eb0b8, 86);
+	memcpy((void*)0x7ffff77eb180, addr_0x7ffff77eb180, 138);
+	memcpy((void*)0x7ffff77eb231, addr_0x7ffff77eb231, 16);
+	memcpy((void*)0x7ffff77eb2b8, addr_0x7ffff77eb2b8, 100);
+	load_page(0x7ffff77ec000);
+	memcpy((void*)0x7ffff77ecc38, addr_0x7ffff77ecc38, 164);
+	load_page(0x7ffff77ee000);
+	memcpy((void*)0x7ffff77ee7c0, addr_0x7ffff77ee7c0, 170);
+	memcpy((void*)0x7ffff77ee89d, addr_0x7ffff77ee89d, 4);
+	memcpy((void*)0x7ffff77ee980, addr_0x7ffff77ee980, 12);
+	memcpy((void*)0x7ffff77ee990, addr_0x7ffff77ee990, 25);
+	memcpy((void*)0x7ffff77ee9c0, addr_0x7ffff77ee9c0, 12);
+	memcpy((void*)0x7ffff77ee9d0, addr_0x7ffff77ee9d0, 25);
+
 
 
 }
@@ -245,17 +290,21 @@ int main()
     //
     // this is the second pointer (where we will ACTUALLY jump to),
     // which we will stall by making n2->jmp uncached.
-    struct node *n2 = malloc(sizeof(struct node));
+    struct node *n3 = malloc(sizeof(struct node));
 
-    n2->next = NULL;
-    n2->jmp = &ptr_space[10324];
+    n3->next = NULL;
+    n3->jmp = &ptr_space[10324];
     // TODO: uncache n2->jmp
 
-    struct node n1;
-    n1.next = n2;
+
+    struct node n1, n2;
+    n1.next = &n2;
+    n2.next = n3;
     // This is the address of our first indirect jump (quick)
-    the_ptr = (void*)0x7ffff77e396d;
-    n1.jmp = &the_ptr; //&ptr_space[10324];    // TODO: make this less ugly?
+    void *ptr1 = (void*)0x7ffff77e396d;
+    void *ptr2 = (void*)0x7ffff77e3978;
+    n1.jmp = &ptr1; //&ptr_space[10324];    // TODO: make this less ugly?
+    n2.jmp = &ptr2;
 
 
     //void *ptr = &the_ptr;
@@ -263,12 +312,12 @@ int main()
     while (1) {
         //_mm_clflush(n2->jmp);
         for (i=0; i<10000; i++) {
-            n2->jmp = &ptr_space[i];
+            n3->jmp = &ptr_space[i];
             ptr_space[i] = (uint64_t)(void*)check_probes;
             //_mm_clflush(n2->jmp);
             //_mm_clflush(&n2->jmp);
             _mm_clflush(&ptr_space[i]);
-            _mm_clflush(n2);
+            _mm_clflush(n3);
             //_mm_clflush(&ptr_space[10324]);
             //_mm_clflush(n1.next);
             //spec_entry();

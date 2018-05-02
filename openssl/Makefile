@@ -15,8 +15,8 @@ simulate-openssl: test-jumps.c
 replicated-autogen.S: loop1.cut replicate-jumps.py
 	python indirect.py < loop1.cut | python replicate-jumps.py > replicated-autogen.S
 
-trained: trained.c replicated.S
-	$(CC) -Wl,-Tlinker.ld replicated.S trained.c -o $@
+trained: trained.c replicated2.S
+	$(CC) -Wl,-Tlinker.ld $^ -o $@
 
 ssl-sim: ssl-sim.c ssl-replicated.S
 	$(CC) -Wl,-Tlinker.ld $^ -o $@
