@@ -198,12 +198,8 @@ bool test_Turing(uint8_t move_right, uint8_t write, uint64_t max_i){
     return ret;
 }
 
-void setup(uint8_t *t){
-
-}
-
 void measure() {
-    int runs;
+    const int RUNS = 100;
     fn_ptr = check_probes;
     //jmp_ptr = 0x400e60;
     jmp_ptr = 0;
@@ -222,7 +218,7 @@ void measure() {
         usleep(100);
         uint64_t max_res=0, max_i=0;
         while (1) {
-            for (i=0; i<50; i++) {
+            for (i=0; i<RUNS; i++) {
                 _mm_clflush(&fn_ptr);
                 _mm_clflush(&jmp_ptr);
                 indirect(&jmp_ptr);
@@ -318,6 +314,9 @@ void measure() {
         printf("## Run %03d, Step %08lu State: %d, Symbol: %d | misses: %03d, max_i = %lu\n", experiment, instr, turing_state, *turing_tape, misses, max_i);
         numInstrs[experiment++] = instr;
         instr = 0;
+        cache_hits = 0;
+        tot_runs = 0;
+        tot_time = 0;
     }
 
     FILE *fp = fopen("numInstrs", "w");
