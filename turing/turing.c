@@ -199,7 +199,7 @@ bool test_Turing(uint8_t move_right, uint8_t write, uint64_t max_i){
 }
 
 void measure() {
-    const int RUNS = 100;
+    const int RUNS = 1000;
     fn_ptr = check_probes;
     //jmp_ptr = 0x400e60;
     jmp_ptr = 0;
@@ -237,7 +237,7 @@ void measure() {
             }
 
             // max_i = max_i ^ rand_xor;
-            if (max_res > 10 && avg < 50){
+            if (max_res > 0.1*RUNS && avg < 50){
                 // printf("[%lu]: %lu / %lu = %0.5f%% hits, %lu avg cycles, ps %ld\n", max_i, max_res, tot_runs, 100*((float)max_res)/tot_runs, avg, cur_probe_space);
                 signal_idx++;
                 instr++;
