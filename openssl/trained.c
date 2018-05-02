@@ -140,7 +140,7 @@ void setup()
     memcpy((void*)0x7ffff77e3466, addr_0x7ffff77e3466, 9);
     memcpy((void*)0x7ffff77e36e0, addr_0x7ffff77e36e0, 33);
     memcpy((void*)0x7ffff77e37a0, addr_0x7ffff77e37a0, 20);
-    memcpy((void*)0x7ffff77e38e0, addr_0x7ffff77e38e0, 165);
+    memcpy((void*)0x7ffff77e38e0, addr_0x7ffff77e38e0, 200);    // was 165
     memcpy((void*)0x7ffff77e3a24, addr_0x7ffff77e3a24, 41);
     memcpy((void*)0x7ffff77e3d82, addr_0x7ffff77e3d82, 40);
     memcpy((void*)0x7ffff77e3daf, addr_0x7ffff77e3daf, 34);
@@ -152,7 +152,7 @@ void setup()
     memcpy((void*)0x7ffff77e7d18, addr_0x7ffff77e7d18, 11);
     memcpy((void*)0x7ffff77e7d28, addr_0x7ffff77e7d28, 8);
     memcpy((void*)0x7ffff77e7d40, addr_0x7ffff77e7d40, 41);
-    memcpy((void*)0x7ffff77e7d72, addr_0x7ffff77e7d72, 54);
+    memcpy((void*)0x7ffff77e7d72, addr_0x7ffff77e7d72, 55); // was 54 originally
     memcpy((void*)0x7ffff77e7db0, addr_0x7ffff77e7db0, 15);
     load_page(0x7ffff77e8000);
     memcpy((void*)0x7ffff77e8320, addr_0x7ffff77e8320, 34);
@@ -248,14 +248,14 @@ int main()
     struct node *n2 = malloc(sizeof(struct node));
 
     n2->next = NULL;
-    n2->jmp = check_probes; //&ptr_space[10324];
+    n2->jmp = &ptr_space[10324];
     // TODO: uncache n2->jmp
 
     struct node n1;
     n1.next = n2;
     // This is the address of our first indirect jump (quick)
     the_ptr = (void*)0x7ffff77e396d;
-    n1.jmp = the_ptr;    // TODO: make this less ugly?
+    n1.jmp = &the_ptr; //&ptr_space[10324];    // TODO: make this less ugly?
 
 
     //void *ptr = &the_ptr;
@@ -263,19 +263,24 @@ int main()
     while (1) {
         //_mm_clflush(n2->jmp);
         for (i=0; i<10000; i++) {
+            n2->jmp = &ptr_space[i];
+            ptr_space[i] = (uint64_t)(void*)check_probes;
             //_mm_clflush(n2->jmp);
             //_mm_clflush(&n2->jmp);
+            _mm_clflush(&ptr_space[i]);
             _mm_clflush(n2);
+            //_mm_clflush(&ptr_space[10324]);
             //_mm_clflush(n1.next);
             //spec_entry();
+            //((void(*)(void))0x7ffff77e3978)();
             //check_probes();
-            t0 = _rdtscp(&junk2);
+            //t0 = _rdtscp(&junk2);
             do_pattern(&n1);
-            t1 = _rdtscp(&junk2);
-            tot_pattern += (t1-t0);
+            //t1 = _rdtscp(&junk2);
+            //tot_pattern += (t1-t0);
             usleep(1);
         }
-        printf("took %ld cylces average\n", tot_pattern/10000);
+        //printf("took %ld cylces average\n", tot_pattern/10000);
         tot_pattern = 0 ;
 
         // Check stats...
