@@ -44,9 +44,7 @@ uint64_t tot_runs = 0;      // Number of trials (i.e. 10k)
 uint64_t tot_time = 0;      // Number cycles total
 uint64_t R = 1;
 uint64_t L = 0;
-uint64_t numInstrs[1000];
 #define MAX_EXPERIMENT 1000
-int experiment = 0;
 
 unsigned int junk=0;    // For rdtscp
 
@@ -198,8 +196,14 @@ bool test_Turing(uint8_t move_right, uint8_t write, uint64_t max_i){
     return ret;
 }
 
+// const int MINJUMPS = 2;
+#define MINJUMPS 2
+// const int MAXJUMPS = 10;
+#define MAXJUMPS 10
+// const int JUMPINC = 2;
+#define JUMPINC 2
+uint64_t numInstrs[((MAXJUMPS-MINJUMPS)/JUMPINC)][1000];
 void measure() {
-    const int RUNS = 1000;
     fn_ptr = check_probes;
     //jmp_ptr = 0x400e60;
     jmp_ptr = 0;
@@ -207,121 +211,137 @@ void measure() {
 
     uint8_t *turing_tape_base = malloc(TURING_TAPE_LEN);
 
-    while(experiment < MAX_EXPERIMENT){
-        memset(turing_tape_base, 0, TURING_TAPE_LEN);
-        turing_tape = &turing_tape_base[TURING_TAPE_LEN/2];
-        turing_state = 0;
-        true_turing_state = 0;
-        true_max_i = 0;
-        int misses = 0;
-        // printf("## Run %03d, Step %08lu State: %d, Symbol: %d | misses: %03d\n", experiment, instr, turing_state, *turing_tape, misses);
-        usleep(100);
-        uint64_t max_res=0, max_i=0;
-        while (1) {
-            for (i=0; i<RUNS; i++) {
-                _mm_clflush(&fn_ptr);
-                _mm_clflush(&jmp_ptr);
-                indirect(&jmp_ptr);
-                //((void(*)(void *))map)(&jmp_ptr);
-                usleep(1);
-            }
-            uint64_t avg = 0;
-            if (cache_hits > 0) avg = tot_time/cache_hits;
-
-            max_res=0, max_i=0;
-            for (i=0; i<NUM_PROBES; i++) {
-                if (results[i]>max_res) {
-                    max_res = results[i];
-                    max_i = i;
+    for (int jump = MINJUMPS; jump < MAXJUMPS; jump += JUMPINC){
+        int experiment = 0;
+        while(experiment < MAX_EXPERIMENT){
+            memset(turing_tape_base, 0, TURING_TAPE_LEN);
+            turing_tape = &turing_tape_base[TURING_TAPE_LEN/2];
+            turing_state = 0;
+            true_turing_state = 0;
+            true_max_i = 0;
+            int misses = 0;
+            // printf("## Run %03d, Step %08lu State: %d, Symbol: %d | misses: %03d\n", experiment, instr, turing_state, *turing_tape, misses);
+            usleep(100);
+            uint64_t max_res=0, max_i=0;
+            while (1) {
+                for (i=0; i<jump; i++) {
+                    // rand_xor = (uint8_t) rand() & 0xff;
+                    _mm_clflush(&fn_ptr);
+                    _mm_clflush(&jmp_ptr);
+                    indirect(&jmp_ptr);
+                    //((void(*)(void *))map)(&jmp_ptr);
+                    usleep(1);
                 }
-            }
+                uint64_t avg = 0;
+                if (cache_hits > 0) avg = tot_time/cache_hits;
 
-            // max_i = max_i ^ rand_xor;
-            if (max_res > 0.1*RUNS && avg < 50){
-                // printf("[%lu]: %lu / %lu = %0.5f%% hits, %lu avg cycles, ps %ld\n", max_i, max_res, tot_runs, 100*((float)max_res)/tot_runs, avg, cur_probe_space);
-                signal_idx++;
-                instr++;
+                max_res=0, max_i=0;
+                for (i=0; i<NUM_PROBES; i++) {
+                    if (results[i]>max_res) {
+                        max_res = results[i];
+                        max_i = i;
+                    }
+                }
 
-                true_turing();
-                // Update turing state
-                uint8_t write = max_i & 0x1;
-                uint8_t move_right = (max_i >> 1) & 0x1;
-                turing_state = (max_i >> 2);
-                if (move_right) {
-                    *turing_tape++ = write;
+                // max_i = max_i ^ rand_xor;
+                if (max_res > 0.01*jump && avg < 50){
+                    // printf("[%lu]: %lu / %lu = %0.5f%% hits, %lu avg cycles, ps %ld\n", max_i, max_res, tot_runs, 100*((float)max_res)/tot_runs, avg, cur_probe_space);
+                    // if (instr % 100 == 0){
+                    //     printf("## Run %03d, Step %08lu State: %d, Symbol: %d | misses: %03d, max_i: %02lu, true_max_i: %02lu\n", experiment, instr, turing_state, *turing_tape, misses, max_i, true_max_i);
+                    // }
+                    signal_idx++;
+                    instr++;
+
+                    true_turing();
+                    // Update turing state
+                    uint8_t write = max_i & 0x1;
+                    uint8_t move_right = (max_i >> 1) & 0x1;
+                    turing_state = (max_i >> 2);
+                    if (move_right) {
+                        *turing_tape++ = write;
+                    } else {
+                        *turing_tape-- = write;
+                    }
+                    bool correct = test_Turing(move_right, write, max_i);
+
+
+                    if (!correct){
+                        // printf("incorrect turing computation:\n");
+                        // printf("correct state: %d, received state: %d\n", 
+                        //     true_turing_state, turing_state);
+                        // printf("correct move_right: %d, received move_right: %d\n",
+                        //     true_move_right, move_right);
+                        // printf("correct write: %d, received write: %d\n",
+                        //     true_write, write);
+                        // printf("correct max_i: %lu, received max_i: %lu\n",
+                        //     true_max_i, max_i);
+                        // printf("number of instructions: %lu\n", instr);
+                        break;
+                    }
+
+                    // printf("## Run %03d, Step %08lu State: %d, Symbol: %d | misses: %03d, max_i = %lu\n", experiment, instr, turing_state, *turing_tape, misses, max_i);
+                    misses = 0;
+                    int win = 160;
+                    uint8_t *p = &turing_tape[-win/2];
+                    if (p < turing_tape_base) {
+                        // printf("  ");
+                        p = turing_tape_base;
+                    } else {
+                        // printf("..");
+                    }
+                    for (i=0; i<win; i++) {
+                        if (p > &turing_tape_base[TURING_TAPE_LEN]) break;
+                        // printf("%d", *p++);
+                    }
+                    // if (i==win) printf("..");
+                    // printf("\n");
+                    // printf("                                             ");
+                    for (i=0; i<win/2; i++) {
+                        // printf(" ");
+                    }
+                    // printf("^\n");
+
+                    if (turing_state == 5) {
+                        printf("halt state reached!\n");
+                        exit(0);
+                    }
+
                 } else {
-                    *turing_tape-- = write;
+                    // printf("--[%lu]: %lu, %lu avg cycles ps %ld\n", max_i, max_res, avg, cur_probe_space);
+                    misses++;
+                    cur_probe_space += 63;
+                    cur_probe_space %= MAX_PROBE_SPACE;
                 }
-                bool correct = test_Turing(move_right, write, max_i);
+                cache_hits = 0;
+                tot_runs = 0;
+                tot_time = 0;
 
-
-                if (!correct){
-                    // printf("incorrect turing computation:\n");
-                    // printf("correct state: %d, received state: %d\n", 
-                    //     true_turing_state, turing_state);
-                    // printf("correct move_right: %d, received move_right: %d\n",
-                    //     true_move_right, move_right);
-                    // printf("correct write: %d, received write: %d\n",
-                    //     true_write, write);
-                    // printf("correct max_i: %lu, received max_i: %lu\n",
-                    //     true_max_i, max_i);
-                    // printf("number of instructions: %lu\n", instr);
-                    break;
-                }
-
-                // printf("## Run %03d, Step %08lu State: %d, Symbol: %d | misses: %03d, max_i = %lu\n", experiment, instr, turing_state, *turing_tape, misses, max_i);
-                misses = 0;
-                int win = 160;
-                uint8_t *p = &turing_tape[-win/2];
-                if (p < turing_tape_base) {
-                    // printf("  ");
-                    p = turing_tape_base;
-                } else {
-                    // printf("..");
-                }
-                for (i=0; i<win; i++) {
-                    if (p > &turing_tape_base[TURING_TAPE_LEN]) break;
-                    // printf("%d", *p++);
-                }
-                // if (i==win) printf("..");
-                // printf("\n");
-                // printf("                                             ");
-                for (i=0; i<win/2; i++) {
-                    // printf(" ");
-                }
-                // printf("^\n");
-
-                if (turing_state == 5) {
-                    printf("halt state reached!\n");
-                    exit(0);
-                }
-
-            } else {
-                // printf("--[%lu]: %lu, %lu avg cycles ps %ld\n", max_i, max_res, avg, cur_probe_space);
-                misses++;
-                cur_probe_space += 63;
-                cur_probe_space %= MAX_PROBE_SPACE;
+                //update rand_xor every 10 instructions
+                // if (instr % 10 == 0) {
+                // }
+                memset(results, 0, sizeof(uint64_t)*NUM_PROBES);
+                signal_idx %= NUM_PROBES;
+                usleep(10);
             }
+
+            printf("## Jump: %03d, Run %03d, Step %08lu State: %d, Symbol: %d | misses: %03d, max_i: %02lu, true_max_i: %02lu, rand_xor: %02x\n", jump, experiment, instr, turing_state, *turing_tape, misses, max_i, true_max_i, rand_xor);
+            numInstrs[(jump-MINJUMPS)/JUMPINC][experiment++] = instr;
+            // rand_xor = (uint8_t) rand() & 0xff;
+            instr = 0;
             cache_hits = 0;
             tot_runs = 0;
             tot_time = 0;
-
-            memset(results, 0, sizeof(uint64_t)*NUM_PROBES);
-            signal_idx %= NUM_PROBES;
-            usleep(10);
-        }
-
-        printf("## Run %03d, Step %08lu State: %d, Symbol: %d | misses: %03d, max_i = %lu\n", experiment, instr, turing_state, *turing_tape, misses, max_i);
-        numInstrs[experiment++] = instr;
-        instr = 0;
-        cache_hits = 0;
-        tot_runs = 0;
-        tot_time = 0;
-    }
+        } //experiment 
+    } //jump
 
     FILE *fp = fopen("numInstrs", "w");
-    for (int i = 0; i < MAX_EXPERIMENT; i++) {
-        fprintf(fp, "%lu ", numInstrs[i]);
+
+    for (int i = 0; i < ((MAXJUMPS - MINJUMPS)/JUMPINC); i++) {
+        fprintf(fp, "jump %d\n", (i*JUMPINC) + MINJUMPS);
+        for (int j = 0; j < MAX_EXPERIMENT; j++){
+            fprintf(fp, "%lu ", numInstrs[i][j]);
+        }
+        fprintf(fp, "\n");
     }
     fclose(fp);
 
