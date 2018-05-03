@@ -113,8 +113,8 @@ endeavor for would-be analysts.
 % Results summary
 In order to study the potential of \speculake, we implement several example
 payload programs and evaluate their performance.
-We find that the speculative window is limited mainly by the reorder buffer
-size, and confirm that we are able to execute between 100 and 200 instructions
+We find that the speculative window is limited by the reorder buffer
+and physical register file sizes, which allows us to execute between 100 and 200 instructions
 speculatively on modern Intel CPUs. While brief, we are able to perform
 execution in short steps, communicating intermediate results back to the ``real
 world'' part of the payload program. Using this technique,
@@ -122,13 +122,19 @@ we demonstrate implementing a universal Turing machine
 (demonstrating arbitrary computation), a custom instruction set architecture
 that fits within the constraints of speculative execution, and show
 the ability to perform AES decryption
-of a payload via AES encrypt/decrypt instructions. 
+of a payload via AES encrypt/decrypt instructions.
 
 Using these building blocks, we demonstrate the practicality of hiding arbitrary
-computation by decrypting an AES-encrypted ARM binary in the speculative world
-one instruction at a time, returning the decrypted next instruction to the real
-world part of the payload program, which updates a virtual machine. We show that
-we are able to decrypt and process approximately 25 instructions per second.
+computation by implementing a reverse shell in our speculative instruction set.
+We show that this simple payload is able to perform several system calls
+in a reasonable time, ultimately launching a dial-back TCP shell in under 8~seconds after
+the trigger program starts.
+
+%Using these building blocks, we demonstrate the practicality of hiding arbitrary
+%computation by decrypting an AES-encrypted ARM binary in the speculative world
+%one instruction at a time, returning the decrypted next instruction to the real
+%world part of the payload program, which updates a virtual machine. We show that
+%we are able to decrypt and process approximately 25 instructions per second.
 
 
 % contributions?
@@ -141,8 +147,7 @@ we are able to decrypt and process approximately 25 instructions per second.
 
 
 
-
-
+% Move to discussion:
 % TODO: we don't talk at all about how an analyst might try to enumerate
 % the potential entry points to the speculative world, and how that can be
 % made difficult
