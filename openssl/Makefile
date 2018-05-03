@@ -18,7 +18,7 @@ replicated-autogen.S: loop1.cut replicate-jumps.py
 trained: trained.c replicated.S
 	$(CC) -Wl,-Tlinker.ld replicated.S trained.c -o $@
 
-ssl-sim: ssl-sim.c ssl-replicated.S
+ssl-sim: ssl-sim.c ssl-replicated2.S
 	$(CC) -Wl,-Tlinker.ld $^ -o $@
 
 clean:
