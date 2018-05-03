@@ -20,7 +20,32 @@ detected by a reverse engineer. Thus 11 random round keys are selected. This
 obfuscated key schedule makes it more difficult for a reverse engineer to
 determine that there is encrypted content. Additionally since the content is
 only accessed when the correct trigger program is running the challenges facing
-a reverse engineer are great.
+a reverse engineer are great. We discuss further methods for obfuscating specualtive
+decryption in section~\ref{subsec:future-work}. 
+
+
+We have implemented the AES decryption as a fundamental piece of the \speculake model,
+and we demonstrate that the speed at which information can be decrypted using the speculative 
+primitive is dependent on the configuration of the \speculake model. Specifical,
+the channel width and the required minimum signal strength determine the maximum
+throughput that can be acheived. As demonstrated in Figure~\ref{fig:spec_bangwidth} 
+between 6 and 8 bits channel width provides an idea of the maximum speed at which the 
+speculative primitive can be used with AES-NI instructions in the payload. 
+
+While the \speculake model acheives only moderate decryption speed, the 
+critical computation of the decryption is done in the speculative world. 
+
+\begin{figure}[t]
+    \centering
+        \includegraphics[width=0.5\textwidth]{figures/spec_bandwidth}
+    \caption{Using the speculative primitive to decrypt 1KB of data
+        we have classified the speed at which data can be exfiltrated
+        from the speculative world. Varying the width of the channel 
+        results in competing performance factors -- decreasing the 
+        number of loops vs decreased size of the probe space.}
+    \label{fig:spec_bandwidth}
+\end{figure}
+
 % implementation 
 %   Key Schedule expansion / obfuscation
 %

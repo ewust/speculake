@@ -142,7 +142,7 @@ void setup()
     memcpy((void*)0x7ffff77e37a0, addr_0x7ffff77e37a0, 20);
     memcpy((void*)0x7ffff77e38e0, addr_0x7ffff77e38e0, 200);    // was 165
     memcpy((void*)0x7ffff77e3a24, addr_0x7ffff77e3a24, 41);
-    memcpy((void*)0x7ffff77e3d82, addr_0x7ffff77e3d82, 40);
+    memcpy((void*)0x7ffff77e3d82, addr_0x7ffff77e3d82, 45);
     memcpy((void*)0x7ffff77e3daf, addr_0x7ffff77e3daf, 34);
     load_page(0x7ffff77e7000);
     memcpy((void*)0x7ffff77e7130, addr_0x7ffff77e7130, 55);

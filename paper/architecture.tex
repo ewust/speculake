@@ -64,8 +64,17 @@ still.
 
 \begin{figure}[t]
     \centering
-        \includegraphics[width=0.5\textwidth]{figures/Speculative_capacity.png}
-    \caption{}
+        \includegraphics[width=0.5\textwidth]{figures/speculative_measurements.png}
+    \caption{The speculative primitive allows for a limited number of instructions
+        to be completed speculatively, dependent on multiple factors. A) The 
+        processor generation determines the maximum ROB size and PRF capacity,
+        however intel xeon E3-1270(warm colors) and i5-7200U both (cool colors) 
+        perform similarly for comparable instructions. B) Because trigger and 
+        payload processes must share cpu resources they must be performed on 
+        the same hyperthread or associated parity hyperthreads. Processes on
+        the parity hyperthreads (warm colors) denoted by (P) accomplish a 
+        significantly lower number of instructions as compared with processes 
+        on the same hyperthread (cool colors).}
     \label{fig:spec-capacity}
 \end{figure}
 
@@ -106,11 +115,11 @@ In addition we tested whether instruction complexity or data dependencies impact
 the maximum work that can be completed. We found that the processor can identify 
 some operations that have no effect on output registers and allows them to use the 
 entire size provided by the ROB, as determined in section~\ref{sssec:ROB}. This includes 
-idomatic no-ops, which have no effect on the registers, for example the instruction 
-"xchg \%rax \%rax" or similarly "xor \%rax, \%rax". However, if an instruction
-has the potential to cause data dependencies, it must use an entry in the PRF
+idomatic no-ops and zero idioms, which have no reliance on register values, 
+for example the instruction \textit{xchg \%rax \%rax} and \textit{xor \%rax, \%rax}. 
+However, if an instruction is a potential data hazard, it must use an entry in the PRF
 until it reaches the correct stage in the execution pipeline. In this case, the number 
-of instructions is limited by the PRF entries available 
+of instructions is limited by the PRF entries available.
 
 Most notably instructions making use of the extended x86 registers are still
 valid within speculative context. Specifically Intel's hardware accelerated AES-NI

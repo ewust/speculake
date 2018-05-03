@@ -91,8 +91,9 @@
 do_pattern:
     sub   $0x120, %rsp
     mov   %rsp,  %rsi
+    sub   $0x120, %rsp
     callq pattern_setup
-    add   $0x120, %rsp
+    add   $0x240, %rsp
     retq
 /*
 # We're going to assume that pattern_setup gets called with rsi set to
@@ -152,6 +153,8 @@ pushq %rax
 movl $0x00000002,12(%rsi)
 movl $0x00000002,4(%rsi)
 movl $0x00000008,8(%rsi)
+movl $0x00000001,16(%rsi)   # 0x7ffff77e3db8
+movl $0x00000001,20(%rsi)   # 0x7ffff77e3da8
 test %eax,%eax
 
 movabs  $0x7ffff77eb240, %rax
@@ -587,22 +590,34 @@ addr_0x7ffff77e3d82:
  jo  .+35   # 0x7ffff77e3d9b 0x7ffff77e3d9b  0 sources, dests: 0x7ffff77e3d9d jle    0x7ffff77e3dbe <BN_div+1246>+2 bytes
  nop   # 0x7ffff77e3d9d 
  nop   # 0x7ffff77e3d9e 
- nop   # 0x7ffff77e3d9f 
- nop   # 0x7ffff77e3da0 
- nop   # 0x7ffff77e3da1 
- nop   # 0x7ffff77e3da2 
- nop   # 0x7ffff77e3da3 
- nop   # 0x7ffff77e3da4 
- nop   # 0x7ffff77e3da5 
- nop   # 0x7ffff77e3da6 
- nop   # 0x7ffff77e3da7 
- jmp  .+7   # 0x7ffff77e3da8 
+/*
+ #nop   # 0x7ffff77e3d9f 
+ #nop   # 0x7ffff77e3da0 
+ #nop   # 0x7ffff77e3da1 
+ #nop   # 0x7ffff77e3da2 
+ #nop   # 0x7ffff77e3da3 
+ #nop   # 0x7ffff77e3da4 
+ #nop   # 0x7ffff77e3da5 
+ #nop   # 0x7ffff77e3da6 
+ #nop   # 0x7ffff77e3da7
+ #jmp  .+7   # 0x7ffff77e3da8 
+*/
+ mov 20(%rsi),%eax
+ sarl 20(%rsi)
+ and $0x1, %eax
+ jne .+7     # 0x7ffff77e3da8
+ nop # 0x7ffff77e3daa
+ nop # 0x7ffff77e3dab
+ nop # 0x7ffff77e3dac
+ jo  .+5    # 0x7ffff77e3dad ??? TODO: look up actual offset? this is not taken, doesn't matter..
 
 
 .section .addr_0x7ffff77e3daf, "ax"
 .global addr_0x7ffff77e3daf
 .type addr_0x7ffff77e3daf, @function
 addr_0x7ffff77e3daf:
+
+/*
  nop   # 0x7ffff77e3daf 
  nop   # 0x7ffff77e3db0 
  nop   # 0x7ffff77e3db1 
@@ -612,7 +627,12 @@ addr_0x7ffff77e3daf:
  nop   # 0x7ffff77e3db5 
  nop   # 0x7ffff77e3db6 
  nop   # 0x7ffff77e3db7 
- jo  .-14   # 0x7ffff77e3db8 0x7ffff77e3db8  0 sources, dests: 0x7ffff77e3dba je     0x7ffff77e3daa <BN_div+1226>+2 bytes
+*/
+ mov 16(%rsi),%eax
+ sarl 16(%rsi)
+ and $0x1, %eax
+ jne .-14   # 0x7ffff77e3db8
+ #jo  .-14   # 0x7ffff77e3db8 0x7ffff77e3db8  0 sources, dests: 0x7ffff77e3dba je     0x7ffff77e3daa <BN_div+1226>+2 bytes
  nop   # 0x7ffff77e3dba 
  nop   # 0x7ffff77e3dbb 
  nop   # 0x7ffff77e3dbc 
