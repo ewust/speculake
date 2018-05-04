@@ -19,13 +19,10 @@
 \newcommand{\FigSpecMeasure}{
 \begin{figure*}[t]
     \centering
-        \includegraphics[width=0.9\textwidth]{figures/speculative_measurements.png}
+        \includegraphics[width=0.9\textwidth]{figures/Speculative_measurements.png}
     \caption{The speculative primitive allows for a limited number of instructions
-        to be completed speculatively, dependent on multiple factors. A) The 
-        processor generation determines the maximum ROB size and PRF capacity,
-        however intel xeon E3-1270(warm colors) and i5-7200U both (cool colors) 
-        perform similarly for comparable instructions. B) Because trigger and 
-        payload processes must share cpu resources they must be performed on 
+        to be completed speculatively, dependent on multiple factors. Trigger and 
+        payload processes must share cpu resources as they must be performed on 
         the same hyperthread or associated parity hyperthreads. Processes on
         the parity hyperthreads (warm colors) denoted by (P) accomplish a 
         significantly lower number of instructions as compared with processes 
@@ -39,8 +36,36 @@
 \begin{figure}[h]
     \centering
     \includegraphics[width=0.5\textwidth]{figures/cache_miss_dist}
-    \caption{}
+    \caption{Cache Hit/Miss Latency Distribution}
     \label{fig:cache-miss}
 \end{figure}
 }
 
+
+\newcommand{\FigGeneralModel}{
+\begin{figure}[t]
+    \centering
+        \includegraphics[width=0.4\textwidth]{figures/general_model}
+    \caption{ General model of speculative computation within the Measure 
+        process when triggered. \textit{Speculative Computation} has access
+        to all variables which do not require a memory transaction within
+        the current state of the process. The process can subsequently make
+        \textit{Resultant Computations} based on the value returned from 
+        Prime and Probe to update the state of the process. }
+    \label{fig:general_model}
+\end{figure}
+}
+
+
+\newcommand{\FigSpecBandwidth}{
+\begin{figure}[t]
+    \centering
+        \includegraphics[width=0.5\textwidth]{figures/Speculative_bandwidth}
+    \caption{Speculative Bandwidth - Using the speculative primitive 
+        1KB of data can be decrypted and exfiltrated at a speed around 5500 kbps
+        from the speculative world. Varying the width of the channel 
+        results in competing performance factors -- decreasing the 
+        number of loops vs decreased size of the probe space.}
+    \label{fig:spec_bandwidth}
+\end{figure}
+}

@@ -35,17 +35,7 @@ speculative primitive can be used with AES-NI instructions in the payload.
 While the \speculake model acheives only moderate decryption speed, the 
 critical computation of the decryption is done in the speculative world. 
 
-\begin{figure}[t]
-    \centering
-        \includegraphics[width=0.5\textwidth]{figures/spec_bandwidth}
-    \caption{Using the speculative primitive to decrypt 1KB of data
-        we have classified the speed at which data can be exfiltrated
-        from the speculative world. Varying the width of the channel 
-        results in competing performance factors -- decreasing the 
-        number of loops vs decreased size of the probe space.}
-    \label{fig:spec_bandwidth}
-\end{figure}
-
+\FigSpecBandwidth
 % implementation 
 %   Key Schedule expansion / obfuscation
 %

@@ -19,18 +19,7 @@ computation, instructions are stored in the real world encrypted, they are then
 decrypted in the speculative world and passed to the real world to be executed.
 This method makes it appear as though the program is generating its own code.
 
-\begin{figure}[t]
-    \centering
-        \includegraphics[width=0.4\textwidth]{figures/general_model}
-    \caption{ General model of speculative computation within the Measure 
-        process when triggered. \textit{Speculative Computation} has access
-        to all variables which do not require a memory transaction within
-        the current state of the process. The process can subsequently make
-        \textit{Resultant Computations} based on the value returned from 
-        Prime and Probe to update the state of the process. }
-    \label{fig:general_model}
-\end{figure}
-
+\FigGeneralModel
 
 \subsection{Turing Machine}
 \label{subsec:turing}
