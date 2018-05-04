@@ -5,7 +5,11 @@ extern uint8_t *probe_buf;
 extern uint64_t cur_probe_space;
 extern uint64_t signal_idx;
 extern uint8_t rand_xor;
+#ifdef STATE4
 extern uint8_t lookup[2][4];
+#else
+extern uint8_t lookup[2][5];
+#endif
 
 extern uint8_t *turing_tape;
 extern uint8_t turing_state;
@@ -65,6 +69,57 @@ void target_fn(void)
     //     else             update_state(0, L, 0);
     // }
     // do 4 state- 2 symbol lookup
+    // asm volatile ("nop\n" 
+    //               "nop\n"
+    //               "nop\n"
+    //               "nop\n"
+    //               "nop\n"
+    //               "nop\n"
+    //               "nop\n"
+    //               "nop\n"
+    //               "nop\n"
+    //               "nop\n"
+    //               "nop\n"
+    //               "nop\n"
+    //               "nop\n"
+    //               "nop\n"
+    //               "nop\n"
+    //               "nop\n"
+    //               "nop\n"
+    //               "nop\n"
+    //               "nop\n"
+    //               "nop\n"
+    //               "nop\n"
+    //               "nop\n"
+    //               "nop\n"
+    //               "nop\n"
+    //               "nop\n"
+    //               "nop\n"
+    //               "nop\n"
+    //               "nop\n"
+    //               "nop\n"
+    //               "nop\n"
+    //               "nop\n"
+    //               "nop\n"
+    //               "nop\n"
+    //               "nop\n"
+    //               "nop\n"
+    //               "nop\n"
+    //               "nop\n"
+    //               "nop\n"
+    //               "nop\n"
+    //               "nop\n"
+    //               "nop\n"
+    //               "nop\n"
+    //               "nop\n"
+    //               "nop\n"
+    //               "nop\n"
+    //               "nop\n"
+    //               "nop\n"
+    //               "nop\n"
+    //               "nop\n"
+                  
+    // ::: );
     signal(lookup[symbol][turing_state]);
 }
 
