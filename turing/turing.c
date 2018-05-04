@@ -202,16 +202,18 @@ bool test_Turing(uint8_t move_right, uint8_t write, uint64_t max_i){
 #define MAXJUMPS 10
 // const int JUMPINC = 2;
 #define JUMPINC 2
-uint64_t numInstrs[((MAXJUMPS-MINJUMPS)/JUMPINC)][1000];
+uint64_t numInstrs[((MAXJUMPS-MINJUMPS)/JUMPINC + 1)][1000];
 void measure() {
     fn_ptr = check_probes;
     //jmp_ptr = 0x400e60;
     jmp_ptr = 0;
     int i;
 
+    FILE *fp = fopen("numInstrs", "w");
     uint8_t *turing_tape_base = malloc(TURING_TAPE_LEN);
 
-    for (int jump = MINJUMPS; jump < MAXJUMPS; jump += JUMPINC){
+    for (int jump = MINJUMPS; jump <= MAXJUMPS; jump += JUMPINC){
+        fprintf(fp, "jump %d\n", jump);
         int experiment = 0;
         while(experiment < MAX_EXPERIMENT){
             memset(turing_tape_base, 0, TURING_TAPE_LEN);
@@ -332,17 +334,13 @@ void measure() {
             tot_runs = 0;
             tot_time = 0;
         } //experiment 
-    } //jump
-
-    FILE *fp = fopen("numInstrs", "w");
-
-    for (int i = 0; i < ((MAXJUMPS - MINJUMPS)/JUMPINC); i++) {
-        fprintf(fp, "jump %d\n", (i*JUMPINC) + MINJUMPS);
         for (int j = 0; j < MAX_EXPERIMENT; j++){
-            fprintf(fp, "%lu ", numInstrs[i][j]);
+            fprintf(fp, "%lu ", numInstrs[(jump-MINJUMPS)/JUMPINC][j]);
         }
         fprintf(fp, "\n");
-    }
+    } //jump
+
+
     fclose(fp);
 
 }
