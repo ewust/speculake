@@ -1,14 +1,22 @@
 
+
+ver=$(shell awk -F'.' '{print $$1}' < /etc/issue)
+NO_PIE=-no-pie
+ifeq ($(ver),Ubuntu 14)
+	NO_PIE=-fno-pie
+endif
+
+
 all: inject measure
 
 inject: inject.c indirect.S
-	$(CC) -Wl,-Tlinker.ld $^ -o $@ -no-pie
+	$(CC) -Wl,-Tlinker.ld $^ -o $@ ${NO_PIE}
 
 trigger: trigger.c indirect.S
-	$(CC) -Wl,-Tlinker.ld $^ -o $@ -no-pie
+	$(CC) -Wl,-Tlinker.ld $^ -o $@ ${NO_PIE}
 
 measure: target_fn.c measure.c indirect.S decrypt.S
-	$(CC) -Wl,-Tlinker.ld $^ -o $@ -no-pie
+	$(CC) -Wl,-Tlinker.ld $^ -o $@ ${NO_PIE}
 
 camellia: target_fn.c camellia-triggered.c decrypt.S
 	$(CC) -Wl,-Tlinker.ld $^ -o $@
