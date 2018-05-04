@@ -22,18 +22,38 @@ payload program.
 
 \subsection{Indirect jumps}
 
+
+In \speculake, we cause the CPU to mis-speculate the destination of an indirect
+branch in the payload program, causing it to speculatively execute from an
+instruction that is never truly executed. We term this speculative destination the
+\emph{speculative entry point}.
+\speculake uses indirect jumps to allow speculatively executing from \emph{any}
+instruction in the payload process' address space. Because it can jump to any
+instruction, the malware analyst has a difficult task in determining where a
+payload program's speculative entry point is.
+
+In fact, the location this entry point is not determined by the payload
+program, but rather the corresponding trigger program. This means that with only
+the payload program, an analyst does not posses enough information to find the
+speculative entry point.
+
+
+
 Indirect branch predictors allow the CPU to predict the destination address of a
 branch based solely off its source address and a brief history of previous
 branch sources and destinations. While the inner-working details of modern CPU
 branch predictors are proprietary, it is possible to reverse engineer parts of
 their behavior, which we do in \speculake.
 
-We created a simple trigger program that performs a series of 32 indirect jumps,
-using the \texttt{jmpq *\%rax} instruction. Between each jump, we increment
+We observe that Intel CPUs consider three types of x86\_64 indirect branches:
+\texttt{retq}, \texttt{callq *\%rax}, and \texttt{jmpq *\%rax}\footnote{other
+general purpose registers besides \texttt{\%rax} can be used as well}.
+We created a simple trigger program that performs a series of 32 indirect
+branches
+using \texttt{jmpq *\%rax} instructions. Between each jump, we increment
 \texttt{\%rax} to account for the number of bytes between jumps. For the last
 jump, we load a function pointer into \texttt{\%rax} and do a final indirect
-jump using \texttt{callq \%rax}.
-
+branch using \texttt{callq *\%rax}.
 
 In our payload program, we first perform the same 32 indirect jumps. We ensure
 the source address of these jumps is the same as in the trigger program by
@@ -41,10 +61,12 @@ manually defining their containing function at a fixed address inside a linker
 script. We also do the final indirect call to a function pointer, but with two
 differences. First, the destination of the function pointer is a different
 address, and second, the location of the function pointer in memory is uncached.
-This forces the CPU to predict the destination of the indirect call, which it
-predicts to be the destination of the function pointer in trigger program. In
-the payload program, we purposefully place code at this address which acts as
-the \emph{speculative entry point}. Even though the in-order execution of
+This forces the CPU to predict the destination of the indirect call while it
+waits for the function pointer to load from memory. Due to the similarity
+history of branches with the trigger program,
+the CPU will (incorrectly) predict the destination to be the same as the one in
+the trigger program, which determines the speculative entry point for the
+payload. Even though the in-order execution of
 payload program never executes or even reads from this address, the CPU will
 briefly execute instructions there speculatively.
 
@@ -55,11 +77,6 @@ entry point instructions will be discarded, and the CPU will continue executing
 from the correct destination. However, as the speculative code changes what is
 loaded into the cache based on its results, it can covertly communicate its
 results to the ``real world'' program.
-
-
-TODO: Note that returns can also be indirect jumps, and rets/jmpq can be mixed
-to a certain extent...need to document/quantify how much mixing can be done
-still.
 
 
 \begin{figure}[t]
