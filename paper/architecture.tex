@@ -61,22 +61,7 @@ TODO: Note that returns can also be indirect jumps, and rets/jmpq can be mixed
 to a certain extent...need to document/quantify how much mixing can be done
 still.
 
-
-\begin{figure}[t]
-    \centering
-        \includegraphics[width=0.5\textwidth]{figures/speculative_measurements.png}
-    \caption{The speculative primitive allows for a limited number of instructions
-        to be completed speculatively, dependent on multiple factors. A) The 
-        processor generation determines the maximum ROB size and PRF capacity,
-        however intel xeon E3-1270(warm colors) and i5-7200U both (cool colors) 
-        perform similarly for comparable instructions. B) Because trigger and 
-        payload processes must share cpu resources they must be performed on 
-        the same hyperthread or associated parity hyperthreads. Processes on
-        the parity hyperthreads (warm colors) denoted by (P) accomplish a 
-        significantly lower number of instructions as compared with processes 
-        on the same hyperthread (cool colors).}
-    \label{fig:spec-capacity}
-\end{figure}
+\FigSpecMeasure
 
 \subsection{Limits of Speculative Execution}
 We performed several experiments to investigate how much computation can be done
