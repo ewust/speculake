@@ -84,51 +84,93 @@ results to the ``real world'' program.
 
 \FigSpecMeasure
 
-We performed several experiments to investigate how much computation can be done
-speculatively. We performed these experiments on an Intel Xeon-1270, as well as 
-an intel i5-7200U to verify the results across processor generations. 
+We performed several experiments to determine how much computation can be
+performed
+speculatively, as well as what components are responsible for the limit.
+We report results from our experiments on an Intel~Xeon-1270,
+though we note we found similar results across other Intel processor generations,
+including an i5-7200U, % jack
+an i5-4300U, % ewust laptop
+and an i5-4590. % ewust desktop
+% For simplicity, we report results from only the Xeon-1270.
 
-Speculative branching is not a new feature in processors~\cite{branching-hist}, 
-and it has been integrated in multiple generations of commodity processors today. 
-Accordingly speculative instruction capacity has fairly well defined limits, in 
-line with known features of processor designs. We have determined that features 
-like reorder buffers (ROB), physical register file (PRF), and cache miss timing
-determines a strong limit on the number of instructions that can be accomplished
-speculatively. 
 
-\subsubsection{Reorder Buffer Capacity} \label{sssec:ROB}
-To determine these limits we first measured the capacity of the reorder buffer
-using the method outlined by~\cite{intel-rob-capacity}. By performing two cache loads
-with a variable number or instructions between them and watching the amount of 
-time taked to complete this loop we can find a definitive number of instructions
-at which the second cache access is outside of the ROB. Figure~\ref{fig:spec-capacity}
-shows this step function at ~220 instructions for both Sandy Lake and Kaby Lake 
-generation processors. 
+
+%Speculative branching is not a new feature in processors~\cite{branching-hist}, 
+%and it has been integrated in multiple generations of commodity processors today. 
+%Accordingly speculative instruction capacity has fairly well defined limits, in 
+%line with known features of processor designs. We have determined that features 
+%like reorder buffers (ROB), physical register file (PRF), and cache miss timing
+%determines a strong limit on the number of instructions that can be accomplished
+%speculatively. 
 
 \subsubsection{Cache Miss Duration}
-When executing instructions speculatively we rely on a load from a cache line that
-has recently been evicted. We have examined the number of cycles a
-cache miss takes to return by artificially evicting an item from cache and timing 
-a request for that specific item. The distribution of cycle counts can be seen in
-Figure~\ref{fig:cache-miss}, along with the CDF. For a large majority of cases, 
-an item evicted from cache will have 300 clock cycles and often much more. 
+When executing instructions speculatively we rely on a memory load of a function
+pointer from uncached memory. Thus, one potential limit on our computation comes
+in the form of the time it takes for the memory read to return with a result
+(and for the CPU to determine the result was mis-predicted).
+We measured the number of cycles a
+cache miss takes to return by artificially evicting an item from cache and
+timing reads from its address.
+Figure~\ref{fig:cache-miss} shows the CDF of cycles taken. In the typical case,
+an evicted item takes approximately 300 clock cycles to load from L3, which
+would allow a limit of roughly 200 speculative instructions to be
+executed during that time. We note that when an item is not in L3, it takes
+considerably longer to load, in theory allowing for thousands of speculative
+instructions.
+
+
+\subsubsection{Reorder Buffer Capacity} \label{sssec:ROB}
+We also measured the capacity of the reorder buffer (ROB) using a method
+outlined by~\cite{intel-rob-capacity}. We measure the maximum number of cycles taken to
+perform two uncached memory reads, and vary the number of filler instructions
+between them. If the number of filler instructions is small, both memory reads
+will fit inside the ROB, and can issue their memory reads in parallel. However,
+if the filler instructions fill the ROB, the second memory read will have to
+wait for the first to return before it can be issued, causing a noticeable step
+increase in the cycle count.
+Figure~\ref{fig:spec-capacity}
+shows this step occurs at approximately 220 instructions for our processor,
+suggesting a hard upper bound regardless of how long the cache miss takes to
+resolve.
+
+%TODO: explain why it's noisy? why does the maximum number of cycles drop below
+%this when we're above 220 instructions? Is the step somewhere above that, but
+%other processes have crept in (but occasionally, we get lucky and it's just us)?
 
 \subsubsection{Speculative Instruction Capacity}
-To verify that the ROB defines an upper limit for speculative instruction capacity
-we instrumented the trigger and payload to test variable length target functions. 
-In addition we tested whether instruction complexity or data dependencies impact
-the maximum work that can be completed. We found that the processor can identify 
+
+To verify the upper limit of speculative instructions,
+we instrumented our trigger and payload programs to test a variable-length target
+function before it communicated a signal to the real world via a cache side
+channel. If the cache side channel revealed no signal in the real world, then we know the
+speculative execution did not make it to the signal instructions before the
+mis-speculated branch was resolved.
+
+We also tested whether instruction complexity or data dependencies impact
+the number of instructions that can be completed. We find that data dependencies
+and instruction complexity both have an impact on the number of instructions
+that can be executed. Instruction complexity is determined the number of
+$\mu$ ops that the instruction uses, which appears to be what is tracked in the ROB.
+For instance, on our architecture, the 64-bit \texttt{idiv} instruction takes 59
+$\mu$ ops, and we can execute up to 3 of them in the speculative world.
+Meanwhile, we can execute up to 18 32-bit \texttt{idiv} instructions, which each
+take 9 $\mu$ ops~\cite{intel-instruction-tables}.
+
+We found that the processor can identify
 some operations that have no effect on output registers and allows them to use the 
 entire size provided by the ROB, as determined in section~\ref{sssec:ROB}. This includes 
 idomatic no-ops and zero idioms, which have no reliance on register values, 
 for example the instruction \textit{xchg \%rax \%rax} and \textit{xor \%rax, \%rax}. 
 However, if an instruction is a potential data hazard, it must use an entry in the PRF
 until it reaches the correct stage in the execution pipeline. In this case, the number 
-of instructions is limited by the PRF entries available.
+of instructions could be limited by the PRF entries available.
 
-Most notably instructions making use of the extended x86 registers are still
-valid within speculative context. Specifically Intel's hardware accelerated AES-NI
-encryption and decryption instructions, which make use of the 128 bit registers.
+%TODO: is this true? Or better explained by the micro-op story?
+
+Most notably instructions that use the extended x86 registers are still
+valid within the speculative context. Specifically, Intel's hardware accelerated AES-NI
+encryption and decryption instructions, which each use 128-bit registers.
 As shown in Figure~\ref{fig:spec-capacity}, speculative environments can complete
 a significant number of AES rounds -- more than enough to decrypt a full block 
 using AES-CBC. We investigate the use of AES instructions in the spculative environment
@@ -136,10 +178,10 @@ further in Sections~\ref{subsec:decryption}.
 
 \medskip
 
-When executing speculatively, the number of instrutions completed 
-will almost never be limited by cache miss duration. Instead
-ROB size and processor mechanisms for resolving 
-data dependencies define an upper boundary. 
+We find that when executing speculatively, the number of instrutions completed
+is rarely limited by cache miss duration. Instead
+ROB size and processor mechanisms for resolving
+data dependencies define an upper boundary.
 
 % TODO: 
 % - Highlist instruction signal variablity (add v mul v aesdec v nop)?
@@ -148,17 +190,12 @@ data dependencies define an upper boundary.
 % - ARM?
 
 
-\begin{figure}[h]
-    \centering
-        \includegraphics[width=0.5\textwidth]{figures/cache_miss_dist}
-    \caption{}
-    \label{fig:cache-miss}
-\end{figure}
+\FigCacheMiss
 
 \subsection{Speculative Primitive}
 
 We summarize our findings into a \emph{speculative primitive}, which allows us to
-speculatively (and covertly) perform approximately TK:150 arbitrary
+speculatively (and covertly) perform on the order of 100 arbitrary
 instructions, and communicate a short (e.g. single byte) result to the real
 world via a cache side channel. These speculative instructions are able to read
 from any real-world memory or registers, but they cannot perform updates or
@@ -167,7 +204,7 @@ to the real world through a cache side channel.
 
 We note a performance tradeoff between the size of communication (e.g. 4 bits vs 8
 bits) and the time it takes the real world to recover the result from the side
-channel. Using Prime+Probe~\cite{prime-probe} as our cache side channel,
+channel. Using Flush+Reload~\cite{flush-reload} as our cache side channel,
 recovering the result requires accessing all elements in an array exponential in
 the size of the result (e.g. $2^8$ array reads to recover an 8-bit result). 
 Therefore, there is a
