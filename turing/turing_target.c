@@ -5,6 +5,7 @@ extern uint8_t *probe_buf;
 extern uint64_t cur_probe_space;
 extern uint64_t signal_idx;
 extern uint8_t rand_xor;
+extern uint8_t lookup[2][4];
 
 extern uint8_t *turing_tape;
 extern uint8_t turing_state;
@@ -47,22 +48,24 @@ void target_fn(void)
     //      1   1LC 1RB 0LE 1LD 0LA
     //
     uint8_t symbol = *turing_tape;
-    if (turing_state == 0) {    // A
-        if (symbol == 0) update_state(1, R, 1);
-        else             update_state(1, L, 2);
-    } else if (turing_state == 1) { // B
-        if (symbol == 0) update_state(1, R, 2);
-        else             update_state(1, R, 1);
-    } else if (turing_state == 2) { // C
-        if (symbol == 0) update_state(1, R, 3);
-        else             update_state(0, L, 4);
-    } else if (turing_state == 3) { // D
-        if (symbol == 0) update_state(1, L, 0);
-        else             update_state(1, L, 3);
-    } else if (turing_state == 4) { // E
-        if (symbol == 0) update_state(1, R, 5);
-        else             update_state(0, L, 0);
-    }
+    // if (turing_state == 0) {    // A
+    //     if (symbol == 0) update_state(1, R, 1);
+    //     else             update_state(1, L, 2);
+    // } else if (turing_state == 1) { // B
+    //     if (symbol == 0) update_state(1, R, 2);
+    //     else             update_state(1, R, 1);
+    // } else if (turing_state == 2) { // C
+    //     if (symbol == 0) update_state(1, R, 3);
+    //     else             update_state(0, L, 4);
+    // } else if (turing_state == 3) { // D
+    //     if (symbol == 0) update_state(1, L, 0);
+    //     else             update_state(1, L, 3);
+    // } else if (turing_state == 4) { // E
+    //     if (symbol == 0) update_state(1, R, 5);
+    //     else             update_state(0, L, 0);
+    // }
+    // do 4 state- 2 symbol lookup
+    signal(lookup[symbol][turing_state]);
 }
 
 void end_target_fn(void) __attribute__((section(".targetfn")));
