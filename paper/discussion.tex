@@ -1,9 +1,87 @@
 
 \section{Discussion}
 
-
 \subsection{Defenses}
+We now address possible defenses to this new class of malware introduced by
+\speculake. Though we caution that these defenses often have drawbacks. The core
+component of \speculake is taking advantage of speculative execution inherent in
+CPUs today, thus these defenses focus on limiting this behavior.
 
+\subsubsection{SpecFence}
+The \texttt{mfence} instruction requires that instructions earlier in the code
+be retired before instructions after it. This ensures that memory is loaded and
+stored in a particular order (in the real world). However, the \texttt{mfence}
+instruction can be speculated past, meaning that caches can be affected
+out-of-order even with this instruction.
+
+One possible defense against \speculake is the introduction of a new
+instruction: \texttt{specfence} which designates to the CPU a point that cannot 
+be speculated past. This would require that loads/stores after the 
+\texttt{specfence} instruction would be on hold until loads/stores from before
+the \texttt{specfence} instruction have retired. Note the subtle difference from
+\texttt{mfence}, we not only require that the loads/stores before a
+\texttt{specfence} retire ahead of the loads/stores after the 
+\texttt{specfence}, but more strongly: the loads/stores after a 
+\texttt{specfence} do not begin to execute at all until the loads/stores before
+the \texttt{specfence} retire.
+
+This would possibly require a set of new API instructions in most basic
+libraries allowing for functions that ensure no speculation (for security, no
+data is leaked, no mystery instructions are run) and a separate set of functions
+(as exist now) which allow speculation to occur (for performance, no sensitive
+data is at risk).
+
+We note that this instruction seems to already exist, albeit unintentionally.
+The \texttt{rep} instruction repeats the execution of string instructions a set
+number of times (set in a register). When set to repeat 90 or more times, these
+instructions are not speculated past, requiring they complete and be retired
+before looking to the next instruction. This appears to be due to the 
+\texttt{rep} instruction adding additional $\mu$ ops per instruction, we found
+that using the \texttt{rep} instruction caused $2n$ $\mu$ ops when the string
+operation works on $n$ bytes. Thus enough repetitions would cause instructions
+after the \texttt{rep} instruction to wait for the full repetition to be retired
+before beginning their execution.
+
+While this either new or repurposed instruction may provide some defense
+against \speculake there are clear drawbacks: 
+\begin{enumerate}
+    \item Code using this instruction will be slower to execute by design. The
+    purpose of this instruction is to deliberately slow the CPU and force it to
+    wait. This will lead to a direct trade-off of speed vs. security.
+
+    \item This will require a new set of APIs for basic library functions that
+    load and store data. It would be detrimental to require all loads and stores
+    never be speculated past, meaning there must be an option for choosing when
+    certain loads and stores are not to be speculated past. This comes with all
+    the usual drawbacks of modified APIs, un-updated systems, software engineers
+    unaware of the new API, or of the significance, or when speculation is
+    appropriate and when it is dangerous.
+\end{enumerate}
+
+\subsubsection{Malware Detection}
+The world of computer security is often referred to as an arms race, hackers and
+criminals racing to create and use exploits before security researchers and
+software engineers can create defenses. As such we expect to see the same type
+of race with this new class of malware. 
+
+A necessary portion of this class of malware is utilizing a cache side-channel,
+determining how long certain values require to load from memory or cache. Thus
+one method of defense against \speculake is to adapt malware detectors to
+examine if a program checks for the timing of loading values from memory. 
+
+Initially this appears to be a very effective method of recognizing this attack.
+However, the notion of timing memory loads can be done in obscure ways which can
+be made to appear innocuous. As opposed to directly measuring the timing of
+memory loads, the timing can be more indirect: measuring how long a specific
+loop takes that happens to do a memory load. Or more directly, avoiding
+measuring time altogether: create a race-condition which only the
+already-in-cache value will easily win.
+
+While the notion of simply adapting current defenses to recognize this new
+strain of malware may be simplest, we caution that the methods introduced by
+\speculake are very general and can be accomplished in numerous ways and simply
+attempting to recognize one method will undoubtedly be circumvented by future
+generations of this malware.
 
 \subsection{Future Work}
 \label{subsec:future-work}
