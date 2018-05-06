@@ -85,16 +85,7 @@ a traversal of an array od size 64. When using a redundancy of 256 to establish
 confidence in the signal the entire \textit{ReverseShell} program takes under 7 
 seconds to run once triggered. 
 
-\begin{figure}[b]
-    \centering
-        \includegraphics[width=0.5\textwidth]{figures/spasm_model}
-    \caption{This model describes the VM control flow. An encrypted SPASM binary 
-        stored in dead code or data accessible to \textit{Speculative Computation} 
-        is decrypted  and then returned through the primitive. The SPASM 
-        \textit{Resultant Computation} performs the SPASM emulation to update the 
-        process state before the next instruction is decrypted.}
-    \label{fig:spasm_model}
-\end{figure}
+\FigSpasmModel
 
 \subsubsection{ARM}
 \label{subsubsec:arm}
