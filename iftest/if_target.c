@@ -11,9 +11,6 @@ extern uint8_t lookup[2][4];
 extern uint8_t lookup[2][5];
 #endif
 
-extern uint8_t *turing_tape;
-extern uint8_t turing_state;
-
 // This will be an int 0-255 typically...
 void signal(uint64_t state)
 {

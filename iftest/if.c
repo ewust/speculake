@@ -49,6 +49,8 @@ unsigned int junk=0;    // For rdtscp
 // #define STATE4
 
 uint8_t rand_xor;
+uint8_t randt;
+uint8_t *rand2 = &randt;
 void init_rand() {
     srand(time(0));
     rand_xor = (uint8_t) rand() & 0xff;
