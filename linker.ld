@@ -66,9 +66,12 @@ SECTIONS
     *.funcfoo.*
     /*__test_end__ = .;*/
   }
-  .indirect 0x420000: { *indirect.* }
-  .targetfn 0x430000: { *targetfn.* }
+  .indirect  0x420000: { *indirect.* }
+  .targetfn  0x470000: { *targetfn.* }
+  .targetfn2 0x430000: { *targetfn2.* }
   .fnptr    0x440000: { KEEP(*(.fnptr)) }
+  .fnptr2   0x450000: { KEEP(*(.fnptr2)) }
+  .jmpptr2  0x460000: { KEEP(*(.jmpptr2)) }
 
   .probe_buf 0x480000: { KEEP(*(.probe_buf)) }
   .cur_probe_space 0x480010: { KEEP(*(.cur_probe_space)) }

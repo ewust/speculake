@@ -5,6 +5,16 @@ fn_ptr:
 	.global fn_ptr
 	.space 8
 
+.section .fnptr2, "aw"
+fn_ptr2:
+    .global fn_ptr2
+    .space 8
+
+.section .jmpptr2, "aw"
+jmp_ptr2:
+    .global jmp_ptr2
+    .space 8
+
 .section .indirect, "ax"
   .global indirect
   .type indirect, @function
@@ -258,6 +268,7 @@ call_get_rip:
 
         //nop
 		// */
+
 
     // Do indirect jump
 	movabs (fn_ptr),%rax

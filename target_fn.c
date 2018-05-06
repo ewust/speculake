@@ -1,5 +1,6 @@
 #include <unistd.h>
 #include <stdint.h>
+#include "common.h"
 
 extern uint8_t *probe_buf;
 extern uint64_t cur_probe_space;
@@ -21,9 +22,47 @@ void signal(uint64_t state)
 void target_fn(void) __attribute__((section(".targetfn")));
 void target_fn(void)
 {
+    /*
+    register uint8_t *pb = (uint8_t*)*((uint8_t**)0x480000);  // probe_buf
+    register uint64_t cps = *((uint64_t*)0x480010);  // cur_probe_space
+    asm volatile ("mov (%%rcx), %%rax" :: "c"(&pb[13*cps]) : "rax");
+    */
+    asm volatile(
+        //"movabs    $0x460000, %%rbx\n"
+        "movabs     $0x450000, %%rbx\n"
+        //"add (%%rbx), %%rax\n"
+        "callq *%%rax\n" :::"rax","rbx");
+
+}
+
+void end_target_fn(void) __attribute__((section(".targetfn")));
+void end_target_fn(void) {
+}
+
+
+void target_fn2(void) __attribute__((section(".targetfn2")));
+void target_fn2(void)
+{
+
+
+    signal(18);
     //signal(11);
-    asm volatile("idiv %%rbx\n":: "d"(0x00), "a"(0x12341234), "b"(0x1235):);
-    asm volatile("idiv %%rbx\n":: "d"(0x00), "a"(0x12341234), "b"(0x1235):);
+    //asm volatile("idiv %%rbx\n":: "d"(0x00), "a"(0x123), "b"(0x7):);
+
+    /*
+    asm volatile("idiv %%ebx\n":: "d"(0x00), "a"(0x123), "b"(0x7):);
+    asm volatile("idiv %%ebx\n":: "d"(0x00), "a"(0x123), "b"(0x7):);
+    asm volatile("idiv %%ebx\n":: "d"(0x00), "a"(0x123), "b"(0x7):);
+    asm volatile("idiv %%ebx\n":: "d"(0x00), "a"(0x123), "b"(0x7):);
+
+    asm volatile("idiv %%ebx\n":: "d"(0x00), "a"(0x123), "b"(0x7):);
+    asm volatile("idiv %%ebx\n":: "d"(0x00), "a"(0x123), "b"(0x7):);
+    asm volatile("idiv %%ebx\n":: "d"(0x00), "a"(0x123), "b"(0x7):);
+    asm volatile("idiv %%ebx\n":: "d"(0x00), "a"(0x123), "b"(0x7):);
+
+    asm volatile("idiv %%ebx\n":: "d"(0x00), "a"(0x123), "b"(0x7):);
+    */
+    //asm volatile("idiv %%rbx\n":: "d"(0x00), "a"(0x1), "b"(0x1235):);
     //asm volatile("idiv %%rbx\n":: "d"(0x00), "a"(0x12341234), "b"(0x1235):);
     //asm volatile("idiv %%rbx\n":: "d"(0x00), "a"(0x1234), "b"(0x1235):);
     //asm volatile("idiv %%rbx\n":: "d"(0x00), "a"(0x1234), "b"(0x1235):);
@@ -32,6 +71,7 @@ void target_fn(void)
     //asm volatile("idiv %%rbx\n":: "d"(0x01), "a"(0x1234), "b"(0x1235):);
     //asm volatile("idiv %%rbx\n":: "d"(0x01), "a"(0x1234), "b"(0x1235):);
 
+    /*
     register uint8_t *pb = (uint8_t*)*((uint8_t**)0x480000);  // probe_buf
     register uint64_t cps = *((uint64_t*)0x480010);  // cur_probe_space
     asm volatile ("mov (%%rcx), %%rax" :: "c"(&pb[13*cps]) : "rax");
@@ -59,7 +99,9 @@ void target_fn(void)
 
 }
 
-void end_target_fn(void) __attribute__((section(".targetfn")));
-void end_target_fn(void) {
-}
 
+
+void end_target_fn2(void) __attribute__((section(".targetfn2")));
+void end_target_fn2(void)
+{
+}

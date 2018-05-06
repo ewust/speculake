@@ -1,6 +1,6 @@
 display/i $pc
 set $i=0
-break main
+break do_pattern
 run
 while ($i<100000)
 si

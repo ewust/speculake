@@ -59,6 +59,7 @@ void *map;
 // where we collect results and see what's in cache
 void target_fn(void) __attribute__((section(".targetfn")));
 void end_target_fn(void);
+void end_target_fn2(void);
 
 uint64_t results[NUM_PROBES];
 
@@ -89,14 +90,23 @@ void check_probes() {
     }
 }
 
+
 uint64_t jmp_ptr;
 
+void nop ()
+{
 
+}
+
+extern void target_fn2(void);
+extern void target_fn(void);
 
 void measure() {
     fn_ptr = check_probes;
+    fn_ptr2 = nop;
     //jmp_ptr = 0x400e60;
     jmp_ptr = 0;
+    jmp_ptr2 = 0;
     int i;
 
     int misses = 0;
@@ -105,7 +115,9 @@ void measure() {
     while (1) {
         for (i=0; i<2000; i++) {
             _mm_clflush(&fn_ptr);
+            _mm_clflush(&fn_ptr2);
             //_mm_clflush(&jmp_ptr);
+            //_mm_clflush(&jmp_ptr2);
             indirect(&jmp_ptr);
             //((void(*)(void *))map)(&jmp_ptr);
             usleep(1);
@@ -121,7 +133,7 @@ void measure() {
             }
         }
 
-        if (max_res > 10 && avg < 50){
+        if (max_res > 10 && avg < 55){
             printf("[%02lx]: %04lu / %lu = %0.5f%% hits, %lu avg cycles, ps %ld, #%03d, %d misses\n",
                      max_i, max_res, tot_runs, 100*((float)max_res)/tot_runs, avg, cur_probe_space, signal_idx, misses);
             avgpct += ((float)max_res)/tot_runs;
@@ -170,9 +182,20 @@ int main()
         _mm_clflush(&probe_buf[i*cur_probe_space]);
     }
 
-    map = mmap((void*)TARGET_FN_ADDR, 0x1000, PROT_READ|PROT_WRITE|PROT_EXEC, MAP_PRIVATE|MAP_ANONYMOUS|MAP_FIXED, -1, 0);
-    memcpy(map, indirect, ((uint64_t)end_indirect)-((uint64_t)indirect));
-    memcpy(map+600, target_fn, end_target_fn-target_fn);
+    //map = mmap((void*)TARGET_FN_ADDR, 0x1000, PROT_READ|PROT_WRITE|PROT_EXEC, MAP_PRIVATE|MAP_ANONYMOUS|MAP_FIXED, -1, 0);
+    //memcpy(map, indirect, ((uint64_t)end_indirect)-((uint64_t)indirect));
+    //memcpy(map+600, target_fn, end_target_fn-target_fn);
+
+    // Load speculative entry points into cache
+    volatile uint8_t *p = (void*)target_fn;
+    while (p < (uint8_t*)end_target_fn) {
+        *p++;
+    }
+
+    p = (void*)target_fn2;
+    while (p < (uint8_t*)end_target_fn2) {
+        *p++;
+    }
 
     fn_ptr = check_probes;
     measure();
