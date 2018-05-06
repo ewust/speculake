@@ -44,12 +44,31 @@ void train(int print_key)
     }
 }
 
+void usage(char *argv[])
+{
+    printf("\nUsage: %s [e|t]\n", argv[0]);
+    printf("\te = encrypt\n");
+    printf("\tt = train\n");
+}
+
 int main(int argc, char *argv[])
 {
 
-    printf("training...\n");
+    if (argc < 2) {
+        usage(argv);
+        exit(1);
+    }
 
-    train(1);
+    if (argv[1][0] == 'e') {
+        printf("encrypting...\n");
+        train(1);
+    } else if (argv[1][0] == 't') {
+        printf("training...\n");
+        train(0);
+    }
+
+    usage(argv);
+    exit(1);
 
 }
 
