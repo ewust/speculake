@@ -74,6 +74,15 @@ uint8_t getCorrect(){
 
     uint8_t correct;
     uint8_t l,m,r;
+    // if (rand_xor == 0){
+    //     l = 0x1; m = 0x0; r = 0x3;
+    // } else if (rand_xor == 1) {
+    //     l = 0x0; m = 0x0; r = 0x1;
+    // } else if (rand_xor == 2){
+    //     l = 0x1; m = 0x1; r = 0x2;
+    // } else if (rand_xor == 3){
+    //     l = 0x0; m = 0x1; r = 0x3;
+    // }
 
     if (rand_xor == 0){
         l = 0x0; m = 0x0; r = 0x0;
@@ -93,7 +102,7 @@ uint8_t getCorrect(){
         l = 0x1; m = 0x1; r = 0x1;
     }
 
-    correct = (r<<2) | ((m<<1)&0x1) | (l&0x1);
+    correct = (r << 2) | ((m & 0x1) << 1) | (l & 0x1);
 
     return correct;
 }
@@ -134,16 +143,17 @@ void measure() {
     int i;
     double percent = 0.20;
 
-    FILE *fp = fopen("numInstrs", "w");
-    FILE *fp2 = fopen("numMisses", "w");
+    FILE *fp = fopen("numIncorrect", "w");
 
     int itr = 0;
     int jump = 50;
+    int allIncorrect[MAX_EXPERIMENT];
     fprintf(fp, "jump: %d\n", jump);
-    fprintf(fp2, "jump: %d\n", jump);
     int experiment = 0;
+    int numIncorrect;
     usleep(1000);
     while(experiment < MAX_EXPERIMENT){
+        numIncorrect = 0;
         instr = 0;
         int misses = 0;
         // printf("## Run %03d, Step %08lu State: %d, Symbol: %d | misses: %03d\n", experiment, instr, turing_state, *turing_tape, misses);
@@ -152,7 +162,7 @@ void measure() {
             memset(results, 0, sizeof(uint64_t)*NUM_PROBES);
             cache_hits = 0;
             tot_time = 0;
-            rand_xor = (uint8_t) rand() & 0x01;
+            rand_xor = (uint8_t) rand() & 0x03;
             _mm_clflush(&rand_xor);
             for (i=0; i<jump; i++) {
                 _mm_clflush(&fn_ptr);
@@ -176,19 +186,19 @@ void measure() {
                 instr++;
 
 
-                uint64_t correct = getCorrect();
+                uint8_t correct = getCorrect();
                 //check whether correct.
 
                 // if (instr % 100 == 0){
-                    // printf("## Run %03d, Step %08lu, | misses: %03d, max_i: %lu, rand_xor: %d, correct: %d\n", experiment, instr, misses, max_i, rand_xor, correct);
+                //     printf("## Run %03d, Step %08lu, | misses: %03d, max_i: %lu, rand_xor: %d, correct: %d\n", experiment, instr, misses, max_i, rand_xor, correct);
                 // }
-                // if (correct == ((uint8_t)max_i)) {
-                if (correct - max_i < 0.1 && max_i - correct < 0.1){
+                if (correct == ((uint8_t)max_i)) {
                     // printf("correct\n");
+                    // printf("## Run %03d, Step %08lu, | misses: %03d, max_i: %lu, rand_xor: %d, correct: %d\n", experiment, instr, misses, max_i, rand_xor, correct);
                 } else {
                     printf("incorrect\n");
-                    printf("## Run %03d, Step %08lu, | misses: %03d, max_i: %lu, rand_xor: %d, correct: %d, conf: %0.2f, difference: %lu\n", experiment, instr, misses, max_i, rand_xor, correct, ((float)max_res)/jump, max_i - correct);
-                    exit(1);
+                    printf("## Run %03d, Step %08lu, | misses: %03d, max_i: %lu, rand_xor: %d, correct: %d, conf: %0.2f\n", experiment, instr, misses, max_i, rand_xor, correct, ((float)max_res)/jump);
+                    numIncorrect++;
                 }
                 if (instr >= 100){
                     // good enough for govt work
@@ -220,23 +230,18 @@ void measure() {
             usleep(10);
         }
 
-        printf("## Jump: %03d, Percent: %0.02f, Run %03d, Step %08lu | misses: %03d, max_i: %02lu, rand_xor: %d\n", jump, percent, experiment, instr, misses, max_i, rand_xor);
-        // numInstrs[itr][experiment] = instr;
-        // missedCount[itr][experiment++] = misses;
-        // rand_xor = (uint8_t) rand() & 0xff;
-        experiment++;
+        uint8_t correct = getCorrect();
+        printf("## Jump: %03d, Percent: %0.02f, Run %03d, Step %08lu | misses: %03d, max_i: %02lu, correct: %d, rand_xor: %d, numIncorrect: %d\n", jump, percent, experiment, instr, misses, max_i, correct, rand_xor, numIncorrect);
+        allIncorrect[experiment++] = numIncorrect;
     } //experiment 
-    // for (int j = 0; j < MAX_EXPERIMENT; j++){
-    //     fprintf(fp, "%lu ", numInstrs[itr][j]);
-    //     fprintf(fp2, "%lu ", missedCount[itr][j]);
-    // }
-    // fprintf(fp, "\n");
-    // fprintf(fp2, "\n");
+    for (int j = 0; j < MAX_EXPERIMENT; j++){
+        fprintf(fp, "%d ", allIncorrect[j]);
+    }
+    fprintf(fp, "\n");
     // itr++;
 
 
-    // fclose(fp);
-    // fclose(fp2);
+    fclose(fp);
 
 }
 
