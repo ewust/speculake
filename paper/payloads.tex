@@ -24,7 +24,8 @@ This method makes it appear as though the program is generating its own code.
 \subsection{Turing Machine}
 \label{subsec:turing}
 To demonstrate that arbitrary computation can be done in the speculative world
-we implement a Turing machine, configured to run the 5-state Busy Beaver function~\cite{busy-beaver}.
+we implement a Turing machine, configured to run the 5-state Busy Beaver 
+function~\cite{chaitin1987computing,herken1992universal}.
 The Busy Beaver is a configuration that writes the most
 1s on the tape with only a limited number of states and still halts.
 
@@ -65,7 +66,7 @@ We note that 200 instructions is too short for most software-implemented
 cryptography. However, modern Intel CPUs provide hardware support for AES, which
 we find only takes a handful of $\mu$-ops to perform the instructions needed in
 AES decryption. We discuss details of our speculative AES decryption in
-Section~\ref{sec:impl-aes}.
+Section~\ref{subsec:impl-aes}.
 
 \medskip
 
@@ -96,7 +97,7 @@ will predict the payload program will also perform the next 10 jumps. If each
 jump has the potential to land in up to 1024 possible locations, this would
 provide in total $1024^{10} = 2^{100}$ possible keys, or 100~bits of security.
 We describe our implementation of this nested speculative execution concept in
-Section~\ref{sec:impl-aes}.
+Section~\ref{subsec:nested-spec}.
 
 
 %There are numerous challenges for a reverse engineer to overcome to learn how a
@@ -121,11 +122,10 @@ Section~\ref{sec:impl-aes}.
 %   - Find the correct trigger program
 
 \subsection{Virtual Machines}
-Given the specific constraints that the speculative environment enforces on
-these payloads, general purpose computation []. We demonstrated in
-Section~\ref{subsec:turing} that general purpose computation is possible using
-computation performed in the speculative environment. However, a turing machine
-is not a user friendly model, nor is it an efficient model for computation when
+We demonstrated in Section~\ref{subsec:turing} that general purpose computation 
+is possible in the speculative environment in spite of the contraints 
+imposed by the speculative world. However, a turing machine
+is not an efficient or usable model for computation when
 attempting to accomplish tasks on modern processors. 
 
 Using emulators in the "real world" allows for crafted binary programs to be

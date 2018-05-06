@@ -12,6 +12,7 @@
 % against reference python implementation?
 
 \subsection{AES Decryption}
+\label{subsec:impl-aes}
 The speculative world is able to take advantage of the AES-NI instructions to
 decrypt messages. In order to avoid detection (as well as reduce the computation
 that needs to be done in the speculative world) the key expansion can be done
@@ -28,7 +29,7 @@ We have implemented the AES decryption as a fundamental piece of the \speculake 
 and we demonstrate that the speed at which information can be decrypted using the speculative 
 primitive is dependent on the configuration of the \speculake model. Specifical,
 the channel width and the required minimum signal strength determine the maximum
-throughput that can be acheived. As demonstrated in Figure~\ref{fig:spec_bangwidth} 
+throughput that can be acheived. As demonstrated in Figure~\ref{fig:spec_bandwidth} 
 between 6 and 8 bits channel width provides an idea of the maximum speed at which the 
 speculative primitive can be used with AES-NI instructions in the payload. 
 
@@ -113,6 +114,7 @@ results in a 16x slowdown when considering per-instruction throughput.
 \end{lstlisting}
 
 \subsection{OpenSSL Trigger}
+\label{subsec:openssl}
 
 % extract jump patterns
 % sufficiency checks 
@@ -121,5 +123,9 @@ results in a 16x slowdown when considering per-instruction throughput.
 %   - future work developing tools to determine sufficiency and strength
 %
 % OPENSSL TRIGGERING REVERSE SHELL SPASM PAYLOAD
+
+
+\subsection{Nested Speculation}
+\label{subsec:nested-spec}
 
 %%%%%%%%%%%%%%
