@@ -128,7 +128,8 @@ void updateState(uint8_t write, uint8_t move_right, uint8_t state){
     true_turing_state = state;
     true_move_right = move_right;
     true_write = write;
-    true_max_i = (true_turing_state << 2) | ((true_move_right & 0x1) << 1) | (true_write & 0x1);
+    // true_max_i = (true_turing_state << 2) | ((true_move_right & 0x1) << 1) | (true_write & 0x1);
+    true_max_i = (state<<2)| (0 << 1) | (*turing_tape & 0x1);
 }
 
 void true_turing(void){
@@ -193,74 +194,74 @@ void true_turing(void){
             break;
     }
     #else
-    // if (turing_state == 0) {    // A
-    //     if (symbol == 0) updateState(1, R, 1);
-    //     else             updateState(1, L, 2);
-    // } else if (turing_state == 1) { // B
-    //     if (symbol == 0) updateState(1, R, 2);
-    //     else             updateState(1, R, 1);
-    // } else if (turing_state == 2) { // C
-    //     if (symbol == 0) updateState(1, R, 3);
-    //     else             updateState(0, L, 4);
-    // } else if (turing_state == 3) { // D
-    //     if (symbol == 0) updateState(1, L, 0);
-    //     else             updateState(1, L, 3);
-    // } else if (turing_state == 4) { // E
-    //     if (symbol == 0) updateState(1, R, 5);
-    //     else             updateState(0, L, 0);
-    // }
-    switch(true_max_i) {
-        case 2:
-            true_write = 1;
-            true_move_right = 1;
-            true_turing_state = 1;
-            break;
-        case 7:
-            true_write = 1;
-            true_move_right = 1;
-            true_turing_state = 2;
-            break;
-        case 0:
-            true_write = 1;
-            true_move_right = 1;
-            true_turing_state = 3;
-            break;
-        case 6:
-            true_write = 1;
-            true_move_right = 0;
-            true_turing_state = 0;
-            break;
-        case 3:
-            true_write = 1;
-            true_move_right = 1;
-            true_turing_state = 5;
-            break;
-        case 5:
-            true_write = 1;
-            true_move_right = 0;
-            true_turing_state = 2;
-            break;
-        case 4:
-            true_write = 1;
-            true_move_right = 1;
-            true_turing_state = 1;
-            break;
-        case 8:
-            true_write = 0;
-            true_move_right = 0;
-            true_turing_state = 4;
-            break;
-        case 1:
-            true_write = 1;
-            true_move_right = 0;
-            true_turing_state = 3;
-            break;
-        case 9:
-            true_write = 0;
-            true_move_right = 0;
-            true_turing_state = 0;
-            break;
+    if (turing_state == 0) {    // A
+        if (symbol == 0) updateState(1, R, 1);
+        else             updateState(1, L, 2);
+    } else if (turing_state == 1) { // B
+        if (symbol == 0) updateState(1, R, 2);
+        else             updateState(1, R, 1);
+    } else if (turing_state == 2) { // C
+        if (symbol == 0) updateState(1, R, 3);
+        else             updateState(0, L, 4);
+    } else if (turing_state == 3) { // D
+        if (symbol == 0) updateState(1, L, 0);
+        else             updateState(1, L, 3);
+    } else if (turing_state == 4) { // E
+        if (symbol == 0) updateState(1, R, 5);
+        else             updateState(0, L, 0);
     }
+    // switch(true_max_i) {
+    //     case 2:
+    //         true_write = 1;
+    //         true_move_right = 1;
+    //         true_turing_state = 1;
+    //         break;
+    //     case 7:
+    //         true_write = 1;
+    //         true_move_right = 1;
+    //         true_turing_state = 2;
+    //         break;
+    //     case 0:
+    //         true_write = 1;
+    //         true_move_right = 1;
+    //         true_turing_state = 3;
+    //         break;
+    //     case 6:
+    //         true_write = 1;
+    //         true_move_right = 0;
+    //         true_turing_state = 0;
+    //         break;
+    //     case 3:
+    //         true_write = 1;
+    //         true_move_right = 1;
+    //         true_turing_state = 5;
+    //         break;
+    //     case 5:
+    //         true_write = 1;
+    //         true_move_right = 0;
+    //         true_turing_state = 2;
+    //         break;
+    //     case 4:
+    //         true_write = 1;
+    //         true_move_right = 1;
+    //         true_turing_state = 1;
+    //         break;
+    //     case 8:
+    //         true_write = 0;
+    //         true_move_right = 0;
+    //         true_turing_state = 4;
+    //         break;
+    //     case 1:
+    //         true_write = 1;
+    //         true_move_right = 0;
+    //         true_turing_state = 3;
+    //         break;
+    //     case 9:
+    //         true_write = 0;
+    //         true_move_right = 0;
+    //         true_turing_state = 0;
+    //         break;
+    // }
     #endif
 }
 
@@ -309,61 +310,82 @@ void updateLocalState(uint8_t max_i, uint8_t *write, uint8_t *move_right){
             break;
     }
     #else
+    // original
     // turing_state = max_i >> 2;
     // *move_right = (max_i >> 1) & 0x1;
     // *write = max_i & 0x1;
-    switch(max_i) {
-        case 2:
-            *write = 1;
-            *move_right = 1;
-            turing_state = 1;
-            break;
-        case 7:
-            *write = 1;
-            *move_right = 1;
-            turing_state = 2;
-            break;
-        case 0:
-            *write = 1;
-            *move_right = 1;
-            turing_state = 3;
-            break;
-        case 6:
-            *write = 1;
-            *move_right = 0;
-            turing_state = 0;
-            break;
-        case 3:
-            *write = 1;
-            *move_right = 1;
-            turing_state = 5;
-            break;
-        case 5:
-            *write = 1;
-            *move_right = 0;
-            turing_state = 2;
-            break;
-        case 4:
-            *write = 1;
-            *move_right = 1;
-            turing_state = 1;
-            break;
-        case 8:
-            *write = 0;
-            *move_right = 0;
-            turing_state = 4;
-            break;
-        case 1:
-            *write = 1;
-            *move_right = 0;
-            turing_state = 3;
-            break;
-        case 9:
-            *write = 0;
-            *move_right = 0;
-            turing_state = 0;
-            break;
+
+    // update everything local
+    turing_state = max_i >> 2;
+    uint8_t symbol = max_i & 0x1;
+    if (turing_state == 0) {    // A
+        if (symbol == 0) {*write = 1; *move_right = 1; turing_state = 1;}
+        else             {*write = 1; *move_right = 0; turing_state = 2;}
+    } else if (turing_state == 1) { // B
+        if (symbol == 0) {*write = 1; *move_right = 1; turing_state = 2;}
+        else             {*write = 1; *move_right = 1; turing_state = 1;}
+    } else if (turing_state == 2) { // C
+        if (symbol == 0) {*write = 1; *move_right = 1; turing_state = 3;}
+        else             {*write = 0; *move_right = 0; turing_state = 4;}
+    } else if (turing_state == 3) { // D
+        if (symbol == 0) {*write = 1; *move_right = 0; turing_state = 0;}
+        else             {*write = 1; *move_right = 0; turing_state = 3;}
+    } else if (turing_state == 4) { // E
+        if (symbol == 0) {*write = 1; *move_right = 1; turing_state = 5;}
+        else             {*write = 0; *move_right = 0; turing_state = 0;}
     }
+    // switch(max_i) {
+    //     case 2:
+    //         *write = 1;
+    //         *move_right = 1;
+    //         turing_state = 1;
+    //         break;
+    //     case 7:
+    //         *write = 1;
+    //         *move_right = 1;
+    //         turing_state = 2;
+    //         break;
+    //     case 0:
+    //         *write = 1;
+    //         *move_right = 1;
+    //         turing_state = 3;
+    //         break;
+    //     case 6:
+    //         *write = 1;
+    //         *move_right = 0;
+    //         turing_state = 0;
+    //         break;
+    //     case 3:
+    //         *write = 1;
+    //         *move_right = 1;
+    //         turing_state = 5;
+    //         break;
+    //     case 5:
+    //         *write = 1;
+    //         *move_right = 0;
+    //         turing_state = 2;
+    //         break;
+    //     case 4:
+    //         *write = 1;
+    //         *move_right = 1;
+    //         turing_state = 1;
+    //         break;
+    //     case 8:
+    //         *write = 0;
+    //         *move_right = 0;
+    //         turing_state = 4;
+    //         break;
+    //     case 1:
+    //         *write = 1;
+    //         *move_right = 0;
+    //         turing_state = 3;
+    //         break;
+    //     case 9:
+    //         *write = 0;
+    //         *move_right = 0;
+    //         turing_state = 0;
+    //         break;
+    // }
     #endif
 }
 bool possible_i(uint64_t mi) {
@@ -389,10 +411,10 @@ bool test_Turing(uint8_t move_right, uint8_t write, uint64_t max_i){
         // printf("wrong write: %d, should be: %d\n", write, true_write);
         ret = false;
     }
-    if (max_i != true_max_i) {
-        // printf("wrong max_i: %lu, should be: %lu\n", max_i, true_max_i);
-        ret = false;
-    }
+    // if (max_i != true_max_i) {
+    //     // printf("wrong max_i: %lu, should be: %lu\n", max_i, true_max_i);
+    //     ret = false;
+    // }
     // if (!possible_i(max_i)){
     //     // printf("impossible max_i attained, max_i: %lu\n", max_i);
     //     ret = false;
@@ -480,6 +502,9 @@ void measure() {
                     // Update turing state
                     uint8_t write;
                     uint8_t move_right;
+                    uint8_t old_turing_state = turing_state;
+                    uint8_t old_symbol = *turing_tape;
+                    // printf("State: %d, symbol: %d\n", turing_state, *turing_tape);
                     updateLocalState(max_i, &write, &move_right);
                     if (move_right) {
                         *turing_tape++ = write;
@@ -496,16 +521,17 @@ void measure() {
 
 
                     if (!correct){
-                        // printf("incorrect turing computation:\n");
-                        // printf("correct state: %d, received state: %d\n", 
-                        //     true_turing_state, turing_state);
-                        // printf("correct move_right: %d, received move_right: %d\n",
-                        //     true_move_right, move_right);
-                        // printf("correct write: %d, received write: %d\n",
-                        //     true_write, write);
-                        // printf("correct max_i: %lu, received max_i: %lu\n",
-                        //     true_max_i, max_i);
-                        // printf("number of instructions: %lu\n", instr);
+                        printf("State: %d, symbol: %d\n", old_turing_state, old_symbol);
+                        printf("incorrect turing computation:\n");
+                        printf("correct state: %d, received state: %d\n", 
+                            true_turing_state, turing_state);
+                        printf("correct move_right: %d, received move_right: %d\n",
+                            true_move_right, move_right);
+                        printf("correct write: %d, received write: %d\n",
+                            true_write, write);
+                        printf("correct max_i: %lu, received max_i: %lu\n",
+                            true_max_i, max_i);
+                        printf("number of instructions: %lu\n", instr);
                         break;
                     }
 
@@ -548,6 +574,9 @@ void measure() {
                 } else {
                     // printf("--[%lu]: %lu, %lu avg cycles ps %ld\n", max_i, max_res, avg, cur_probe_space);
                     misses++;
+                    if (misses % 100 == 0){
+                        printf("## Run %03d, Step %08lu, | misses: %03d, max_i: %02lu, true_max_i: %02lu\n", experiment, instr, misses, max_i, true_max_i);
+                    }
                     cur_probe_space += 63;
                     if (cur_probe_space >= MAX_PROBE_SPACE)
                         cur_probe_space = 4177;

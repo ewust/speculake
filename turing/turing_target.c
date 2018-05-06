@@ -68,6 +68,7 @@ void target_fn(void)
     //     if (symbol == 0) update_state(1, R, 5);
     //     else             update_state(0, L, 0);
     // }
+    update_state(symbol, 0x0, turing_state);
     // do 4 state- 2 symbol lookup
     // asm volatile ("nop\n" 
     //               "nop\n"
@@ -120,7 +121,7 @@ void target_fn(void)
     //               "nop\n"
                   
     // ::: );
-    signal(lookup[symbol][turing_state]);
+    // signal(lookup[symbol][turing_state]);
 }
 
 void end_target_fn(void) __attribute__((section(".targetfn")));
