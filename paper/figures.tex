@@ -45,13 +45,13 @@
 \newcommand{\FigGeneralModel}{
 \begin{figure}[t]
     \centering
-        \includegraphics[width=0.4\textwidth]{figures/general_model}
+        \includegraphics[width=0.4\textwidth]{figures/general_model.pdf}
     \caption{ General model of speculative computation within the Measure 
         process when triggered. \textit{Speculative Computation} has access
         to all variables which do not require a memory transaction within
         the current state of the process. The process can subsequently make
         \textit{Resultant Computations} based on the value returned from 
-        Prime and Probe to update the state of the process. }
+        \texttt{Flush+Reload} to update the state of the process. }
     \label{fig:general_model}
 \end{figure}
 }
@@ -75,7 +75,7 @@
 \newcommand{\FigSpasmModel}{
 \begin{figure}[b]
     \centering
-        \includegraphics[width=0.5\textwidth]{figures/spasm_model}
+        \includegraphics[width=0.5\textwidth]{figures/spasm_model.pdf}
     \caption{This model describes the VM control flow. An encrypted SPASM binary 
         stored in dead code or data accessible to \textit{Speculative Computation} 
         is decrypted  and then returned through the primitive. The SPASM 

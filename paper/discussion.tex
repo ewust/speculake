@@ -87,7 +87,63 @@ generations of this malware.
 \label{subsec:future-work}
 
 
+\subsubsection{Full Whitebox Cryptography}
+To make it difficult to extract the key schedule used to decrypt the ciphertext,
+we can preload a large block of random data, and have multiple speculative entry
+points, each that choose a different index into the random data to be used as
+the key schedule, and then jumps to a common decryption routine. This way, the exact
+speculative entry point determines the key used for decryption. Because the
+exact speculative entry point is determined by the trigger program, an analyst
+cannot discover the decryption key directly from the payload program.
 
+An analyst could enumerate potential entry points, and test each one
+until they find one that correctly decrypts the ciphertext. In a 1~MB binary,
+there are (at most) only about 1~million entry points, providing just 20~bits of
+security.
+
+To increase security, we could \emph{chain} entry points together. Rather than
+derive the index from the entry point, we have each potential entry point perform
+another indirect jump that the CPU cannot immediately resolve, forcing it to 
+speculate, inside the speculative world. The predicted
+target of that jump will also be determined by the trigger program. For
+instance, if the trigger program makes 30 training jumps, followed by 10
+additional jumps, the payload program will follow all 40 jumps, with the
+locations of the last 10 jumps used to determine the key index information.
+If each jump could land in up to 1024 possible locations, this would provide in
+total $1024^10 = 2^100$ possible keys, or 100~bits of security.
+
+A payload can still be crafted to use a benign program, given that it 
+implements a sufficient series of jumps. Even if a reverse engineer 
+gets to watch the program run they will only find out the plain text 
+and not the key schedule as any attempts to observe the decryption 
+process will interfere with the speculative branching. The reverse enginner 
+must either identify the exact process that was running concurently 
+which trained the branch predictor, or identify the correct series of 
+jumps taken speculatively to derive the key schedule. 
+
+We believe that the state explosion provided in both of these scenarios 
+presents new and difficult challenges for reverse engineers. 
+
+
+\subsubsection{Multiple Triggers}
+To create further difficulties for a reverse engineer, or to further target
+the execution environment in which a sample executes it is possible
+to have the payload program test a series of separate jump patterns. The decryption
+process can then be done in stages where the result of a given stage determines 
+the initial state of the next decryption stage that the payload program 
+performs. Only when all triggers have been completed in the correct order will
+the true plaintext be available. 
+
+While this would increase the difficulty for a reverse engineer who has access
+to a sample in isolation, it  does not add any extra layers of complication 
+for reverse engineers who can observe the entire decryption process. Any state 
+encoded in the real world during the individual stages will be available to current 
+debugging tools. This allows reverse engineers start the sample from the initial
+state of any stage in subsequent runs. For example, they could patch the 
+binary to begin with the state of the final stage such that only the final 
+trigger must be run again to retreive the plaintext. While this simplifies the 
+job of acquiring the plaintext of a given \speculake sample, it does not give any 
+information about the trigger programs or the key schedules used. 
 
 
 %%%%%%%%%%%%%%

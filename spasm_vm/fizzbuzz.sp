@@ -1,1 +1,0 @@
-../spasm/examples/fizzbuzz.sp
