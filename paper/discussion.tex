@@ -7,6 +7,8 @@ We now address possible defenses to this new class of malware introduced by
 component of \speculake is taking advantage of speculative execution inherent in
 CPUs today, thus these defenses focus on limiting this behavior.
 
+
+%TODO: This is a defense to Spectre, but not to Exspectre...
 \subsubsection{SpecFence}
 The \texttt{mfence} instruction requires that instructions earlier in the code
 be retired before instructions after it. This ensures that memory is loaded and
@@ -87,42 +89,42 @@ generations of this malware.
 \label{subsec:future-work}
 
 
-\subsubsection{Full Whitebox Cryptography}
-To make it difficult to extract the key schedule used to decrypt the ciphertext,
-we can preload a large block of random data, and have multiple speculative entry
-points, each that choose a different index into the random data to be used as
-the key schedule, and then jumps to a common decryption routine. This way, the exact
-speculative entry point determines the key used for decryption. Because the
-exact speculative entry point is determined by the trigger program, an analyst
-cannot discover the decryption key directly from the payload program.
-
-An analyst could enumerate potential entry points, and test each one
-until they find one that correctly decrypts the ciphertext. In a 1~MB binary,
-there are (at most) only about 1~million entry points, providing just 20~bits of
-security.
-
-To increase security, we could \emph{chain} entry points together. Rather than
-derive the index from the entry point, we have each potential entry point perform
-another indirect jump that the CPU cannot immediately resolve, forcing it to 
-speculate, inside the speculative world. The predicted
-target of that jump will also be determined by the trigger program. For
-instance, if the trigger program makes 30 training jumps, followed by 10
-additional jumps, the payload program will follow all 40 jumps, with the
-locations of the last 10 jumps used to determine the key index information.
-If each jump could land in up to 1024 possible locations, this would provide in
-total $1024^10 = 2^100$ possible keys, or 100~bits of security.
-
-A payload can still be crafted to use a benign program, given that it 
-implements a sufficient series of jumps. Even if a reverse engineer 
-gets to watch the program run they will only find out the plain text 
-and not the key schedule as any attempts to observe the decryption 
-process will interfere with the speculative branching. The reverse enginner 
-must either identify the exact process that was running concurently 
-which trained the branch predictor, or identify the correct series of 
-jumps taken speculatively to derive the key schedule. 
-
-We believe that the state explosion provided in both of these scenarios 
-presents new and difficult challenges for reverse engineers. 
+%\subsubsection{Full Whitebox Cryptography}
+%To make it difficult to extract the key schedule used to decrypt the ciphertext,
+%we can preload a large block of random data, and have multiple speculative entry
+%points, each that choose a different index into the random data to be used as
+%the key schedule, and then jumps to a common decryption routine. This way, the exact
+%speculative entry point determines the key used for decryption. Because the
+%exact speculative entry point is determined by the trigger program, an analyst
+%cannot discover the decryption key directly from the payload program.
+%
+%An analyst could enumerate potential entry points, and test each one
+%until they find one that correctly decrypts the ciphertext. In a 1~MB binary,
+%there are (at most) only about 1~million entry points, providing just 20~bits of
+%security.
+%
+%To increase security, we could \emph{chain} entry points together. Rather than
+%derive the index from the entry point, we have each potential entry point perform
+%another indirect jump that the CPU cannot immediately resolve, forcing it to 
+%speculate, inside the speculative world. The predicted
+%target of that jump will also be determined by the trigger program. For
+%instance, if the trigger program makes 30 training jumps, followed by 10
+%additional jumps, the payload program will follow all 40 jumps, with the
+%locations of the last 10 jumps used to determine the key index information.
+%If each jump could land in up to 1024 possible locations, this would provide in
+%total $1024^10 = 2^100$ possible keys, or 100~bits of security.
+%
+%A payload can still be crafted to use a benign program, given that it 
+%implements a sufficient series of jumps. Even if a reverse engineer 
+%gets to watch the program run they will only find out the plain text 
+%and not the key schedule as any attempts to observe the decryption 
+%process will interfere with the speculative branching. The reverse enginner 
+%must either identify the exact process that was running concurently 
+%which trained the branch predictor, or identify the correct series of 
+%jumps taken speculatively to derive the key schedule. 
+%
+%We believe that the state explosion provided in both of these scenarios 
+%presents new and difficult challenges for reverse engineers. 
 
 
 \subsubsection{Multiple Triggers}
