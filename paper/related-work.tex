@@ -2,22 +2,119 @@
 \section{Related Work}
 \label{sec:related-work}
 
-This work makes use of ideas spanning multiple computer science and computer
-security disciplines. 
+% This work makes use of ideas spanning multiple computer science and computer
+% security disciplines. 
 
 
-\subsection{CPU Reverse Engineering}
+\subsection{Spectre}
+
+% Lead in 
 Leading up to the discovery and release of the Spectre and Meltdown vulnerabilities
 multiple teams were working to reverse engineer the mechanisms that implemented in 
-the microcode of various processors. 
+the microcode of various processors. As early as 2013 attempts to learn about the size 
+of the re-order buffer were using cache timing side channels very similar to the 
+Spectre variants~\cite{measuring-rob}. 
 
-\subsection{Weird Machines}
+% Discovery
+Multiple teams discovered the Spectre vulnerabilites concurrently including the 
+various teams associated with Kocher \textit{et al.}~\cite{spectre}, the Project Zero team 
+at Google~\cite{project_zero},and numerous others~\cite{}. 
 
 
-\subsection{Red Pills}
+% Follow Up
+The Spectre variants have been used in many other attacks on security critical 
+including 
+
+% defenses 
+Much like cache side channel vulnerabilities speculative execution is relatively
+critical to processor performance and requires significant software, and hardware 
+updates to fully address. Multiple measures have been proposed to address the 
+individial variants of Spectre. Retpoline is Google's in house fix for enforcing 
+isolation against branch target injection attacks~\cite{retpoline}. \textbf{Someone} 
+\textit{et al.} propose that 
+
+We can certainly look forward to more vulnerabilities relating to speculative 
+branching and related hardware side channels. Our work represents an exploit 
+model for these vulnerabilities reliant upon shared hardware resources. 
+
+
+\subsection{Weird Machines \& Red-Pills}
+Hardware side effects often leave behind unexpected state transitions 
+that are not, or cannot be, accounted for in modeling environments. Malware
+has historically made use of these bugs to create "weird" models of 
+computation~\cite{weird_machines}. These state transitions can also leak 
+information about the environment in which a program is running, which 
+malware has used to avoid honey-pots and emulated environments.
+
+The term \textit{weird machine} comes from work done by Bratus \textit{et al.}
+composing bugs and features of a system to create arbitrary compuatation with 
+interesting properties~\cite{weird_machines,bratus2011exploit}. This 
+encompasses many traditional computer vulnerabilities including 
+buffer overflow~\cite{buffer_overflow}, format string exploits~\cite{format_string_exploit}, 
+and return oriented programming~\cite{shacham2007geometry} to name only a few. 
+
+Bangert~\textit{et al.} demonstrate that a turing complete weird machine 
+can be constructed using the page fault handling mechanism in Intel's
+IA32 architecture~\cite{bangert2013page}. Bugs like this are abundant in
+modern processors as multiple processes share system resources cooperatively
+and optimizations and agregation are done objectively with regards of the 
+process for the most part. Accessing copoerative hardware resources is at
+the heart of the \speculake model, which constructs a hardware weird machine
+using speculative branching and \texttt{Flush+Reload}. This is 
+very much in the spirit of traditional exploit creation~\cite{weird_exploits}.
+
+\smallskip 
+
+Similarly hardware bugs have been used to identify and fingerprint execution
+environments, in malware this is know as a red-pill~\cite{red-pill}. This can be used 
+to ensure that malware is not being emulated in a debugging 
+environment~\cite{lindorfer2011detecting, balzarotti2010efficient}. Paleari 
+\textit{et al.} automate the process of discovering red-pills by applying 
+fuzzing techniques to emulated environmenta and identifying situations 
+in which the emulators differ from their physical counterparts~\cite{paleari2009fistful}.
+This is still by no means an exhaustive list of red-pills for a given 
+processor as many rely on timing or race conditions in physical 
+environments. 
+
+% Hardware bare-metal analysis
+To combat this Kirat \textit{et al.} propose the use of automated "bare-metal" 
+emulation of malware~\cite{kirat2011barebox}, and methods to determine if malware
+is performing red-pill checks to avoid emulation environments~\cite{kirat2014barecloud}.
+This can also be combatted using symbolic execution by finding environmental triggers 
+in malicious binaries~\cite{schwartz2010all}. 
+
+\smallskip
+
+Unlike other red-pills based on hardware bugs, \speculake cannot be bypassed
+by patching binaries as the speculation can only happen on "bare-metal" systems, 
+and break points will fail to trigger on a speculative call to a specific function.
+Symbolic execution will also fail to find a target function as it is never on the 
+execution pathway. 
 
 
 \subsection{Cache Side Channels}
+
+The \speculake model relies critically on cache side channel attacks to 
+communicate information from the speculative world.
+
+\texttt{Flush+Reload}~\cite{yarom2014flush+}
+
+
+Prime+Probe technique has been used against a number of processors
+at multiple different leverls of cache. L1 data cache~\cite{} 
+L2 cache~\cite{}
+branch prediction cache~\cite{}
+L1 instruction cache~\cite{}. These attacks have also been performed 
+in cloud environments~\cite{}, collocated VMs~\cite{}, and local
+environments~\cite{}.  
+
+While other works have demonstrated higher throughput from similar 
+covert cache side channels~\cite{}, we incurr slightly higher performance 
+penalties in our implementation as we perform redundancy checks to 
+ensure the signal strength and cause intentional cache misses to enable
+speculative execution costing hundreds to thousands of clock cycles~\ref{fig:cache-miss}
+per round. 
+
 
 
 %%%%%%%%%%%%%%

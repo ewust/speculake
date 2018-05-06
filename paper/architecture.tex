@@ -122,7 +122,7 @@ instructions.
 
 \subsubsection{Reorder Buffer Capacity} \label{sssec:ROB}
 We also measured the capacity of the reorder buffer (ROB) using a method
-outlined by~\cite{intel-rob-capacity}. We measure the maximum number of cycles taken to
+outlined by~\cite{measuring-rob}. We measure the maximum number of cycles taken to
 perform two uncached memory reads, and vary the number of filler instructions
 between them. If the number of filler instructions is small, both memory reads
 will fit inside the ROB, and can issue their memory reads in parallel. However,
@@ -204,7 +204,7 @@ to the real world through a cache side channel.
 
 We note a performance tradeoff between the size of communication (e.g. 4 bits vs 8
 bits) and the time it takes the real world to recover the result from the side
-channel. Using Flush+Reload~\cite{flush-reload} as our cache side channel,
+channel. Using Flush+Reload~\cite{yarom2014flush+} as our cache side channel,
 recovering the result requires accessing all elements in an array exponential in
 the size of the result (e.g. $2^8$ array reads to recover an 8-bit result). 
 Therefore, there is a

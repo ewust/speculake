@@ -38,7 +38,7 @@ instructions are not speculated past, requiring they complete and be retired
 before looking to the next instruction. This appears to be due to the 
 \texttt{rep} instruction adding additional $\mu$ ops per instruction, we found
 that using the \texttt{rep} instruction caused $2n$ $\mu$ ops when the string
-operation works on $n$ bytes. Thus enough repetitions would cause instructions
+operation works on $n$ bytes~\cite{uop_article}. Thus enough repetitions would cause instructions
 after the \texttt{rep} instruction to wait for the full repetition to be retired
 before beginning their execution.
 
