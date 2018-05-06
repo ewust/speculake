@@ -54,9 +54,9 @@ in which structured values can be entered into memory locations before making
 a systemcall.
 
 To acheive a balance with speed the number of bits in each instruction is both 
-fixed and minimized.  A variable length instruction would require that the prime
-and probe stage search the maximum number of bits on each round, and each 
-aditional bit doubles the search space that the prime and probe stage must 
+fixed and minimized.  A variable length instruction would require that the 
+\texttt{Flush+Reload} stage search the maximum number of bits on each round, and each 
+aditional bit doubles the search space that the \texttt{Flush+Reload} stage must 
 traverse.  So every bit shorted effectively doubles the throughput of the 
 emulator, and there is effectively no advantage to allowing variable length 
 instructions. 
@@ -69,7 +69,7 @@ a \textit{ReverseShell} program that opens and connects to a socket before
 duplicating I/O and executing a local shell. 
 
 Expected performance for a given SPASM binary will vary given multiple factors, 
-the most important of which is the prime and probe redundancy. This can be tuned
+the most important of which is the \texttt{Flush+Reload} redundancy. This can be tuned
 based on the specific trigger, as it is used to establish confidence that a signal 
 has been identified in the indicess returned from the "speculative world". 
 Thus accomplishing a task using SPASM generally equates to:
