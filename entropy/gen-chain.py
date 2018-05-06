@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 
-NUM_ROUNDS = 10
+NUM_ROUNDS = 16
 BYTES_PER_ROUND = 1
 NUM_LANDINGS = 2**(BYTES_PER_ROUND*8)
 
@@ -20,7 +20,7 @@ print '.section .targets, "ax"'
 print '  .global targets'
 print 'targets:'
 
-targets_offset = 0x510000
+targets_offset = 0x990000
 addrs = []
 
 for i in xrange(NUM_LANDINGS):

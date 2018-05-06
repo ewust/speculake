@@ -67,7 +67,7 @@ SECTIONS
     /*__test_end__ = .;*/
   }
   .indirect  0x420000: { *indirect.* }
-  .targets   0x510000: { *targets.* }
+  .targets   0x990000: { *targets.* }
   .encrypt   0x520000: { *encrypt.* }
   .fnptr    0x440000: { KEEP(*(.fnptr)) }
   .fnptr2   0x450000: { KEEP(*(.fnptr2)) }

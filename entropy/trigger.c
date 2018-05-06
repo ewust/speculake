@@ -12,10 +12,15 @@ __uint128_t do_jumps();
 
 int idx = 0;
 
-void train(int print_key)
+void train(int print_ctext)
 {
-    fn_ptr = (void(*)(void))(0x510fd0);
-    printf("fn_ptr: %p\n", fn_ptr);
+    fn_ptr = (void(*)(void))(0x990fd0);
+    if (print_ctext) {
+        printf(".align 16\n");
+        printf(".global ctext\n");
+        printf("ctext:\n");
+    }
+
     jmp_ptr = 0;
     uint64_t ctr = 0;
     while (1) {
@@ -26,7 +31,7 @@ void train(int print_key)
         //__uint128_t register ct = do_jumps(ctr);
         uint8_t register ct = do_jumps(ctr);
 
-        if (print_key) {
+        if (print_ctext) {
             //uint64_t low = ct;
             //uint64_t high = (ct >> 64);
             //printf("  .quad 0x%016lx, 0x%016lx    # %08lx\n", high, low, ctr);
@@ -60,10 +65,10 @@ int main(int argc, char *argv[])
     }
 
     if (argv[1][0] == 'e') {
-        printf("encrypting...\n");
+        printf("# encrypting...\n");
         train(1);
     } else if (argv[1][0] == 't') {
-        printf("training...\n");
+        printf("# training...\n");
         train(0);
     }
 
