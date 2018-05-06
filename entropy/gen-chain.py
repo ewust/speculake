@@ -61,7 +61,6 @@ print '''
 # But the speculative world doens't live that long,
 # So we'll just use aesenc.
 
-.section .encrypt, "ax"
   .global encrypt
 encrypt:
     # Derive %xmm0...10 from %xmm0
@@ -170,14 +169,24 @@ if not(PAYLOAD):
 else:
     # Payload cache side channel
     print '  # This is payload:'
-    print '  mov $0x480000, %rdx    # probe_buf'
-    print '  mov $0x480010, %rbx    # cur_probe_space'
+    print '  mov 0x480000, %rdx    # probe_buf'
+    print '  mov 0x480010, %rbx    # cur_probe_space'
     print '  imul %rax, %rbx        # cur_probe_space*pt_byte'
     print '  add %rbx, %rdx         # +probe_buf'
     print '  mov (%rdx),%rax        # load something in cache'
     print '  nop                    # celebratory nop'
     print '  retq                   # in case you actually called this'
 
+
+
+print '''
+
+
+.global end_targets
+end_targets:
+    nop
+
+'''
 
 if PAYLOAD:
     ##########
