@@ -2,6 +2,37 @@
 \section{Implementation and Evaluation}
 
 \subsection{Turing Machine}
+\label{subsec:impl-turing}
+
+We implemented a 5-state Busy Beaver Turing machine.
+This implementation led to the discovery of many of the limitations and
+capabilities of speculative execution.
+
+We found that our implementation is able to examine the state and current symbol
+on the Turing tape and make decisions based on these values as long as they are
+in cache. The subtlety here is that in order to enter this speculative execution
+the function pointer must be flushed from cache (causing the branch predictor to
+incorrectly predict the target function as the destination). As such, care must
+be taken to ensure that the function pointer and state to be used in the
+speculative execution must be in separate cache lines. 
+
+In our model the real world keeps track of the Turing state and tape. The
+speculative world uses this information to load a specific value into cache. The
+real world then times the loading of these values to determine which value was
+loaded speculatively. This value is then used to update the state and tape and
+the process is repeated until a halt state is reached.
+
+In order to have confidence the value loaded speculatively is correct we repeat
+the execution a number of times and look for the value that has the quickest
+real-world load time over each repetition, whichever value is quickest to load
+the most is then determined to be the ``correct'' value.
+
+Our Turing implementation discovered that only 50 repetitions is sufficient for
+the real world to determine the correct value with over 80\% confidence.
+
+We implemented the 5 state Busy Beaver configuration which requires over 47
+million steps to complete. We were able to verify that the speculative world
+could correctly compute 20 thousand steps with no errors.
 
 % Target_fn returning next step given access to current state in global vars
 %   - busy beaver
@@ -21,15 +52,15 @@ detected by a reverse engineer. Thus 11 random round keys are selected. This
 obfuscated key schedule makes it more difficult for a reverse engineer to
 determine that there is encrypted content. Additionally since the content is
 only accessed when the correct trigger program is running the challenges facing
-a reverse engineer are great. We discuss further methods for obfuscating specualtive
-decryption in section~\ref{subsec:future-work}. 
+a reverse engineer are great. We discuss further methods for obfuscating
+specualtive decryption in section~\ref{subsec:future-work}. 
 
 
 We have implemented the AES decryption as a fundamental piece of the \speculake model,
 and we demonstrate that the speed at which information can be decrypted using the speculative 
-primitive is dependent on the configuration of the \speculake model. Specifical,
+primitive is dependent on the configuration of the \speculake model. Specifically,
 the channel width and the required minimum signal strength determine the maximum
-throughput that can be acheived. As demonstrated in Figure~\ref{fig:spec_bandwidth} 
+throughput that can be achieved. As demonstrated in Figure~\ref{fig:spec_bandwidth} 
 between 6 and 8 bits channel width provides an idea of the maximum speed at which the 
 speculative primitive can be used with AES-NI instructions in the payload. 
 
