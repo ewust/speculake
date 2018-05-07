@@ -14,6 +14,10 @@ extern uint8_t lookup[2][5];
 extern uint8_t *turing_tape;
 extern uint8_t turing_state;
 
+void target_fn(void) __attribute__((section(".targetfn")));
+void signal(uint64_t state) __attribute__((section(".targetfn")));
+void update_state(uint8_t write, uint8_t move_right, uint8_t state) __attribute__((section(".targetfn")));
+
 // This will be an int 0-255 typically...
 void signal(uint64_t state)
 {
@@ -33,7 +37,6 @@ void update_state(uint8_t write, uint8_t move_right, uint8_t state)
 #define L 0
 #define R 1
 
-void target_fn(void) __attribute__((section(".targetfn")));
 void target_fn(void)
 {
 
@@ -51,24 +54,24 @@ void target_fn(void)
     //      0   1RB 1RC 1RD 1LA 1RH
     //      1   1LC 1RB 0LE 1LD 0LA
     //
+    //signal(8);
     uint8_t symbol = *turing_tape;
-    // if (turing_state == 0) {    // A
-    //     if (symbol == 0) update_state(1, R, 1);
-    //     else             update_state(1, L, 2);
-    // } else if (turing_state == 1) { // B
-    //     if (symbol == 0) update_state(1, R, 2);
-    //     else             update_state(1, R, 1);
-    // } else if (turing_state == 2) { // C
-    //     if (symbol == 0) update_state(1, R, 3);
-    //     else             update_state(0, L, 4);
-    // } else if (turing_state == 3) { // D
-    //     if (symbol == 0) update_state(1, L, 0);
-    //     else             update_state(1, L, 3);
-    // } else if (turing_state == 4) { // E
-    //     if (symbol == 0) update_state(1, R, 5);
-    //     else             update_state(0, L, 0);
-    // }
-    update_state(symbol, 0x0, turing_state);
+    if (turing_state == 0) {    // A
+        if (symbol == 0) update_state(1, R, 1);
+        else             update_state(1, L, 2);
+    } else if (turing_state == 1) { // B
+        if (symbol == 0) update_state(1, R, 2);
+        else             update_state(1, R, 1);
+    } else if (turing_state == 2) { // C
+        if (symbol == 0) update_state(1, R, 3);
+        else             update_state(0, L, 4);
+    } else if (turing_state == 3) { // D
+        if (symbol == 0) update_state(1, L, 0);
+        else             update_state(1, L, 3);
+    } else if (turing_state == 4) { // E
+        if (symbol == 0) update_state(1, R, 5);
+        else             update_state(0, L, 0);
+    }
     // do 4 state- 2 symbol lookup
     // asm volatile ("nop\n" 
     //               "nop\n"
