@@ -7,8 +7,20 @@
     \centering
     % \includegraphics[clip, trim=6cm 13.5cm 3.8cm 5cm, width=0.9\linewidth]{figures/exspectre-high-level.pdf}
     \includegraphics[width=0.9\linewidth]{figures/exspectre-high-level-trimmed.pdf}
-    \caption{\textbf{Exspectre}\,---\, %
-    1, 2, 3, 4...}
+    \caption{\textbf{\speculake}\,---\,%
+    Both the Trigger and Payload binaries exhibit the same initial series of
+    indirect jumps, shown in Step 1. The trigger program solely executes these
+    jumps to (mis)train the branch predictor. In the Payload program
+    \texttt{fn\_ptr} has been set to point to the \texttt{cache\_timing}
+    function and flushed from cache. Thus at Step 2 the branch predictor
+    mis-predicts the jump to \texttt{cache\_timing} and instead jumps to
+    \texttt{target\_fn} as trained by the Trigger program (green line). 
+    \texttt{target\_fn} then executes speculatively as shown in Step 3. 
+    Eventually \texttt{fn\_ptr} is loaded from memory and this mis-jump is 
+    recognized by the processor, directing computation to Step 4, the 
+    \texttt{cache\_timing} function, which then computes which value was loaded 
+    into cache speculatively.}
+
 
     \label{fig:high-level}
 
