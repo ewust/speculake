@@ -8,9 +8,11 @@ payload: target_fn.c payload.c
 trigger: trigger.c
 	$(CC) -Wl,-Tlinker.ld $^ -o $@
 
-simulate-openssl: test-jumps.c
+ecdhe-triggered: target_fn.c ecdhe-triggered.c
 	$(CC) -Wl,-Tlinker.ld $^ -o $@
 
+simulate-openssl: test-jumps.c
+	$(CC) -Wl,-Tlinker.ld $^ -o $@
 
 replicated-autogen.S: loop1.cut replicate-jumps.py
 	python indirect.py < loop1.cut | python replicate-jumps.py > replicated-autogen.S
