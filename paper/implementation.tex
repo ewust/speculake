@@ -37,10 +37,6 @@ While the \speculake model acheives only moderate decryption speed, the
 critical computation of the decryption is done in the speculative world. 
 
 \FigSpecBandwidth
-% implementation 
-%   Key Schedule expansion / obfuscation
-%
-% you can speculatively execute AES instructions 
 
 \subsection{Virtual Machine}
 
@@ -170,14 +166,6 @@ suite (DHE-RSA-AES128-GCM-SHA256), we similarly received no hit rate. This
 could potentially allow an adversary to use an obscure or uncommon (but still
 supported) cipher suite to trigger a malicious payload program on a remote server.
 
-
-% extract jump patterns
-% sufficiency checks 
-%
-% trigger strength
-%   - future work developing tools to determine sufficiency and strength
-%
-% OPENSSL TRIGGERING REVERSE SHELL SPASM PAYLOAD
 
 
 \subsection{Nested Speculation}
