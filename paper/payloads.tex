@@ -137,24 +137,20 @@ program.
 
 To accommodate both developers as well as the unique constraints 
 enforced by the speculative primitive, a custom emulation solution is required. 
-we have approached this challenge by creating a custom instruction set -- 
-SPASM -- which accommodates the speculative primitive specifically. This 
+We have created a custom emulator and instruction set -- SPASM -- which 
+accommodate the speculative primitive specifically. This 
 provides a higher level of abstraction around the speculative primitive
-that we have used to implement various payloads. 
+that we have used to implement various executable binaries. 
 
 % The assembly level abstraction that SPASM provides is still not extremely
 % user friendly as it does not allow an author to write their encrypted 
 % emulator payload in a high level language.  
 
-% REFERENCE FIGURES
-% - Constraints enforced by speculative primitive
-%       - more bits = slower
-%       - less bits = less expressive
-%       - must be computable within speculative ROB limit (~150 instrs) (decrypt only)
-%   
-% - optimizations for weird-machine computations 
-
-% --- VM
-%   - Wrappers around traditional ISA VMs
-%   - SPASM  custom emulator made f
-%%%%%%%%%%%%%%
+While the custom emulator that we developed gives higher level abstraction to
+an author, it still requires programs to be written in a custom assembly language. 
+We note that the \speculake model is not intrinsically linked to the SPASM emulator. 
+A wrapper could be implemented around other existing emulators to incrementally 
+construct instructions 6 or 8 bits at a time (depending on the channel width). 
+This would allow for encrypted payloads to be written in higher level languages
+like C or C++, although there would be a significant performance reduction to 
+using this type of wrapper. 
