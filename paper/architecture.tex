@@ -82,6 +82,8 @@ results to the ``real world'' program.
 
 \subsection{Limits of Speculative Execution}
 
+\FigCacheMiss
+
 \FigSpecMeasure
 
 We performed several experiments to determine how much computation can be
@@ -96,14 +98,6 @@ and an i5-4590. % ewust desktop
 
 
 
-%Speculative branching is not a new feature in processors~\cite{branching-hist}, 
-%and it has been integrated in multiple generations of commodity processors today. 
-%Accordingly speculative instruction capacity has fairly well defined limits, in 
-%line with known features of processor designs. We have determined that features 
-%like reorder buffers (ROB), physical register file (PRF), and cache miss timing
-%determines a strong limit on the number of instructions that can be accomplished
-%speculatively. 
-
 \subsubsection{Cache Miss Duration}
 When executing instructions speculatively we rely on a memory load of a function
 pointer from uncached memory. Thus, one potential limit on our computation comes
@@ -117,9 +111,8 @@ an evicted item takes approximately 300 clock cycles to load from L3, which
 would allow a limit of roughly 200 speculative instructions to be
 executed during that time. We note that when an item is not in L3, it takes
 considerably longer to load, in theory allowing for thousands of speculative
-instructions.
+instructions in a significant fraction of runs.
 
-\FigCacheMiss
 
 \subsubsection{Reorder Buffer Capacity} \label{sssec:ROB}
 We also measured the capacity of the reorder buffer (ROB) using a method
@@ -151,7 +144,7 @@ mis-speculated branch was resolved.
 We also tested whether instruction complexity or data dependencies impact
 the number of instructions that can be completed. We find that data dependencies
 and instruction complexity both have an impact on the number of instructions
-that can be executed. Instruction complexity is determined the number of
+that can be executed. Instruction complexity is determined by the number of
 $\mu$ ops that the instruction uses, which appears to be what is tracked in the ROB.
 For instance, on our architecture, the 64-bit \texttt{idiv} instruction takes 59
 $\mu$ ops, and we can execute up to 3 of them in the speculative world.
@@ -162,7 +155,7 @@ We found that the processor can identify
 some operations that have no effect on output registers and allows them to use the 
 entire size provided by the ROB, as determined in section~\ref{sssec:ROB}. This includes 
 idomatic no-ops and zero idioms, which have no reliance on register values, 
-for example the instruction \textit{xchg \%rax \%rax} and \textit{xor \%rax, \%rax}. 
+for example the instruction \texttt{xchg \%rax \%rax} and \texttt{xor \%rax, \%rax}. 
 However, if an instruction is a potential data hazard, it must use an entry in the PRF
 until it reaches the correct stage in the execution pipeline. In this case, the number 
 of instructions could be limited by the PRF entries available.
@@ -222,7 +215,7 @@ is a second indirect jump, perhaps using the same register as the first jump
 (which has still not resolved). If the trigger program jumps to C, the payload
 program will speculate a second time and also begin executing code at C.
 
-We find that not all Intel CPUs we tried support nested speculation. For
+We find that not all Intel CPUs support nested speculation. For
 example, it appears Haswell chips do not speculate while already speculating,
 but nonetheless support non-nested \speculake. Both Sandy Bridge (which
 preceeded Haswell) and Kaby Lake (which followed Haswell) support nested

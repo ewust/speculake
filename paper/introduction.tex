@@ -43,7 +43,8 @@ For example, binary \emph{packers} or \emph{crypters} encode an executable paylo
 data that must be ``unpacked'' at runtime, making it difficult to tell
 statically what a program will do~\cite{malware-packers}. Malware may also use
 \emph{triggers} that only run the payload when certain conditions are present, preventing
-it from executing when it is inside an analysis sandbox or debugger.
+it from executing when it is inside an analysis sandbox or 
+debugger~\cite{balzarotti2010efficient,red-pill}.
 
 However, with some effort, these existing malware techniques can be defeated.
 Analysts can use
@@ -133,7 +134,7 @@ of a payload via AES encrypt/decrypt instructions.
 Using these building blocks, we demonstrate the practicality of hiding arbitrary
 computation by implementing a reverse shell in our speculative instruction set.
 We show that this simple payload is able to perform several system calls
-in a reasonable time, ultimately launching a dial-back TCP shell in under 8~seconds after
+in a reasonable time, ultimately launching a dial-back TCP shell in under 7~seconds after
 the trigger program starts.
 
 %Using these building blocks, we demonstrate the practicality of hiding arbitrary

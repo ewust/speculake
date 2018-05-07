@@ -9,12 +9,12 @@ functional registers, PTR and VAL, and a stack. This instruction set has been
 designed to be emulated in x86 and x86-64 environments, though the emulator 
 could be implemented to run on other systems. 
 
-The progamming model used by SPASM build up values on the maintained stack
-and stores values in specially reserved offsets equivalent to registers 
-in order to build up system calls. Immediates can be assigned into VAL
+The progamming model used by SPASM builds up values on the maintained stack
+and stores values in specially reserved offsets equivalent to x86 registers 
+in order to perform system calls. Immediates can be assigned into VAL
 incrementally, and stored, operated on, or pushed onto the maintained
-stack. Control Flow is implemented by modifying the maintained 
-instruction pointer SRIP, including conditional jmps. 
+stack. Control Flow, including conditional jmps, is implemented by modifying 
+the maintained instruction pointer SRIP. 
 
 Using this we have implemented various example programs including 
 \textit{HelloWorld}, \textit{FizzBuzz}, and \textit{DialbackShell}.
@@ -85,35 +85,35 @@ Perform 2's compliment operation on VAL and store the result into VAL.
 Used to implement subtraction operations.
 
 \item[DADD] (0x0D) - 
-Dereference the value in PTR, add VAL and store back into the dereference 
+Dereference the value in PTR, add VAL and store the result back into the dereference 
 of PTR. 
 
 \item[DMUL] (0x0C) - 
-Dereference the value in PTR, multiply VAL and store back into the dereference
+Dereference the value in PTR, multiply VAL and store the result back into the dereference
  of PTR. 
 
 \item[DDIV] (0x0B) - 
-Dereference the value in PTR, divide by VAL and store back into the 
+Dereference the value in PTR, divide by VAL and store the result back into the 
 dereference of PTR. 
 
 \item[DSHL] (0x09) - 
-Dereference the value in PTR, shift left by VAL and store back into the 
+Dereference the value in PTR, shift left by VAL and store the result back into the 
 dereference of PTR. 
 
 \item[DSHR] (0x08) - 
-Dereference the value in PTR, shift right by VAL and store back into the 
+Dereference the value in PTR, shift right by VAL and store the result back into the 
 dereference of PTR. 
 
 \item[DAND] (0x07) - 
-Dereference the value in PTR, bitwise and VAL and store back into the 
+Dereference the value in PTR, bitwise and with VAL and store the result back into the 
 dereference of PTR. 
 
 \item[DOR] (0x06) - 
-Dereference the value in PTR, bitwise or with VAL and store back into the 
+Dereference the value in PTR, bitwise or with VAL and store the result back into the 
 dereference of PTR. 
 
 \item[DXOR] (0x05) - 
-Dereference the value in PTR, bitwise xor with VAL and store back into the 
+Dereference the value in PTR, bitwise xor with VAL and store the result back into the 
 dereference of PTR. 
 
 \item[NOT] (0x04) - 

@@ -129,19 +129,19 @@ generations of this malware.
 
 \subsubsection{Multiple Triggers}
 To create further difficulties for a reverse engineer, or to further target
-the execution environment in which a sample executes it is possible
+the execution environment it is possible
 to have the payload program test a series of separate jump patterns. The decryption
 process can then be done in stages where the result of a given stage determines 
 the initial state of the next decryption stage that the payload program 
 performs. Only when all triggers have been completed in the correct order will
 the true plaintext be available. 
 
-While this would increase the difficulty for a reverse engineer who has access
+While this would increase the difficulty for analyst  who has access
 to a sample in isolation, it  does not add any extra layers of complication 
-for reverse engineers who can observe the entire decryption process. Any state 
+for an analyst who can observe the entire decryption process. Any state 
 encoded in the real world during the individual stages will be available to current 
-debugging tools. This allows reverse engineers start the sample from the initial
-state of any stage in subsequent runs. For example, they could patch the 
+debugging tools. This allows the initial state of a sample to be modified
+to simplify subsequent runs. For example, they could patch the 
 binary to begin with the state of the final stage such that only the final 
 trigger must be run again to retreive the plaintext. While this simplifies the 
 job of acquiring the plaintext of a given \speculake sample, it does not give any 

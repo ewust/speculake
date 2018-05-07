@@ -2,8 +2,8 @@
 \section{Related Work}
 \label{sec:related-work}
 
-Many resourcess have been useful in developing the \speculake exploit 
-model.  
+% Many resourcess have been useful in developing the \speculake exploit 
+% model.  
 
 \subsection{Weird Machines \& Red-Pills}
 Hardware side effects often leave behind unexpected state transitions 
@@ -11,7 +11,8 @@ that are not, or cannot be, accounted for in modeling environments. Malware
 has historically made use of these bugs to create "weird" models of 
 computation~\cite{weird_machines}. These state transitions can also leak 
 information about the environment in which a program is running, which 
-malware has used to detect honey-pots and emulated environments.
+malware has used to detect honey-pots and emulated 
+environments~\cite{balzarotti2010efficient}.
 
 The term \textit{weird machine} comes from work done by Bratus \textit{et al.}
 composing bugs and features of a system to create arbitrary compuatation with 
@@ -23,9 +24,10 @@ and return oriented programming~\cite{shacham2007geometry} to name only a few.
 Bangert~\textit{et al.} demonstrate that a turing complete weird machine 
 can be constructed using the page fault handling mechanism in Intel's
 IA32 architecture~\cite{bangert2013page}. Bugs like this are abundant in
-modern processors as multiple threads share system resources cooperatively
+modern processors~\cite{d2015exploiting} as multiple threads share system resources cooperatively
 and optimizations is done objectively with regards of the 
-process isolation for the most part. Accessing copoerative hardware resources is at
+process isolation for the most part~\footnote{With the exception of permission 
+rings, i.e. kernel vs user space isolation}. Accessing cooperative hardware resources is at
 the heart of the \speculake model, which constructs a hardware weird machine
 using speculative branching and \texttt{Flush+Reload}. This is 
 very much in the spirit of traditional exploit creation~\cite{weird_exploits}.
@@ -54,8 +56,8 @@ in malicious binaries~\cite{schwartz2010all}.
 
 Unlike other red-pills based on hardware bugs, \speculake cannot be bypassed
 by patching binaries as the speculation can only happen on "bare-metal" systems, 
-and speculative execution will not trigger debugging break-points as 
-they are never completed in a committed state.
+and the critical functionality is performed speculatively. Similarly, debugging 
+break-points wll not be triggered as instructions are never completed in a committed state.
 Symbolic execution will also fail to find a target function as it is never on the 
 execution pathway. 
 
@@ -74,7 +76,7 @@ and branch prediction cache~\cite{aciiccmez2007power}.
 These attacks have also been performed in 
 cloud~\cite{ristenpart2009hey,zhang2012cross}, 
 browser~\cite{oren2015spy,google_cache_browser},
-security critical encryption~\cite{yarom2014recovering,tromer2010efficient}
+and security critical encryption~\cite{yarom2014recovering,tromer2010efficient}
 environments, demonstrating how ubiquitous hardware side-channel exploits can be. 
 
 Most cache side-channles fall into one of the following categories, although
@@ -113,13 +115,13 @@ Efforts to examine cache and memory security also preempted the spectre work,
 including Sophia D'Antoine's thesis work developing a side channel based on 
 instruction interleavings in the CPU~\cite{d2015exploiting}. Similar research into branch 
 predictors, cache replacement policies, and reorder buffer construction including work by Matt 
-Godbolt~\cite{godbolt2016branch}, Henry Wong~\cite{measuring-rob} paved the runway for 
+Godbolt~\cite{godbolt2016branch}, and Henry Wong~\cite{measuring-rob} paved the runway for 
 dedicated branch prodiction side-channels.
 
 % Discovery & Followup
 Given the numerous directions that were being investigated in reverse engineering 
-Intel processors, multiple teams discovered the Spectre vulnerabilites concurrently including the 
-various teams associated with Kocher \textit{et al.}~\cite{spectre}, the Project Zero team 
+Intel processors, multiple teams discovered the Spectre vulnerabilites concurrently including 
+the teams associated with Kocher \textit{et al.}~\cite{spectre}, the Project Zero team 
 at Google~\cite{project_zero},and various others~\cite{evtyushkin2018branchscope,maisuradze2018speculose}. 
 These works propose multiple variants making use of banch prediction.  Follow 
 up work on speculative execution side channels have also demonstrated
@@ -130,12 +132,8 @@ leaks in Intel's SGX~\cite{spectre_sgx}.
 % defenses 
 Much like cache side channel vulnerabilities speculative execution is relatively
 critical to processor performance and requires significant software, and hardware 
-updates to fully address. Multiple measures have been proposed to address the 
-individial variants of Spectre.  Trippel \textit{et al.} proposes a method of faithfully simulating 
-hardware bugs, such as processes cooperatively using speculating branch prediction,
-by synthesizing microarchetecture defects~\cite{trippel2018meltdownprime}. However, 
-manufacturers generally guard complete formal descriptions of processor microarchitecture closely, 
-making this a less accessible solution for the research community. 
+updates to fully address. Multiple measures have been proposed to combat the 
+individial variants of Spectre.   
 
 The main defenses that have been widely applied to 
 speculative branching attacks uses compiler level software patches to wrap sensitive 
@@ -150,6 +148,12 @@ granularity~\cite{renau2018securing}, and fuzzy clocks that would reduce the acc
 of any time based exfiltration pathway~\cite{hu1992reducing}. However, none of these defenses 
 fundamentally defeat the use of a branch predictor as a cooperative mechanism
 spanning multiple processes. 
+
+Trippel \textit{et al.} proposes a method of faithfully simulating 
+hardware bugs, such as processes cooperatively using speculating branch prediction,
+by synthesizing microarchetecture defects~\cite{trippel2018meltdownprime}. However, 
+manufacturers generally guard complete formal descriptions of processor microarchitecture closely, 
+making this a less accessible solution for the research community.
 
 \smallskip
 
