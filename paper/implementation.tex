@@ -20,6 +20,12 @@ incorrectly predict the target function as the destination). As such, care must
 be taken to ensure that the function pointer and state to be used in the
 speculative execution must be in separate cache lines. 
 
+If the state is removed from cache, during the speculative execution the
+state is also speculated. This error is particularly devious, as it is not an
+error of bit flips, but rather the processor speculating what the state could
+be, meaning that the state it uses is a possible value, and is not simply a
+mutation. 
+
 In our model the real world keeps track of the Turing state and tape. The
 speculative world uses this information to load a specific value into cache. The
 real world then times the loading of these values to determine which value was
