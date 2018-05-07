@@ -57,13 +57,14 @@ function pointers, class methods, or case statements.
 \subsection{Spectre}
 
 In early 2018, researchers revealed the Spectre vulnerability, which allows an
-attacker to leak information from a victim program~\cite{spectre}. Spectre uses
-the fact that speculative execution can influence system state via side
-channel. In Spectre, an attacker mistrains the branch predictor of a CPU running
-a victim program by providing inputs to it. Once mistrained, the attacker then
-sends a new input that will cause a different in-order execution path. However,
-because the CPU's branch predictor has been mistrained, it will still
-speculatively execute the previous path.
+attacker to leak information from a victim
+program~\cite{spectre,project_zero,maisuradze2018speculose}. Spectre uses the
+fact that speculative execution can influence system state via side channel. In
+Spectre, an attacker mistrains the branch predictor of a CPU running a victim
+program by providing inputs to it. Once mistrained, the attacker then sends a
+new input that will cause a different in-order execution path. However, because
+the CPU's branch predictor has been mistrained, it will still speculatively
+execute the previous path.
 
 Consider the following code snippet from the Spectre
 paper~\cite{spectre}:

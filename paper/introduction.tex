@@ -61,25 +61,26 @@ program functionality in code that does not execute at runtime.
 At a high level, \speculake consists of two parts: a payload program, and a
 trigger program. When run by itself, the payload program executes a pattern of
 indirect jumps and measures a cache side channel. While the trigger program is
-not running, the payload program is effectively inactive (and may optionally do some
-decoy operation). When the trigger program runs, it executes a similar pattern of
-indirect jumps (with similar source and destination addresses as the payload
-program), effectively training the CPU's branch predictor to the jump pattern
-specified by the trigger program.
+not running, the payload program is effectively inactive (and may optionally do
+some decoy operation). When the trigger program runs, it executes a similar
+pattern of indirect jumps (with similar source and destination addresses as the
+payload program), effectively training the CPU's branch predictor to the jump
+pattern specified by the trigger program.
 
-Importantly, the trigger program and payload
-program's indirect jump patterns diverge on the destination of their final jumps.
-However, because the trigger program has trained the CPU's branch predictor, the
-CPU speculates that the payload program will continue following the pattern of
-the trigger program, causing it to speculatively execute a
-\emph{target function} in the payload program. We emphasize that this target
-function is in a region that is neither read nor executed by the payload
-program, and after the CPU discovers the mis-speculation in the payload program,
-it will discard the results from the target function and continue executing from
-the correct destination. However, the payload program has a limited speculative
-window where it can perform computation in the target function, and can
-communicate results back to the ``real world'' payload program via a cache side
-channel.
+Importantly, the trigger program and payload program's indirect jump patterns
+diverge on the destination of their final jumps. However, because the trigger
+program has trained the CPU's branch predictor, the CPU speculates that the
+payload program will continue following the pattern of the trigger program,
+causing it to speculatively execute a \emph{target function} in the payload
+program. This execution path is shown in Figure~\ref{fig:high-level}.
+
+We emphasize that this target function is in a region that is neither
+read nor executed by the payload program, and after the CPU discovers the
+mis-speculation in the payload program, it will discard the results from the
+target function and continue executing from the correct destination. However,
+the payload program has a limited speculative window where it can perform
+computation in the target function, and can communicate results back to the
+``real world'' payload program via a cache side channel.
 
 %Figure~\ref{fig:high-level}
 
@@ -119,17 +120,16 @@ endeavor for would-be analysts.
 
 % Results summary
 In order to study the potential of \speculake, we implement several example
-payload programs and evaluate their performance.
-We find that the speculative window is limited by the reorder buffer
-and physical register file sizes, which allows us to execute between 100 and 200 instructions
-speculatively on modern Intel CPUs. While brief, we are able to perform
-execution in short steps, communicating intermediate results back to the ``real
-world'' part of the payload program. Using this technique,
-we demonstrate implementing a universal Turing machine
-(demonstrating arbitrary computation), a custom instruction set architecture
-that fits within the constraints of speculative execution, and show
-the ability to perform AES decryption
-of a payload via AES encrypt/decrypt instructions.
+payload programs and evaluate their performance. We find that the speculative
+window is limited by the reorder buffer and physical register file sizes, which
+allows us to execute between 100 and 200 instructions speculatively on modern
+Intel CPUs. While brief, we are able to perform execution in short steps,
+communicating intermediate results back to the ``real world'' part of the
+payload program. Using this technique, we demonstrate implementing a universal
+Turing machine (demonstrating arbitrary computation), a custom instruction set
+architecture that fits within the constraints of speculative execution, and show
+the ability to perform AES decryption of a text block via AES encrypt/decrypt
+instructions.
 
 Using these building blocks, we demonstrate the practicality of hiding arbitrary
 computation by implementing a reverse shell in our speculative instruction set.
