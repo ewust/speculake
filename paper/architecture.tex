@@ -3,14 +3,14 @@
 \section{Architecture}
 
 
-\speculake malware is comprised of two independent programs: a payload program, and a
-trigger program. Both are installed on the victim's computer (e.g. via trojan, remote
-exploit, or phishing), and must run simultaenously on the same physical CPU. We
-note that the constraint of running programs on the same CPU is not a signifcant
-burden: \texttt{taskset} can be used to limit a process to a core, or if not
-available, the attacker can simply run multiple copies of the trigger or payload
-program to coerce the OS scheduler to assign a payload/trigger pair to the same
-core.
+\speculake malware is comprised of two independent programs: a payload program,
+and a trigger program. Both are installed on the victim's computer (e.g. via
+trojan, remote exploit, or phishing), and must run simultaenously on the same
+physical CPU. We note that the constraint of running programs on the same CPU is
+not a signifcant burden: \texttt{taskset} can be used to limit a process to a
+core, or if not available, the attacker can simply run multiple copies of the
+trigger or payload program to coerce the OS scheduler to assign a
+payload/trigger pair to the same core.
 
 At a high level, the trigger program performs a series of indirect jumps in a
 loop, training the branch predictor to this pattern. Meanwhile, the
@@ -24,13 +24,13 @@ payload program.
 
 
 In \speculake, we cause the CPU to mis-speculate the destination of an indirect
-branch in the payload program, causing it to speculatively execute from an
-instruction that is never truly executed. We term this speculative destination the
-\emph{speculative entry point}.
-\speculake uses indirect jumps to allow speculatively executing from \emph{any}
-instruction in the payload process' address space. Because it can jump to any
-instruction, the malware analyst has a difficult task in determining where a
-payload program's speculative entry point is.
+branch in the payload program, causing it to speculatively execute 
+instructions that are never truly executed. We term this speculative destination
+the \emph{speculative entry point}. \speculake uses indirect jumps to allow
+speculatively executing from \emph{any} instruction in the payload process'
+address space. Because it can jump to any instruction, the malware analyst has a
+difficult task in determining where a payload program's speculative entry point
+is.
 
 In fact, the location this entry point is not determined by the payload
 program, but rather the corresponding trigger program. This means that with only
@@ -62,7 +62,7 @@ script. We also do the final indirect call to a function pointer, but with two
 differences. First, the destination of the function pointer is a different
 address, and second, the location of the function pointer in memory is uncached.
 This forces the CPU to predict the destination of the indirect call while it
-waits for the function pointer to load from memory. Due to the similarity
+waits for the function pointer to load from memory. Due to the similar
 history of branches with the trigger program,
 the CPU will (incorrectly) predict the destination to be the same as the one in
 the trigger program, which determines the speculative entry point for the
@@ -72,11 +72,11 @@ briefly execute instructions there speculatively.
 
 Eventually, the dereference of the uncached function pointer in payload program
 will be resolved, and the CPU will recognize it has incorrectly predicted the
-destination of its \texttt{callq} instruction. The results from the speculative
-entry point instructions will be discarded, and the CPU will continue executing
-from the correct destination. However, as the speculative code changes what is
-loaded into the cache based on its results, it can covertly communicate its
-results to the ``real world'' program.
+destination of its \texttt{callq}/\texttt{jmpq}/\texttt{retq} instruction. The
+results from the speculative entry point instructions will be discarded, and the
+CPU will continue executing from the correct destination. However, as the
+speculative code changes what is loaded into the cache based on its results, it
+can covertly communicate its results to the ``real world'' program.
 
 
 
@@ -107,7 +107,7 @@ We measured the number of cycles a
 cache miss takes to return by artificially evicting an item from cache and
 timing reads from its address.
 Figure~\ref{fig:cache-miss} shows the CDF of cycles taken. In the typical case,
-an evicted item takes approximately 300 clock cycles to load from L3, which
+an evicted item takes approximately 300 clock cycles to load from the Level 3 cache (L3), which
 would allow a limit of roughly 200 speculative instructions to be
 executed during that time. We note that when an item is not in L3, it takes
 considerably longer to load, in theory allowing for thousands of speculative
@@ -116,14 +116,13 @@ instructions in a significant fraction of runs.
 
 \subsubsection{Reorder Buffer Capacity} \label{sssec:ROB}
 We also measured the capacity of the reorder buffer (ROB) using a method
-outlined by~\cite{measuring-rob}. We measure the maximum number of cycles taken to
-perform two uncached memory reads, and vary the number of filler instructions
+outlined by~\cite{measuring-rob}. We measure the maximum number of cycles taken
+to perform two uncached memory reads, and vary the number of filler instructions
 between them. If the number of filler instructions is small, both memory reads
-will fit inside the ROB, and can issue their memory reads in parallel. However,
-if the filler instructions fill the ROB, the second memory read will have to
-wait for the first to return before it can be issued, causing a noticeable step
-increase in the cycle count.
-Figure~\ref{fig:spec-capacity}
+will fit inside the ROB, and it can issue their memory reads in parallel.
+However, if the filler instructions fill the ROB, the second memory read will
+have to wait for the first to return before it can be issued, causing a
+noticeable step increase in the cycle count. Figure~\ref{fig:spec-capacity}
 shows this step occurs at approximately 220 instructions for our processor,
 suggesting a hard upper bound regardless of how long the cache miss takes to
 resolve.
@@ -134,41 +133,41 @@ resolve.
 
 \subsubsection{Speculative Instruction Capacity}
 
-To verify the upper limit of speculative instructions,
-we instrumented our trigger and payload programs to test a variable-length target
-function before it communicated a signal to the real world via a cache side
-channel. If the cache side channel revealed no signal in the real world, then we know the
-speculative execution did not make it to the signal instructions before the
-mis-speculated branch was resolved.
+To verify the upper limit of speculative instructions, we instrumented our
+trigger and payload programs to test a variable-length target function before it
+communicated a signal to the real world via a cache side channel. If the cache
+side channel revealed no signal in the real world, then we know the speculative
+execution did not make it to the signal instructions before the mis-speculated
+branch was resolved.
 
-We also tested whether instruction complexity or data dependencies impact
-the number of instructions that can be completed. We find that data dependencies
-and instruction complexity both have an impact on the number of instructions
-that can be executed. Instruction complexity is determined by the number of
-$\mu$ ops that the instruction uses, which appears to be what is tracked in the ROB.
-For instance, on our architecture, the 64-bit \texttt{idiv} instruction takes 59
+We also tested whether instruction complexity or data dependencies impact the
+number of instructions that can be completed. We find that data dependencies and
+instruction complexity both have an impact on the number of instructions that
+can be executed. Instruction complexity is determined by the number of $\mu$ ops
+that the instruction uses, which appears to be what is tracked in the ROB. For
+instance, on our architecture, the 64-bit \texttt{idiv} instruction takes 59
 $\mu$ ops, and we can execute up to 3 of them in the speculative world.
 Meanwhile, we can execute up to 18 32-bit \texttt{idiv} instructions, which each
 take 9 $\mu$ ops~\cite{intel-instruction-tables}.
 
-We found that the processor can identify
-some operations that have no effect on output registers and allows them to use the 
-entire size provided by the ROB, as determined in section~\ref{sssec:ROB}. This includes 
-idomatic no-ops and zero idioms, which have no reliance on register values, 
-for example the instruction \texttt{xchg \%rax \%rax} and \texttt{xor \%rax, \%rax}. 
-However, if an instruction is a potential data hazard, it must use an entry in the PRF
-until it reaches the correct stage in the execution pipeline. In this case, the number 
-of instructions could be limited by the PRF entries available.
+We found that the processor can identify some operations that have no effect on
+output registers and allows them to use the entire size provided by the ROB, as
+determined in Section~\ref{sssec:ROB}. This includes idomatic no-ops and zero
+idioms, which have no reliance on register values, for example the instruction
+\texttt{xchg \%rax, \%rax} and \texttt{xor \%rax, \%rax}. However, if an
+instruction is a potential data hazard, it must use an entry in the PRF until it
+reaches the correct stage in the execution pipeline. In this case, the number of
+instructions could be limited by the PRF entries available.
 
 %TODO: is this true? Or better explained by the micro-op story?
 
-Most notably instructions that use the extended x86 registers are still
-valid within the speculative context. Specifically, Intel's hardware accelerated AES-NI
-encryption and decryption instructions, which each use 128-bit registers.
-As shown in Figure~\ref{fig:spec-capacity}, speculative environments can complete
-a significant number of AES rounds -- more than enough to decrypt a full block 
-using AES-CBC. We investigate the use of AES instructions in the spculative environment
-further in Sections~\ref{subsec:decryption}.
+Most notably instructions that use the extended x86 registers are still valid
+within the speculative context. Specifically, Intel's hardware accelerated
+AES-NI encryption and decryption instructions, which each use 128-bit registers.
+As shown in Figure~\ref{fig:spec-capacity}, speculative environments can
+complete a significant number of AES rounds -- more than enough to decrypt a
+full block using AES-CBC. We investigate the use of AES instructions in the
+spculative environment further in Sections~\ref{subsec:decryption}.
 
 \medskip
 
@@ -196,13 +195,13 @@ processors aggressively prefetch cache pages~\cite{measuring-cache}
 and simple access patterns could be established to ensure
 that the required block(s) are accessible. 
 
-We have also confirmed that all speculative target code in the payload  
-must be stored in executable pages, and that it cannot be stord in non-executable 
-data sections.  We suspect that this is again due to caching. The processor
-has no reason to cache instructions stored in the data section in the 
-instruction cache. If a trigger trains the branch predictor 
-to jump to an address in the payload's data section, the payload will not 
-be able to fetch the instructions into the execution pipeline. 
+We have also confirmed that all speculative target code in the payload must be
+stored in executable pages, and that it cannot be stored in non-executable data
+sections.  We suspect that this is again due to caching. The processor has no
+reason to cache instructions stored in the data section in the instruction
+cache. If a trigger trains the branch predictor to jump to an address in the
+payload's data section, the payload will not be able to fetch the instructions
+into the execution pipeline. 
 
 \subsubsection{Hyperthreading}
 
