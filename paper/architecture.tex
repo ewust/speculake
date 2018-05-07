@@ -183,6 +183,27 @@ data dependencies define an upper boundary.
 % - MORE PROCESSORS for testing?
 % - ARM?
 
+\subsubsection{Target Function Requirements}
+The benefits of \speculake rely on the computation performed in the
+speculative function being well hidden. To this end we have verified 
+certain requirements about the locations that a target function can 
+be placed. 
+
+First and foremost the target function must be in the instruction cache. 
+This does not require that the function is ever run, only loaded. We have 
+found that this is not a large barrier to overcome as Intel 
+processors aggressively prefetch cache pages~\cite{measuring-cache}
+and simple access patterns could be established to ensure
+that the required block(s) are accessible. 
+
+We have also confirmed that all speculative target code in the payload  
+must be stored in executable pages, and that it cannot be stord in non-executable 
+data sections.  We suspect that this is again due to caching. The processor
+has no reason to cache instructions stored in the data section in the 
+instruction cache. If a trigger trains the branch predictor 
+to jump to an address in the payload's data section, the payload will not 
+be able to fetch the instructions into the execution pipeline. 
+
 \subsubsection{Hyperthreading}
 
 When running our tests, we assign the payload and trigger program to the same
