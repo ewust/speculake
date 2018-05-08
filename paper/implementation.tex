@@ -7,7 +7,7 @@ sufficient to gain a strong confidence in results.
 
 For each of these payloads, we used our custom trigger program that performs 28
 indirect jumps, followed by a final indirect jump to a function pointer that
-pointed to target function at address 0x430000. In each of our payload programs,
+pointed to a gadget at address 0x430000. In each of our payload programs,
 we performed the same 28 indirect jumps and the final indirect jump with the
 function pointer with two differences: first, the function pointer was cleared
 from the cache (using the \texttt{clflush} instruction), and second, the
@@ -15,8 +15,8 @@ function pointer pointed to a different destination (specifically, to a
 function
 that measured the cache side channel, recording the indexes in the probe array
 that appeared to be in the cache and then flushing all indexes).
-At address 0x430000, we placed our target
-function code for the payload program, which is never directly called
+At address 0x430000, we placed the code for our speculative gadget within the 
+payload program, which is never directly called
 (but executes speculatively). We note that this code must be loaded into the
 cache but otherwise need not be accessed directly.
 
@@ -25,8 +25,8 @@ cache but otherwise need not be accessed directly.
 \subsection{Turing Machine}
 \label{subsec:impl-turing}
 
-We implemented a 2-symbol 5-state Busy Beaver Turing machine logic in our speculative
-target function in the payload program. Our implementation reads a global state,
+We implemented a 2-symbol 5-state Busy Beaver Turing machine logic in a  
+payload application. The gadget implementation reads a global state,
 tape, and position, and determines how the state, tape, and position should be
 updated. It encodes this update into a single byte, and loads from a global
 buffer indexed by that byte, loading it into cache.
@@ -38,19 +38,19 @@ in the buffer.
 Our implementation is able to examine the state and current symbol
 on the Turing tape and make decisions based on these values as long as they are
 in cache. If one of these becomes uncached, one of two things will happen.
-First, the speculative function may simply fail to report any result back to the
+First, the speculative gadget may simply fail to report any result back to the
 real world, as the uncached read takes too long to return before the speculative
 world is squashed by the resolution of the function pointer. Second, the CPU may
 \emph{speculate} on the value of the uncached item, which may be incorrect. Of
 course, this does not affect the correctness of normal programs, but it does
 impact the correctness of our speculative code. In particular, the speculative
-target function will compute using an incorrect value of state or current
-symbol, and ultimately compute and report the wrong update.
+gadget will compute using an incorrect value of state or current
+symbol, and ultimately report the wrong update.
 
 
 This error is particularly devious, as it is not an
 error of bit flips or noise, but rather the processor speculating what the
-speculative target function reads from memory. Thus, error correcting codes on
+speculative gadget will read from memory. Thus, error correcting codes on
 the reported result do not improve the situation.
 
 
@@ -60,7 +60,7 @@ the reported result do not improve the situation.
 %loaded speculatively. This value is then used to update the state and tape and
 %the process is repeated until a halt state is reached.
 
-In order to have confidence the speculative target function executed with the
+In order to have confidence the speculative gadget executed with the
 correct inputs and reported the computed result correctly, 
 we repeat the execution a number of times and look for the value that was
 detected as present in the cache most often over all the iterations.
@@ -221,7 +221,7 @@ destination off the stack and performs the indirect jump. At each destination
 address, we place a static (direct) \texttt{jmpq} to bring execution to the
 next source address in our list. The final jump source/destination pair is not
 performed (and its destination is not pushed to the stack). However, we place
-our target function code at the destination address, which loads a specific value
+our gadget code at the destination address, which finishes by loading a specific value
 into the cache.
 The last source in the 31 indirect jumps performs an indirect jump that returns to our
 payload program, which immediately times probing the cache to see if any value was

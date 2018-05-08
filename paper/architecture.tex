@@ -134,7 +134,7 @@ resolve.
 \subsubsection{Speculative Instruction Capacity}
 
 To verify the upper limit of speculative instructions, we instrumented our
-trigger and payload programs to test a variable-length target function before it
+trigger and payload programs to test a simple gadget of variable-length before it
 communicated a signal to the real world via a cache side channel. If the cache
 side channel revealed no signal in the real world, then we know the speculative
 execution did not make it to the signal instructions before the mis-speculated
@@ -182,22 +182,23 @@ data dependencies define an upper boundary.
 % - MORE PROCESSORS for testing?
 % - ARM?
 
-\subsubsection{Target Function Requirements}
+\subsubsection{Gadget Location}
 The benefits of \speculake rely on the computation performed in the
 speculative function being well hidden. To this end we have verified 
-certain requirements about the locations that a target function can 
-be placed. 
+certain requirements about the locations that a speculative gadget can 
+be placed within a binary. 
 
-First and foremost the target function must be in the instruction cache. 
-This does not require that the function is ever run, only loaded. We have 
+First and foremost the gadget must be in the instruction cache. 
+This does not require that the actual instructions ever run,
+ only that they are in cache. We have 
 found that this is not a large barrier to overcome as Intel 
 processors aggressively prefetch cache pages~\cite{measuring-cache}
 and simple access patterns could be established to ensure
 that the required block(s) are accessible. 
 
-We have also confirmed that all speculative target code in the payload must be
+We have also confirmed that all speculative code in the payload must be
 stored in executable pages, and that it cannot be stored in non-executable data
-sections.  We suspect that this is again due to caching. The processor has no
+sections. We suspect that this is again due to caching. The processor has no
 reason to cache instructions stored in the data section in the instruction
 cache. If a trigger trains the branch predictor to jump to an address in the
 payload's data section, the payload will not be able to fetch the instructions

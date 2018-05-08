@@ -71,16 +71,16 @@ Importantly, the trigger program and payload program's indirect jump patterns
 diverge on the destination of their final jumps. However, because the trigger
 program has trained the CPU's branch predictor, the CPU speculates that the
 payload program will continue following the pattern of the trigger program,
-causing it to speculatively execute a \emph{target function} in the payload
+causing it to execute a \emph{speculative gadget} in the payload
 program. This execution path is shown in Figure~\ref{fig:high-level}.
 
-We emphasize that this target function is in a region that is neither
+We emphasize that this gadget is in a region that is neither
 read nor executed by the payload program, and after the CPU discovers the
 mis-speculation in the payload program, it will discard the results from the
-target function and continue executing from the correct destination. However,
+speculative gadget and continue executing from the correct destination. However,
 the payload program has a limited speculative window where it can perform
-computation in the target function, and can communicate results back to the
-``real world'' payload program via a cache side channel.
+computation, and can communicate results back to the ``real world'' payload 
+program via a cache side channel.
 
 %Figure~\ref{fig:high-level}
 
@@ -90,8 +90,8 @@ computation in the target function, and can communicate results back to the
 
 
 While it's possible for the trigger and payload programs to be bundled in a
-single program, an analyst aware of \speculake could easily find the target
-function in the payload program based on the jump pattern in the trigger program.
+single program, an analyst aware of \speculake could easily find the speculative
+gadget in the payload program based on the jump pattern in the trigger program.
 However, if the trigger and payload are kept separate, the analyst has a much
 harder job and must identify both.
 Moreover, it is possible that the trigger program be a
@@ -103,7 +103,7 @@ program, library, or even operating system component is responsible for training
 the CPU's branch predictor, and finding the specific set of jumps that occur at
 runtime. To make matters worse, the payload program can include dummy jump
 patterns that are effectively dead ends for the analyst, as they do not
-ultimately call the target function speculatively.
+ultimately call the hidden speculative gadget.
 
 
 Simulating or modelling the speculative execution path is a difficult task for a

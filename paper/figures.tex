@@ -91,9 +91,10 @@
 \begin{figure}[b]
     \centering
         \includegraphics[width=0.46\textwidth]{figures/spasm_model.pdf}
-    \caption{This model describes the VM control flow. An encrypted SPASM binary 
+    \caption{This diagram demonstrates the control flow of a \speculake application
+        making use of the decryption gadget and emulation. An encrypted SPASM binary 
         stored in dead code or data accessible to \textit{Speculative Computation} 
-        is decrypted  and then returned through the primitive. The SPASM 
+        is decrypted  and then returned through the primitive. The 
         \textit{Resultant Computation} performs the SPASM emulation to update the 
         process state before the next instruction is decrypted.}
     \label{fig:spasm_model}
