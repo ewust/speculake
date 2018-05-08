@@ -76,6 +76,7 @@ void *map;
 // (mis)speculate and start processing this function.
 // In reality, the CPU will (eventually) call check_probes()
 // where we collect results and see what's in cache
+void update_state(uint8_t write, uint8_t move_right, uint8_t state) __attribute__((section(".targetfn"))); 
 void target_fn(void) __attribute__((section(".targetfn")));
 void end_target_fn(void);
 
@@ -112,7 +113,7 @@ uint64_t jmp_ptr;
 
 #define TURING_TAPE_LEN 1024*512
 uint8_t *turing_tape;
-uint8_t turing_state;
+uint64_t turing_state;
 uint8_t true_turing_state;
 uint8_t true_move_right;
 uint8_t true_write;
@@ -128,8 +129,8 @@ void updateState(uint8_t write, uint8_t move_right, uint8_t state){
     true_turing_state = state;
     true_move_right = move_right;
     true_write = write;
-    // true_max_i = (true_turing_state << 2) | ((true_move_right & 0x1) << 1) | (true_write & 0x1);
-    true_max_i = (state<<2)| (0 << 1) | (*turing_tape & 0x1);
+    true_max_i = (true_turing_state << 2) | ((true_move_right & 0x1) << 1) | (true_write & 0x1);
+    // true_max_i = (state<<2)| (0 << 1) | (*turing_tape & 0x1);
 }
 
 void true_turing(void){
@@ -311,11 +312,12 @@ void updateLocalState(uint8_t max_i, uint8_t *write, uint8_t *move_right){
     }
     #else
     // original
-    // turing_state = max_i >> 2;
-    // *move_right = (max_i >> 1) & 0x1;
-    // *write = max_i & 0x1;
+    turing_state = max_i >> 2;
+    *move_right = (max_i >> 1) & 0x1;
+    *write = max_i & 0x1;
 
     // update everything local
+/*
     turing_state = max_i >> 2;
     uint8_t symbol = max_i & 0x1;
     if (turing_state == 0) {    // A
@@ -334,6 +336,7 @@ void updateLocalState(uint8_t max_i, uint8_t *write, uint8_t *move_right){
         if (symbol == 0) {*write = 1; *move_right = 1; turing_state = 5;}
         else             {*write = 0; *move_right = 0; turing_state = 0;}
     }
+*/
     // switch(max_i) {
     //     case 2:
     //         *write = 1;
@@ -479,7 +482,9 @@ void measure() {
                 for (i=0; i<jump; i++) {
                     // rand_xor = (uint8_t) rand() & 0xff;
                     _mm_clflush(&fn_ptr);
-                    _mm_clflush(&jmp_ptr);
+                    // _mm_clflush(&jmp_ptr);
+                    turing_state = turing_state & 0xff;
+                    *turing_tape = *turing_tape & 0xff;
                     indirect(&jmp_ptr);
                     //((void(*)(void *))map)(&jmp_ptr);
                     usleep(1);
@@ -495,7 +500,7 @@ void measure() {
                     }
                 }
 
-                if (max_res > percent*jump && avg < 50){
+                if ((max_res > percent*jump) && avg < 50){
                     instr++;
 
                     true_turing();
@@ -513,7 +518,7 @@ void measure() {
                     }
                     bool correct = test_Turing(move_right, write, max_i);
                     if (instr % 100 == 0){
-                        printf("## Run %03d, Step %08lu, | misses: %03d, max_i: %02lu, true_max_i: %02lu\n", experiment, instr, misses, max_i, true_max_i);
+                        printf("## Run %03d, Step %08lu, | misses: %03d, max_i: %02lu, true_max_i: %02lu, conf: %0.02f\n", experiment, instr, misses, max_i, true_max_i, ((float)max_res)/jump);
                     }
                     // printf("## Run %03d, Step %08lu, | misses: %03d, max_i: %02lu, true_max_i: %02lu\n", experiment, instr, misses, max_i, true_max_i);
                     // printf("\t-> State: %d, move_right: %d, write: %d, symbol: %d\n", turing_state, move_right, write, *turing_tape);
@@ -523,7 +528,7 @@ void measure() {
                     if (!correct){
                         printf("State: %d, symbol: %d\n", old_turing_state, old_symbol);
                         printf("incorrect turing computation:\n");
-                        printf("correct state: %d, received state: %d\n", 
+                        printf("correct state: %d, received state: %lu\n", 
                             true_turing_state, turing_state);
                         printf("correct move_right: %d, received move_right: %d\n",
                             true_move_right, move_right);
@@ -575,7 +580,12 @@ void measure() {
                     // printf("--[%lu]: %lu, %lu avg cycles ps %ld\n", max_i, max_res, avg, cur_probe_space);
                     misses++;
                     if (misses % 100 == 0){
-                        printf("## Run %03d, Step %08lu, | misses: %03d, max_i: %02lu, true_max_i: %02lu\n", experiment, instr, misses, max_i, true_max_i);
+                        printf("## Run %03d, Step %08lu, | misses: %03d, max_i: %02lu, true_max_i: %02lu, conf: %0.02f\n", experiment, instr, misses, max_i, true_max_i, ((float)max_res)/jump);
+			if (((float)max_res)/jump >= percent){
+				printf("confidence higher than threshold?\n");
+				printf("max_res: %lu, need to beat: %0.02f\n", max_res, percent*jump);
+				printf("avg: %lu\n", avg);
+			}
                     }
                     cur_probe_space += 63;
                     if (cur_probe_space >= MAX_PROBE_SPACE)
