@@ -118,60 +118,73 @@ be directly extended to AMD, ARM, and other processors making use of
 speculative branch prediction.
 
 \subsubsection{Multiple Triggers}
-To create further difficulties for an analyst, or to further target
-the execution environment it is possible
-to have the payload program test a series of separate jump patterns. The decryption
-process can then be done in stages where the result of a given stage determines 
-the initial state of the next stage that the payload program 
-performs. Only when all triggers have been completed in the correct order will
-the true plaintext be available. 
+To create further difficulties for an analyst, or to further target the
+execution environment it is possible to have the payload program test a series
+of separate jump patterns. The decryption process can then be done in stages
+where the result of a given stage determines the initial state of the next stage
+that the payload program performs. Only when all triggers have been completed in
+the correct order will the true plaintext be available. 
 
-While this would increase the difficulty for analyst  who has access
-to a sample in isolation, it  does not add any extra layers of complication 
-for an analyst who can observe the entire decryption process. Any state 
-encoded in the real world during the individual stages will be available to current 
-debugging tools. This allows the initial state of a sample to be modified
-to simplify subsequent runs. For example, they could patch the 
-binary to begin with the state of the final stage such that only the final 
-trigger must be run again to retreive the plaintext. While this simplifies the 
-job of acquiring the plaintext of a given \speculake sample, it does not give any 
-information about the trigger programs or the key schedules used. 
+While this would increase the difficulty for analyst  who has access to a sample
+in isolation, it  does not add any extra layers of complication for an analyst
+who can observe the entire decryption process. Any state encoded in the real
+world during the individual stages will be available to current debugging tools.
+This allows the initial state of a sample to be modified to simplify subsequent
+runs. For example, they could patch the binary to begin with the state of the
+final stage such that only the final trigger must be run again to retreive the
+plaintext. While this simplifies the job of acquiring the plaintext of a given
+\speculake sample, it does not give any information about the trigger programs
+or the key schedules used. 
 
 \smallskip
 
 Alternatively multiple triggers could be used make individual state changes in
-the payload program, and write in data from a local, or (as demonstrated in 
+the payload program, and write in data from a local, or (as demonstrated in
 section~\ref{subsec:openssl}) remote processes. For example, a payload program
-can check a series of three distinct jump patterns corresponding to three different 
-triggers. If the first trigger is detected the payload shifts in a 1 to the state; if
-the second is detected it shifts in a 0. If the third trigger is detected it 
-discontinues listening to the three triggers and proceeds with other computation. 
-This could be a direct form of \speculake using emulation and decryption 
-or more traditional malicious behavior. Using this method a payload program can
-be distributed without the encrypted data section all together, instead having 
-the data written into the process at run-time without ever connecting out to any 
-other resource. 
+can check a series of three distinct jump patterns corresponding to three
+different triggers. If the first trigger is detected the payload shifts in a 1
+to the state; if the second is detected it shifts in a 0. If the third trigger
+is detected it discontinues listening to the three triggers and proceeds with
+other computation. This could be a direct form of \speculake using emulation and
+decryption or more traditional malicious behavior. Using this method a payload
+program can be distributed without the encrypted data section all together,
+instead having the data written into the process at run-time without ever
+connecting out to any other resource. 
 
 \subsubsection{Benign Triggers}
-We have demonstrated that a using OpenSSL as a benign trigger allows for 
-\speculake payloads to be triggered remotely, and discussed the minimum 
+We have demonstrated that a using OpenSSL as a benign trigger allows for
+\speculake payloads to be triggered remotely, and discussed the minimum
 requirements for identifying a benign trigger. However, we have not classified
-typical system resources that might be used a benign triggers. This is a 
-promising direction for future investigation as various system libraries present 
-juicy targets for trigger design. For exmaple, if a sufficient series of jumps 
-is found to exist in the TCP stack implemented in the unix kernel (i.e. in the TCP
-Checksum library) an attacker could reasonably trigger a \speculake payload remotely,
-from a spoofed IP address. This attack would rely on a payload defeating KASLR, 
-however, this has been demonstrated to be feasible~\cite{gruss2017kaslr,evtyushkin2016jump}
+typical system resources that might be used a benign triggers. This is a
+promising direction for future investigation as various system libraries present
+juicy targets for trigger design. For exmaple, if a sufficient series of jumps
+is found to exist in the TCP stack implemented in the unix kernel (i.e. in the
+TCP Checksum library) an attacker could reasonably trigger a \speculake payload
+remotely, from a spoofed IP address. This attack would rely on a payload
+defeating KASLR, however, this has been demonstrated to be
+feasible~\cite{gruss2017kaslr,evtyushkin2016jump}
 
 \subsubsection{Alternative Applications}
-We have proposed the \speculake model as a new malware threat, however, this model
-of hidden computation applies more broadly. As of now there are no ways of 
-debugging speculative computation meaning that the computation done there is effectively
-isolated as with trusted execution environments. The security provided by the obfuscated 
-key schedule makes \speculake useful in the domains of Digital Rights Management (DRM)
-and whitebox cryptography, and apprimate computing fields. 
+We have proposed the \speculake model as a new malware threat, however, this
+model of hidden computation applies more broadly. As of now there are no ways of
+debugging speculative computation meaning that the computation done there is
+effectively isolated as with trusted execution environments. The security
+provided by the obfuscated key schedule makes \speculake useful in the domains
+of Digital Rights Management (DRM) and whitebox cryptography, and approximate
+computing fields. 
 %% Approximate Computing 
+
+Approximate Computing prioritizes the computation of quick results that are
+potentially incorrect. This form of computation often leverages some type of
+machine learning to determine how well individual results fit with a crowd of
+approximately computed results. As mentioned in Section~\ref{subsec:impl-turing}
+occasionally values necessary for computation in the speculative world are not
+in cache and thus must be speculated themselves. In this situation error
+correcting codes are useless given that the mistake is not a mutation of the
+correct input, but rather a guess at what the input might be. The mechanisms
+used in approximate computing may be beneficial here, allowing computation to
+run speculatively and results be analyzed after the computation to determine how
+results fit, with the understanding that these results may not be accurate.
 
 
 
