@@ -69,10 +69,9 @@ Our Turing implementation discovered that 50 repetitions is sufficient for
 the real world to determine the correct value, as the ``hit rate'' for any one
 iteration observing the correct value loaded in cache was over 80\%.
 
-\TODO{Ian: how many seconds did it take to complete?}
 We implemented the 5 state Busy Beaver configuration which requires over 47
 million steps to complete. We were able to verify that the speculative world
-could correctly compute 20 thousand steps with no errors.
+could correctly compute 20 thousand steps with no errors at a rate of 324 instructions per second.
 
 % Target_fn returning next step given access to current state in global vars
 %   - busy beaver
