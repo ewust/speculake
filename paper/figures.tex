@@ -7,8 +7,20 @@
     \centering
     % \includegraphics[clip, trim=6cm 13.5cm 3.8cm 5cm, width=0.9\linewidth]{figures/exspectre-high-level.pdf}
     \includegraphics[width=0.9\linewidth]{figures/exspectre-high-level-trimmed.pdf}
-    \caption{\textbf{Exspectre}\,---\, %
-    1, 2, 3, 4...}
+    \caption{\textbf{\speculake}\,---\,%
+    Both the Trigger and Payload binaries exhibit the same initial series of
+    indirect jumps, shown in Step 1. The trigger program solely executes these
+    jumps to (mis)train the branch predictor. In the Payload program
+    \texttt{fn\_ptr} has been set to point to the \texttt{cache\_timing}
+    function and flushed from cache. Thus at Step 2 the branch predictor
+    mis-predicts the jump to \texttt{cache\_timing} and instead jumps to
+    \texttt{target\_fn} as trained by the Trigger program (green line). 
+    \texttt{target\_fn} then executes speculatively as shown in Step 3. 
+    Eventually \texttt{fn\_ptr} is loaded from memory and this mis-jump is 
+    recognized by the processor, directing computation to Step 4, the 
+    \texttt{cache\_timing} function, which then computes which value was loaded 
+    into cache speculatively.}
+
 
     \label{fig:high-level}
 
@@ -22,7 +34,7 @@
         \includegraphics[width=0.9\textwidth]{figures/Speculative_measurements.png}
     \caption{The speculative primitive allows for a limited number of instructions
         to be completed speculatively, dependent on multiple factors. Trigger and 
-        payload processes must share cpu resources as they must be performed on 
+        payload processes must share CPU resources as they must be performed on 
         the same hyperthread or associated parity hyperthreads. Processes on
         the parity hyperthreads (warm colors) denoted by (P) accomplish a 
         significantly lower number of instructions as compared with processes 
@@ -33,10 +45,12 @@
 
 
 \newcommand{\FigCacheMiss}{
-\begin{figure}[h]
+\begin{figure}[t]
     \centering
     \includegraphics[width=0.5\textwidth]{figures/cache_miss_dist}
-    \caption{Cache Hit/Miss Latency Distribution}
+    \caption{The Cache Hit/Miss Latency Distribution of an Intel
+        Xeon-1270. Measured by timing accesses to cached/uncached memory. 
+        Typical cache miss resolution takes 6x longer than a cache hit.}
     \label{fig:cache-miss}
 \end{figure}
 }
@@ -62,7 +76,7 @@
     \centering
         \includegraphics[width=0.5\textwidth]{figures/Speculative_bandwidth}
     \caption{Speculative Bandwidth - Using the speculative primitive 
-        1KB of data can be decrypted and exfiltrated at a speed around 5500 kbps
+        1KB of data can be decrypted and exfiltrated at a speed between 5 and 6 kbps
         from the speculative world. Varying the width of the channel 
         results in competing performance factors -- decreasing the 
         number of loops vs decreased size of the probe space.}

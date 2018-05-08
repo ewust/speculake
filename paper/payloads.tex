@@ -26,8 +26,8 @@ This method makes it appear as though the program is generating its own code.
 To demonstrate that arbitrary computation can be done in the speculative world
 we implement a Turing machine, configured to run the 5-state Busy Beaver 
 function~\cite{chaitin1987computing,herken1992universal}.
-The Busy Beaver is a configuration that writes the most
-1s on the tape with only a limited number of states and still halts.
+The Busy Beaver is a configuration which writes the most
+1s on the tape before halting with a limited number of states.
 
 The computation of the Turing Machine is done speculatively, meaning that while
 the real world keeps track of the state, tape, and symbols of the turing machine
@@ -36,8 +36,8 @@ all logic used to update the above is done in the speculative world.
 \subsection{Unpacking and Decryption}
 \label{subsec:decryption}
 
-Section~\ref{subsec:turing} demonstrates that arbitrary speculative computation
-is possible, but hiding malware this way has several drawbacks. First, an
+While a Turing machine demonstrates that arbitrary speculative computation
+is possible, hiding malware this way has several drawbacks. First, an
 analyst might be able to observe that something is driving a Turing
 machine by noticing the real world state updating. With enough symbols, the
 analyst could reverse engineer the state machine even without being able to see
@@ -50,7 +50,7 @@ decryption speculatively. To hide keys from the analyst, the key and decryption
 code only occur in the speculative world, while committed state only learns the
 resulting plaintext. Furthermore, the speculative code can
 derive the decryption key based entirely off the trigger program, making it
-impossible for an analyst that only has the payload program from being able to
+impossible for an analyst that only has the payload program to
 determine the key or decrypt the embedded ciphertext.
 
 
@@ -70,35 +70,26 @@ Section~\ref{subsec:impl-aes}.
 
 \medskip
 
-We note that an analyst might attempt to locate the speculative entry point by
-searching for AES-NI instructions in the payload program's dead code, ultimately
-discovering the keys that it uses. However, we find it is possible to overcome
-this by having the trigger program communicate the decryption key to the payload
-program via the branch predictor.
 
-To accomplish this, we use multiple speculative entry points, each that derive a
-different decryption key before calling a common decryption routine. Since
-the exact speculative entry point is determined by the trigger program, an
-analyst cannot discover the decryption key directly from the payload program.
+\subsubsection{Nested Speculation}
 
-An analyst could still enumerate all potential entry points, testing each one
-until they find one that correctly decrypts the ciphertext. In a 1~MB binary,
-there are (at most) only 1~million entry points, providing just 20~bits of
-security.
+We explore the ability for the CPU to ``double speculate'', where a stalled
+indirect jump while the CPU is speculating causes it to predict the target and
+speculate a second time. For instance, suppose a payload program truly jumps to
+target A, but the CPU is mistrained by a trigger program that jumps to B, thus
+causing the payload program to speculatively execute at B. At B, suppose there
+is a second indirect jump, perhaps using the same register as the first jump
+(which has still not resolved). If the trigger program jumps to C, the payload
+program will speculate a second time and also begin executing code at C.
 
-To increase security, we \emph{chain} entry points together. Rather than derive
-the key from a single entry point, we have each potential entry point perform
-another indirect jump that the CPU cannot immediately resolve, forcing it to
-speculate while already executing speculatively. The predicted target of that jump
-will also be determined by the trigger program. For example, if the trigger
-program makes 30 training jumps, followed by 10 additional indirect jumps, and
-the payload program performs the same 30 training jumps before a stall, the CPU
-will predict the payload program will also perform the next 10 jumps. If each
-jump has the potential to land in up to 1024 possible locations, this would
-provide in total $1024^{10} = 2^{100}$ possible keys, or 100~bits of security.
-We describe our implementation of this nested speculative execution concept in
-Section~\ref{subsec:nested-spec}.
-
+We find that not all Intel CPUs support nested speculation. For
+example, it appears Haswell chips do not speculate while already speculating,
+but nonetheless support non-nested \speculake. Both Sandy Bridge (which
+preceeded Haswell) and Kaby Lake (which followed Haswell) support nested
+speculation.
+% Could cut
+We leverage this support in Section~\ref{subsec:decryption} to
+increase the security of speculative decryption keys.
 
 %There are numerous challenges for a reverse engineer to overcome to learn how a
 %malicious program with this primitive works. As with previous examples, the
@@ -122,9 +113,9 @@ Section~\ref{subsec:nested-spec}.
 %   - Find the correct trigger program
 
 \subsection{Virtual Machines}
-We demonstrated in Section~\ref{subsec:turing} that general purpose computation 
-is possible in the speculative environment in spite of the contraints 
-imposed by the speculative world. However, a turing machine
+We demonstrate in Section~\ref{subsec:turing} that general purpose computation 
+is possible in the speculative environment in spite of the constraints 
+imposed by the speculative world. However, a Turing Machine
 is not an efficient or usable model for computation when
 attempting to accomplish tasks on modern processors. 
 
@@ -136,22 +127,21 @@ emulation is being done. It reveals nothing about the ultimate goal of the
 program. 
 
 To accommodate both developers as well as the unique constraints 
-enforced by the speculative primitive, a custom emulation solution is required. We 
-have approached this challenge from both directions. First we demonstrate 
-general purpose emulation using a custom instruction set -- SPASM -- which
-accommodates the speculative primitive specifically. Next we investigate custom 
-wrappers on traditional emulators allow for similar payload construction,
-with a much more developer friendly 
+enforced by the speculative primitive, a custom emulation solution is required. 
+We have created a custom emulator and instruction set -- SPASM -- which 
+accommodate the speculative primitive specifically. This 
+provides a higher level of abstraction around the speculative primitive
+that we have used to implement various executable binaries. 
 
-% REFERENCE FIGURES
-% - Constraints enforced by speculative primitive
-%       - more bits = slower
-%       - less bits = less expressive
-%       - must be computable within speculative ROB limit (~150 instrs) (decrypt only)
-%   
-% - optimizations for weird-machine computations 
+% The assembly level abstraction that SPASM provides is still not extremely
+% user friendly as it does not allow an author to write their encrypted 
+% emulator payload in a high level language.  
 
-% --- VM
-%   - Wrappers around traditional ISA VMs
-%   - SPASM  custom emulator made f
-%%%%%%%%%%%%%%
+While the custom emulator that we developed gives higher level abstraction to
+an author, it still requires programs to be written in a custom assembly language. 
+We note that the \speculake model is not intrinsically linked to the SPASM emulator. 
+A wrapper could be implemented around other existing emulators to incrementally 
+construct instructions 6 or 8 bits at a time (depending on the channel width). 
+This would allow for encrypted payloads to be written in higher level languages
+like C or C++, although there would be a significant performance reduction to 
+using this type of wrapper. 

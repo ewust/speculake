@@ -1,7 +1,48 @@
 
 \section{Implementation and Evaluation}
+We now discuss the details of our implementations and the information learned
+about speculative execution gained by these experiments. We discuss how we gain
+confidence in information passed back, and how a low number of iterations is
+sufficient to gain a strong confidence in results.
 
 \subsection{Turing Machine}
+\label{subsec:impl-turing}
+
+We implemented a 5-state Busy Beaver Turing machine.
+This implementation led to the discovery of many of the limitations and
+capabilities of speculative execution.
+
+We found that our implementation is able to examine the state and current symbol
+on the Turing tape and make decisions based on these values as long as they are
+in cache. The subtlety here is that in order to enter this speculative execution
+the function pointer must be flushed from cache (causing the branch predictor to
+incorrectly predict the target function as the destination). As such, care must
+be taken to ensure that the function pointer and state to be used in the
+speculative execution must be in separate cache lines. 
+
+If the state is removed from cache, during the speculative execution the
+state is also speculated. This error is particularly devious, as it is not an
+error of bit flips, but rather the processor speculating what the state could
+be, meaning that the state it uses is a possible value, and is not simply a
+mutation. 
+
+In our model the real world keeps track of the Turing state and tape. The
+speculative world uses this information to load a specific value into cache. The
+real world then times the loading of these values to determine which value was
+loaded speculatively. This value is then used to update the state and tape and
+the process is repeated until a halt state is reached.
+
+In order to have confidence the value loaded speculatively is correct we repeat
+the execution a number of times and look for the value that has the quickest
+real-world load time over each repetition, whichever value is quickest to load
+the most is then determined to be the ``correct'' value.
+
+Our Turing implementation discovered that only 50 repetitions is sufficient for
+the real world to determine the correct value with over 80\% confidence.
+
+We implemented the 5 state Busy Beaver configuration which requires over 47
+million steps to complete. We were able to verify that the speculative world
+could correctly compute 20 thousand steps with no errors.
 
 % Target_fn returning next step given access to current state in global vars
 %   - busy beaver
@@ -21,32 +62,30 @@ detected by a reverse engineer. Thus 11 random round keys are selected. This
 obfuscated key schedule makes it more difficult for a reverse engineer to
 determine that there is encrypted content. Additionally since the content is
 only accessed when the correct trigger program is running the challenges facing
-a reverse engineer are great. We discuss further methods for obfuscating specualtive
-decryption in section~\ref{subsec:future-work}. 
+a reverse engineer are great. We discuss further methods for obfuscating
+specualtive decryption in section~\ref{subsec:future-work}. 
 
 
 We have implemented the AES decryption as a fundamental piece of the \speculake model,
 and we demonstrate that the speed at which information can be decrypted using the speculative 
-primitive is dependent on the configuration of the \speculake model. Specifical,
+primitive is dependent on the configuration of the \speculake model. Specifically,
 the channel width and the required minimum signal strength determine the maximum
-throughput that can be acheived. As demonstrated in Figure~\ref{fig:spec_bandwidth} 
+throughput that can be achieved. As demonstrated in Figure~\ref{fig:spec_bandwidth} 
 between 6 and 8 bits channel width provides an idea of the maximum speed at which the 
 speculative primitive can be used with AES-NI instructions in the payload. 
 
 While the \speculake model acheives only moderate decryption speed, the 
 critical computation of the decryption is done in the speculative world. 
+To further mask secure this decryption we make use of nested speculation 
+to obfuscate the key schedule, discussed in section~\ref{subsec:nested-spec}.
 
 \FigSpecBandwidth
-% implementation 
-%   Key Schedule expansion / obfuscation
-%
-% you can speculatively execute AES instructions 
 
 \subsection{Virtual Machine}
+\label{subsec:spasm}
 
-
-\subsubsection{SPASM}
-\label{subsubsec:spasm}
+% \subsubsection{SPASM}
+% \label{subsubsec:spasm}
 Constructing an emulator making use of the speculative primitive requires  
 a trade off in expresive capability versus speed. 
 We have implemented SPASM as a model using two pseudo-registers, and six 
@@ -58,60 +97,52 @@ To acheive a balance with speed the number of bits in each instruction is both
 fixed and minimized.  A variable length instruction would require that the 
 \texttt{Flush+Reload} stage search the maximum number of bits on each round, and each 
 aditional bit doubles the search space that the \texttt{Flush+Reload} stage must 
-traverse.  So every bit shorted effectively doubles the throughput of the 
-emulator, and there is effectively no advantage to allowing variable length 
+traverse.  So every bit shorter effectively doubles the throughput of the emulator~\footnote{Until it doesn't}, 
+and there is effectively no advantage to allowing variable length 
 instructions. 
 
+In this model of computation there are no arguments as the speculative 
+primitive provides a limited number of bits. Each opcode performs a 
+specific operation on the registers in the state maintained by the emulator.
+While other small instruction set architectures exist, they either allow 
+exceptions to their instruction length, are too long even in reduced form, 
+or did not have significant support to make them favorable for developers. 
+
+We have used 6 bits in the construction of this instruction set as our original
+goal was to limit the length of each opcode as much as possible. Given the result 
+demonstrated in figure~\ref{fig:spec_bandwidth} we have relaxed this goal a bit, as similar 
+performance can be acheived within a range of bits and other application 
+factors weigh on performance more than channel width. 
+
 Using this model we have implemented multiple example programs that can be run
-as encrypted payloads in an \speculake payload. A \textit{HelloWorld} program 
+as encrypted binaries in an \speculake payload. A \textit{HelloWorld} program 
 that prints to stdout. A \textit{FizzBuzz} program that demonstrates control 
 flow and arithmetic operations while printing to stdout. And finally,
 a \textit{ReverseShell} program that opens and connects to a socket before  
-duplicating I/O and executing a local shell. 
+duplicating I/O file descriptors and executing a local shell. Details of the 
+SPASM instruction set can be found in Appendix~\ref{appendix:spasm}.
 
 Expected performance for a given SPASM binary will vary given multiple factors, 
 the most important of which is the \texttt{Flush+Reload} redundancy. This can be tuned
 based on the specific trigger, as it is used to establish confidence that a signal 
 has been identified in the indicess returned from the "speculative world". 
-Thus accomplishing a task using SPASM generally equates to:
+%Thus accomplishing a task using SPASM generally equates to:
 
-\begin{lstlisting}
-    Redundancy * Probe_Space * Num_Instr
-\end{lstlisting}
+% \begin{lstlisting}
+%     Redundancy * Probe_Space * Num_Instr
+% \end{lstlisting}
 
 For example, the \textit{ReverseShell} program makes six system calls to open a socket,
-connect to it, duplicate I/O, and execve a specified program. This requires 355
-SPASM instructions to complete. The probe space for the 6-bit SPASM ISA requires 
-a traversal of an array od size 64. When using a redundancy of 256 to establish
-confidence in the signal the entire \textit{ReverseShell} program takes under 7 
-seconds to run once triggered. 
+connect to it, duplicate I/O file descriptors, and perform an execve
+systemcall to open a shell. This requires 355 SPASM instructions to complete. 
+The probe space for the 6-bit SPASM ISA requires a traversal of an array of size 64.
+When using a redundancy of 256 to establish confidence in the signal the entire 
+\textit{ReverseShell} program takes under 7 seconds to run once triggered. 
+
+
+% TODO - REFERENCE APPENDIX for ISA
 
 \FigSpasmModel
-
-\subsubsection{ARM}
-\label{subsubsec:arm}
-While the custom emulator that we developed gives a much higher level abstraction to 
-a developer, it still requires programs to be written in custom assembly 
-language. To demonstrate that the extensibility of this model we also implemeted a wrapper
-around an ARM emulator, such that programs can be written in a high level languages 
-such as C or C++, statically compiled to binaries for the ARM emulator, and deployed 
-as an encrypted data sections to be decrypted at run-time.  
-
-
-% ARM Wrapper
-%   - memory
-%   - single instruction vs block
-
-We chose to implement a wrapper around ARM as it has a 32-bit fixed instruction
-length. However this causes a significant hit to the speed at which operations 
-can be performed as the probe space is increased by a factor of four in 
-comparison with SPASM,  and we must complete 4 of these transactions to 
-retreive a single ARM opcode. Trading more expressive operations for speed
-results in a 16x slowdown when considering per-instruction throughput. 
-
-\begin{lstlisting}
-    4 * Redundancy * Probe_Space * Num_Instr
-\end{lstlisting}
 
 \subsection{OpenSSL Trigger}
 \label{subsec:openssl}
@@ -171,16 +202,38 @@ could potentially allow an adversary to use an obscure or uncommon (but still
 supported) cipher suite to trigger a malicious payload program on a remote server.
 
 
-% extract jump patterns
-% sufficiency checks 
-%
-% trigger strength
-%   - future work developing tools to determine sufficiency and strength
-%
-% OPENSSL TRIGGERING REVERSE SHELL SPASM PAYLOAD
-
 
 \subsection{Nested Speculation}
 \label{subsec:nested-spec}
+
+We note that an analyst might attempt to locate the speculative entry point by
+searching for AES-NI instructions in the payload program's dead code, ultimately
+discovering the keys that it uses. However, we find it is possible to overcome
+this by having the trigger program communicate the decryption key to the payload
+program via the branch predictor.
+
+To accomplish this, we use multiple speculative entry points, each that derive a
+different decryption key before calling a common decryption routine. Since
+the exact speculative entry point is determined by the trigger program, an
+analyst cannot discover the decryption key directly from the payload program.
+
+An analyst could still enumerate all potential entry points, testing each one
+until they find one that correctly decrypts the ciphertext. In a 1~MB binary,
+there are (at most) only 1~million entry points, providing just 20~bits of
+security.
+
+To increase security, we \emph{chain} entry points together. Rather than derive
+the key from a single entry point, we have each potential entry point perform
+another indirect jump that the CPU cannot immediately resolve, forcing it to
+speculate while already executing speculatively. The predicted target of that jump
+will also be determined by the trigger program. For example, if the trigger
+program makes 30 training jumps, followed by 10 additional indirect jumps, and
+the payload program performs the same 30 training jumps before a stall, the CPU
+will predict the payload program will also perform the next 10 jumps. If each
+jump has the potential to land in up to 1024 possible locations, this would
+provide in total $1024^{10} = 2^{100}$ possible keys, or 100~bits of security.
+We describe our implementation of this nested speculative execution concept in
+Section~\ref{subsec:nested-spec}.
+
 
 %%%%%%%%%%%%%%
