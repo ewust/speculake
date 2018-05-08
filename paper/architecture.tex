@@ -48,14 +48,14 @@ their behavior, which we do in \speculake.
 We observe that Intel CPUs consider three types of x86\_64 indirect branches:
 \texttt{retq}, \texttt{callq *\%rax}, and \texttt{jmpq *\%rax}\footnote{other
 general purpose registers besides \texttt{\%rax} can be used as well}.
-We created a simple trigger program that performs a series of 32 indirect
+We created a simple trigger program that performs a series of 28 indirect
 branches
 using \texttt{jmpq *\%rax} instructions. Between each jump, we increment
 \texttt{\%rax} to account for the number of bytes between jumps. For the last
 jump, we load a function pointer into \texttt{\%rax} and do a final indirect
 branch using \texttt{callq *\%rax}.
 
-In our payload program, we first perform the same 32 indirect jumps. We ensure
+In our payload program, we first perform the same 28 indirect jumps. We ensure
 the source address of these jumps is the same as in the trigger program by
 manually defining their containing function at a fixed address inside a linker
 script. We also do the final indirect call to a function pointer, but with two
@@ -228,7 +228,8 @@ running trigger and payload on a single core vs.\ a pair of hyperthreaded cores.
 
 We summarize our findings into a \emph{speculative primitive}, which allows us to
 speculatively (and covertly) perform on the order of 100 arbitrary
-instructions, and communicate a short (e.g. single byte) result to the real
+instructions while an accompanying trigger program is running, and communicate
+a short (e.g. single byte) result to the real
 world via a cache side channel. These speculative instructions are able to read
 from any real-world memory or registers, but they cannot perform updates or
 writes directly. To update memory, the speculative instructions must communicate
