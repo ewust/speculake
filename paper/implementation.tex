@@ -76,6 +76,8 @@ speculative primitive can be used with AES-NI instructions in the payload.
 
 While the \speculake model acheives only moderate decryption speed, the 
 critical computation of the decryption is done in the speculative world. 
+To further mask secure this decryption we make use of nested speculation 
+to obfuscate the key schedule, discussed in section~\ref{subsec:nested-spec}.
 
 \FigSpecBandwidth
 
@@ -95,17 +97,30 @@ To acheive a balance with speed the number of bits in each instruction is both
 fixed and minimized.  A variable length instruction would require that the 
 \texttt{Flush+Reload} stage search the maximum number of bits on each round, and each 
 aditional bit doubles the search space that the \texttt{Flush+Reload} stage must 
-traverse.  So every bit shorter effectively doubles the throughput of the 
-emulator, and there is effectively no advantage to allowing variable length 
-instructions. Details of the SPASM instruction set can be found in 
-Appendix~\ref{appendix:spasm}. 
+traverse.  So every bit shorter effectively doubles the throughput of the emulator~\footnote{Until it doesn't}, 
+and there is effectively no advantage to allowing variable length 
+instructions. 
+
+In this model of computation there are no arguments as the speculative 
+primitive provides a limited number of bits. Each opcode performs a 
+specific operation on the registers in the state maintained by the emulator.
+While other small instruction set architectures exist, they either allow 
+exceptions to their instruction length, are too long even in reduced form, 
+or did not have significant support to make them favorable for developers. 
+
+We have used 6 bits in the construction of this instruction set as our original
+goal was to limit the length of each opcode as much as possible. Given the result 
+demonstrated in figure~\ref{fig:spec_bandwidth} we have relaxed this goal a bit, as similar 
+performance can be acheived within a range of bits and other application 
+factors weigh on performance more than channel width. 
 
 Using this model we have implemented multiple example programs that can be run
 as encrypted binaries in an \speculake payload. A \textit{HelloWorld} program 
 that prints to stdout. A \textit{FizzBuzz} program that demonstrates control 
 flow and arithmetic operations while printing to stdout. And finally,
 a \textit{ReverseShell} program that opens and connects to a socket before  
-duplicating I/O file descriptors and executing a local shell. 
+duplicating I/O file descriptors and executing a local shell. Details of the 
+SPASM instruction set can be found in Appendix~\ref{appendix:spasm}.
 
 Expected performance for a given SPASM binary will vary given multiple factors, 
 the most important of which is the \texttt{Flush+Reload} redundancy. This can be tuned
@@ -190,5 +205,35 @@ supported) cipher suite to trigger a malicious payload program on a remote serve
 
 \subsection{Nested Speculation}
 \label{subsec:nested-spec}
+
+We note that an analyst might attempt to locate the speculative entry point by
+searching for AES-NI instructions in the payload program's dead code, ultimately
+discovering the keys that it uses. However, we find it is possible to overcome
+this by having the trigger program communicate the decryption key to the payload
+program via the branch predictor.
+
+To accomplish this, we use multiple speculative entry points, each that derive a
+different decryption key before calling a common decryption routine. Since
+the exact speculative entry point is determined by the trigger program, an
+analyst cannot discover the decryption key directly from the payload program.
+
+An analyst could still enumerate all potential entry points, testing each one
+until they find one that correctly decrypts the ciphertext. In a 1~MB binary,
+there are (at most) only 1~million entry points, providing just 20~bits of
+security.
+
+To increase security, we \emph{chain} entry points together. Rather than derive
+the key from a single entry point, we have each potential entry point perform
+another indirect jump that the CPU cannot immediately resolve, forcing it to
+speculate while already executing speculatively. The predicted target of that jump
+will also be determined by the trigger program. For example, if the trigger
+program makes 30 training jumps, followed by 10 additional indirect jumps, and
+the payload program performs the same 30 training jumps before a stall, the CPU
+will predict the payload program will also perform the next 10 jumps. If each
+jump has the potential to land in up to 1024 possible locations, this would
+provide in total $1024^{10} = 2^{100}$ possible keys, or 100~bits of security.
+We describe our implementation of this nested speculative execution concept in
+Section~\ref{subsec:nested-spec}.
+
 
 %%%%%%%%%%%%%%

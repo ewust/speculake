@@ -70,35 +70,26 @@ Section~\ref{subsec:impl-aes}.
 
 \medskip
 
-We note that an analyst might attempt to locate the speculative entry point by
-searching for AES-NI instructions in the payload program's dead code, ultimately
-discovering the keys that it uses. However, we find it is possible to overcome
-this by having the trigger program communicate the decryption key to the payload
-program via the branch predictor.
 
-To accomplish this, we use multiple speculative entry points, each that derive a
-different decryption key before calling a common decryption routine. Since
-the exact speculative entry point is determined by the trigger program, an
-analyst cannot discover the decryption key directly from the payload program.
+\subsubsection{Nested Speculation}
 
-An analyst could still enumerate all potential entry points, testing each one
-until they find one that correctly decrypts the ciphertext. In a 1~MB binary,
-there are (at most) only 1~million entry points, providing just 20~bits of
-security.
+We explore the ability for the CPU to ``double speculate'', where a stalled
+indirect jump while the CPU is speculating causes it to predict the target and
+speculate a second time. For instance, suppose a payload program truly jumps to
+target A, but the CPU is mistrained by a trigger program that jumps to B, thus
+causing the payload program to speculatively execute at B. At B, suppose there
+is a second indirect jump, perhaps using the same register as the first jump
+(which has still not resolved). If the trigger program jumps to C, the payload
+program will speculate a second time and also begin executing code at C.
 
-To increase security, we \emph{chain} entry points together. Rather than derive
-the key from a single entry point, we have each potential entry point perform
-another indirect jump that the CPU cannot immediately resolve, forcing it to
-speculate while already executing speculatively. The predicted target of that jump
-will also be determined by the trigger program. For example, if the trigger
-program makes 30 training jumps, followed by 10 additional indirect jumps, and
-the payload program performs the same 30 training jumps before a stall, the CPU
-will predict the payload program will also perform the next 10 jumps. If each
-jump has the potential to land in up to 1024 possible locations, this would
-provide in total $1024^{10} = 2^{100}$ possible keys, or 100~bits of security.
-We describe our implementation of this nested speculative execution concept in
-Section~\ref{subsec:nested-spec}.
-
+We find that not all Intel CPUs support nested speculation. For
+example, it appears Haswell chips do not speculate while already speculating,
+but nonetheless support non-nested \speculake. Both Sandy Bridge (which
+preceeded Haswell) and Kaby Lake (which followed Haswell) support nested
+speculation.
+% Could cut
+We leverage this support in Section~\ref{subsec:decryption} to
+increase the security of speculative decryption keys.
 
 %There are numerous challenges for a reverse engineer to overcome to learn how a
 %malicious program with this primitive works. As with previous examples, the
