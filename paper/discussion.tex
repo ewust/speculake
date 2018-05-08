@@ -7,60 +7,26 @@ We now address possible defenses to this new class of malware introduced by
 component of \speculake is taking advantage of speculative execution inherent in
 CPUs today, thus these defenses focus on limiting this behavior.
 
+\subsubsection{Operating System Defenses}
+One defense to limit the capabilities of \speculake is to introduce privileged
+instructions that grant the Operating System more control. 
 
-%TODO: This is a defense to Spectre, but not to Exspectre...
-\subsubsection{SpecFence}
-The \texttt{mfence} instruction requires that instructions earlier in the code
-be retired before instructions after it. This ensures that memory is loaded and
-stored in a particular order (in the real world). However, the \texttt{mfence}
-instruction can be speculated past, meaning that caches can be affected
-out-of-order even with this instruction.
+A necessary component of \speculake is the ability of a process to affect the
+Branch History Buffer (BHB), which is used by all processes, allowing programs
+to affect how separate programs choose to make indirect jumps.
 
-One possible defense against \speculake is the introduction of a new
-instruction: \texttt{specfence} which designates to the CPU a point that cannot 
-be speculated past. This would require that loads/stores after the 
-\texttt{specfence} instruction would be on hold until loads/stores from before
-the \texttt{specfence} instruction have retired. Note the subtle difference from
-\texttt{mfence}, we not only require that the loads/stores before a
-\texttt{specfence} retire ahead of the loads/stores after the 
-\texttt{specfence}, but more strongly: the loads/stores after a 
-\texttt{specfence} do not begin to execute at all until the loads/stores before
-the \texttt{specfence} retire.
+To address this a new set of instructions allowing the OS to set and clear the
+Branch History Buffer on context switches allows for processes to maintain a
+useful branch history while disabling other processes from affecting their jump
+decisions.
 
-This would possibly require a set of new API instructions in most basic
-libraries allowing for functions that ensure no speculation (for security, no
-data is leaked, no mystery instructions are run) and a separate set of functions
-(as exist now) which allow speculation to occur (for performance, no sensitive
-data is at risk).
-
-We note that this instruction seems to already exist, albeit unintentionally.
-The \texttt{rep} instruction repeats the execution of string instructions a set
-number of times (set in a register). When set to repeat 90 or more times, these
-instructions are not speculated past, requiring they complete and be retired
-before looking to the next instruction. This appears to be due to the 
-\texttt{rep} instruction adding additional $\mu$ ops per instruction, we found
-that using the \texttt{rep} instruction caused $2n$ $\mu$ ops when the string
-operation works on $n$ bytes~\cite{uop_article}. Thus enough repetitions would cause instructions
-after the \texttt{rep} instruction to wait for the full repetition to be retired
-before beginning their execution.
-
-While this either new or repurposed instruction may provide some defense
-against \speculake there are clear drawbacks: 
-\begin{enumerate}
-    \item Code using this instruction will be slower to execute by design. The
-    purpose of this instruction is to deliberately slow the CPU and force it to
-    wait. This will lead to a direct trade-off of speed vs. security.
-
-    \item This will require a new set of APIs for basic library functions that
-    load and store data. It would be detrimental to require all loads and stores
-    never be speculated past, meaning there must be an option for choosing when
-    certain loads and stores are not to be speculated past. This comes with all
-    the usual drawbacks of modified APIs, un-updated systems, software engineers
-    unaware of the new API, or of the significance, or when speculation is
-    appropriate and when it is dangerous.
-\end{enumerate}
+By design these new instructions grant the operating system control over the
+state a program generates introducing possible attack vectors for malicious
+Operating Systems to poison the Branch History Buffer or even allow \speculake
+type attacks.
 
 \subsubsection{Malware Detection}
+\label{subsubsec:malware}
 The world of computer security is often referred to as an arms race, hackers and
 criminals racing to create and use exploits before security researchers and
 software engineers can create defenses. As such we expect to see the same type
@@ -84,6 +50,62 @@ strain of malware may be simplest, we caution that the methods introduced by
 \speculake are very general and can be accomplished in numerous ways and simply
 attempting to recognize one method will undoubtedly be circumvented by future
 generations of this malware.
+
+\subsubsection{Cache Poisoning}
+As mentioned in Section~\ref{subsubsec:malware} a vital component of \speculake
+is the ability to perform cache timings. Any mechanism that modifies the cache
+can affect the success of \speculake-like attacks. 
+
+Drastic methods such as completely poisoning the cache will hinder this attack
+while also forcing almost all loads to result in a cache miss, effectively
+nullifying the point of cache.
+
+However, more conservative methods such as randomly loading values into cache
+can have a negative affect on \speculake-like attacks (causing the cache timing
+to predict incorrect values) while not having too detrimental of an affect on
+programs as a whole.
+
+In response to this method of defense \speculake-like attacks can modify the
+number of iterations and confidence thresholds necessary to determine a value.
+As mentioned in Section~\ref{subsec:impl-turing} our experiments found that it
+was only necessary to perform 50 iterations of our \texttt{target\_fn} in order
+to gain 80\% confidence in the value returned. While only 50 iterations are
+necessary, increasing this value to higher levels can lead to a significantly
+higher confidence with very little performance detriment (especially in the
+case of AES decryption).
+
+\subsection{Resilience of \speculake}
+Spectre works to use a cache side-channel to leak information from a process. As
+such defenses to Spectre work to limit the information available to a
+speculatively executing program. One such solution may be a new instruction such
+as  \texttt{specfence}: an instruction which designates to the CPU a point that
+cannot be speculated past. This would require that loads/stores after the
+\texttt{specfence} instruction would be on hold until loads/stores from before
+the \texttt{specfence} instruction have retired. The loads/stores after a
+\texttt{specfence} do not begin to execute at all until the loads/stores before
+the \texttt{specfence} retire.
+
+However effective such an instruction may be against Spectre, it is not a
+defense against \speculake. Such an instruction would be useful in restricting
+the execution of a program to restrict the speculative capabilities of program,
+thereby stopping information from being leaked. However, a malicious user
+creating \speculake malware would simply choose to not use this instruction.
+
+This demonstrates the versatility of speculative execution in general. While
+defenses against Spectre are needed, a more general purpose solution to
+speculative execution as a whole is necessary to address the wide range of its
+capabilities.
+
+% We note that this instruction seems to already exist, albeit unintentionally.
+% The \texttt{rep} instruction repeats the execution of string instructions a set
+% number of times (set in a register). When set to repeat 90 or more times, these
+% instructions are not speculated past, requiring they complete and be retired
+% before looking to the next instruction. This appears to be due to the 
+% \texttt{rep} instruction adding additional $\mu$ ops per instruction, we found
+% that using the \texttt{rep} instruction caused $2n$ $\mu$ ops when the string
+% operation works on $n$ bytes~\cite{uop_article}. Thus enough repetitions would cause instructions
+% after the \texttt{rep} instruction to wait for the full repetition to be retired
+% before beginning their execution.
 
 \subsection{Future Work}
 \label{subsec:future-work}
@@ -148,7 +170,7 @@ of hidden computation applies more broadly. As of now there are no ways of
 debugging speculative computation meaning that the computation done there is effectively
 isolated as with trusted execution environments. The security provided by the obfuscated 
 key schedule makes \speculake useful in the domains of Digital Rights Management (DRM)
-and whoitebox cryptography more generally. 
+and whitebox cryptography more generally. 
 %% Approximate Computing 
 
 

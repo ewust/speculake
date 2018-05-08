@@ -115,23 +115,29 @@ increase the security of speculative decryption keys.
 \subsection{Virtual Machines}
 We demonstrate in Section~\ref{subsec:turing} that general purpose computation 
 is possible in the speculative environment in spite of the constraints 
-imposed by the speculative world. However, a Turing Machine
+imposed. However, a Turing Machine
 is not an efficient or usable model for computation when
 attempting to accomplish tasks on modern processors. 
 
-Using emulators in the "real world" allows for crafted binary programs to be
-instrumented in dead code and, as demonstrated in
-Section~\ref{subsec:decryption} encrypted and hidden. This gives an advantage to
-attackers as traditional reverse engineering methods will reveal only that
-emulation is being done. It reveals nothing about the ultimate goal of the
-program. 
+Using emulators in the ``real world'' allows for binary programs to be
+placed encrypted and hidden in dead code and, as demonstrated in
+Section~\ref{subsec:decryption}.
+Traditional reverse engineering methods will reveal only that
+emulation is being done, while the program being emulated remains encrypted.
+Even when the trigger is running, only the parts of the code that execute would
+be revealed to a careful analyst observing the CPU's committed state, and the
+remainder of the emulated program would remain hidden.
 
-To accommodate both developers as well as the unique constraints 
-enforced by the speculative primitive, a custom emulation solution is required. 
-We have created a custom emulator and instruction set -- SPASM -- which 
-accommodate the speculative primitive specifically. This 
-provides a higher level of abstraction around the speculative primitive
-that we have used to implement various executable binaries. 
+We design a custom emulator and instruction set---SPASM (Speculative
+Assembly)---that accommodates the constraints of the speculative primitive.
+SPASM is a 6-bit Instruction set, where all instructions (including operand,
+registers, and arguments) fit within 6-bits. This allows each step of the
+speculative world to emit a single SPASM instruction to the real world for
+emulation by a light-weight SPASM emulator. Using SPASM, developers can write
+programs, and assemble and encrypt them into a payload program. When the
+associated trigger program runs, the payload will decrypt SPASM instructions in
+the speculative world, and execute them one at a time.
+
 
 % The assembly level abstraction that SPASM provides is still not extremely
 % user friendly as it does not allow an author to write their encrypted 
@@ -140,8 +146,9 @@ that we have used to implement various executable binaries.
 While the custom emulator that we developed gives higher level abstraction to
 an author, it still requires programs to be written in a custom assembly language. 
 We note that the \speculake model is not intrinsically linked to the SPASM emulator. 
-A wrapper could be implemented around other existing emulators to incrementally 
-construct instructions 6 or 8 bits at a time (depending on the channel width). 
+A wrapper could be implemented around other existing emulators to construct
+instructions incrementally through the fixed-width channel (e.g. using 4 8-bit
+reads to reveal a single 32-bit ARM instruction).
 This would allow for encrypted payloads to be written in higher level languages
-like C or C++, although there would be a significant performance reduction to 
-using this type of wrapper. 
+like C or C++, and compiled to any target architecture the real-world emulator
+can execute.
