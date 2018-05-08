@@ -451,18 +451,22 @@ void measure() {
     jmp_ptr = 0;
     int i;
     double percent = 0.20;
+    double times[1000];
 
     FILE *fp = fopen("numInstrs", "w");
     FILE *fp2 = fopen("numMisses", "w");
+    FILE *fp3 = fopen("times", "w");
     uint8_t *turing_tape_base = malloc(TURING_TAPE_LEN);
 
     int itr = 0;
     // for (double per = MINPERCENT; per <= MAXPERCENT; per += INCPERCENT){
-    for (int jump = MINJUMPS; jump <= MAXJUMPS; jump += INCJUMPS){
+    // for (int jump = MINJUMPS; jump <= MAXJUMPS; jump += INCJUMPS){
         // fprintf(fp, "percent: %f\n", per);
         // fprintf(fp2, "percent: %f\n", per);
+        int jump = 50;
         fprintf(fp, "jump: %d\n", jump);
         fprintf(fp2, "jump: %d\n", jump);
+        fprintf(fp3, "jump: %d\n", jump);
         int experiment = 0;
         usleep(1000);
         while(experiment < MAX_EXPERIMENT){
@@ -475,6 +479,7 @@ void measure() {
             int misses = 0;
             // printf("## Run %03d, Step %08lu State: %d, Symbol: %d | misses: %03d\n", experiment, instr, turing_state, *turing_tape, misses);
             uint64_t max_res=0, max_i=0;
+            clock_t start = clock();
             while (1) {
                 memset(results, 0, sizeof(uint64_t)*NUM_PROBES);
                 cache_hits = 0;
@@ -597,8 +602,10 @@ void measure() {
                 // }
                 usleep(10);
             }
+            clock_t end = clock();
+            double t = ((double) end-start)/CLOCKS_PER_SEC;
 
-            printf("## Jump: %03d, Percent: %0.02f, Run %03d, Step %08lu | misses: %03d, max_i: %02lu, %lu/%d = %0.5f%% conf, true_max_i: %02lu\n\tcur_probe_space = %lu\n", jump, percent, experiment, instr, misses, max_i, max_res, jump, 100*((float)max_res)/jump, true_max_i, cur_probe_space);
+            printf("## Jump: %03d, Percent: %0.02f, Run %03d, Step %08lu, time: %0.03f | misses: %03d, max_i: %02lu, %lu/%d = %0.5f%% conf, true_max_i: %02lu\n\tcur_probe_space = %lu\n", jump, percent, experiment, instr, t, misses, max_i, max_res, jump, 100*((float)max_res)/jump, true_max_i, cur_probe_space);
             numInstrs[itr][experiment] = instr;
             missedCount[itr][experiment++] = misses;
             // rand_xor = (uint8_t) rand() & 0xff;
@@ -606,15 +613,18 @@ void measure() {
         for (int j = 0; j < MAX_EXPERIMENT; j++){
             fprintf(fp, "%lu ", numInstrs[itr][j]);
             fprintf(fp2, "%lu ", missedCount[itr][j]);
+            fprintf(fp3, "%0.03f", times[j]);
         }
         fprintf(fp, "\n");
         fprintf(fp2, "\n");
+        fprintf(fp3, "\n");
         itr++;
-    } //jump
+    // } //jump
 
 
     fclose(fp);
     fclose(fp2);
+    fclose(fp3);
 
 }
 
