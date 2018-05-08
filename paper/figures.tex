@@ -60,12 +60,13 @@
 \begin{figure}[t]
     \centering
         \includegraphics[width=0.4\textwidth]{figures/general_model.pdf}
-    \caption{ General model of speculative computation within the Measure 
-        process when triggered. \textit{Speculative Computation} has access
-        to all variables which do not require a memory transaction within
-        the current state of the process. The process can subsequently make
-        \textit{Resultant Computations} based on the value returned from 
-        \texttt{Flush+Reload} to update the state of the process. }
+    \caption{ General model of speculative computation within the Payload 
+        process when triggered. \textit{Speculative Computation} has read-only
+        access to all memory within the process, and returns a result via a
+        cache side channel (via the \texttt{probe\_array}).
+        The process can subsequently make
+        \textit{Resultant Computations} based on the value returned from
+        the cache side channel to update the state of the process. }
     \label{fig:general_model}
 \end{figure}
 }
