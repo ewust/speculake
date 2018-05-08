@@ -14,13 +14,29 @@ extern uint8_t lookup[2][5];
 extern uint8_t *turing_tape;
 extern uint64_t turing_state;
 
+void target_fn(void) __attribute__((section(".targetfn")));
+void signal(uint64_t state) __attribute__((section(".targetfn")));
+void update_state(uint8_t write, uint8_t move_right, uint8_t state) __attribute__((section(".targetfn")));
+
+// This will be an int 0-255 typically...
+void signal(uint64_t state)
+{
+    asm volatile ("mov (%%rcx), %%rax" :: "c"(&probe_buf[state*cur_probe_space]) : "rax");
+}
+
+
+void update_state(uint8_t write, uint8_t move_right, uint8_t state)
+{
+    // write is either 0 or 1 (for 2-symbol)
+    // move_right is 1 for R, 0 for L
+    // state is 0=A, 1=B, etc
+    // signal(((state << 2) | ((move_right&0x1) << 1) | (write & 0x1)) ^ rand_xor);
+    signal(((state << 2) | ((move_right&0x1) << 1) | (write & 0x1)));
+}
 
 #define L 0
 #define R 1
 
-void target_fn(void) __attribute__((section(".targetfn")));
-void signal(uint64_t) __attribute__((section(".targetfn")));
-void update_state(uint8_t write, uint8_t move_right, uint8_t state) __attribute__((section(".targetfn")));
 void target_fn(void)
 {
 
@@ -38,6 +54,7 @@ void target_fn(void)
     //      0   1RB 1RC 1RD 1LA 1RH
     //      1   1LC 1RB 0LE 1LD 0LA
     //
+    //signal(8);
     uint8_t symbol = *turing_tape;
     if (turing_state == 0) {    // A
         if (symbol == 0) update_state(1, R, 1);
@@ -55,43 +72,10 @@ void target_fn(void)
         if (symbol == 0) update_state(1, R, 5);
         else             update_state(0, L, 0);
     }
-
-   // if (turing_state == 0) {    // A
-   //     if (symbol == 0) update_state(symbol, 0x0, turing_state);
-   //     else             update_state(symbol, 0x0, turing_state);
-   // } else if (turing_state == 1) { //symbol, 0x0, turing_state
-   //     if (symbol == 0) update_state(symbol, 0x0, turing_state);
-   //     else             update_state(symbol, 0x0, turing_state);
-   // } else if (turing_state == 2) { //symbol, 0x0, turing_state
-   //     if (symbol == 0) update_state(symbol, 0x0, turing_state);
-   //     else             update_state(symbol, 0x0, turing_state);
-   // } else if (turing_state == 3) { //symbol, 0x0, turing_state
-   //     if (symbol == 0) update_state(symbol, 0x0, turing_state);
-   //     else             update_state(symbol, 0x0, turing_state);
-   // } else if (turing_state == 4) { //symbol, 0x0, turing_state
-   //     if (symbol == 0) update_state(symbol, 0x0, turing_state);
-   //     else             update_state(symbol, 0x0, turing_state);
-   // }
-    update_state(symbol, 0x0, turing_state);
     // do 4 state- 2 symbol lookup
     // signal(lookup[symbol][turing_state]);
 }
 
-// This will be an int 0-255 typically...
-void signal(uint64_t state)
-{
-    asm volatile ("mov (%%rcx), %%rax" :: "c"(&probe_buf[state*cur_probe_space]) : "rax");
-}
-
-
-void update_state(uint8_t write, uint8_t move_right, uint8_t state)
-{
-    // write is either 0 or 1 (for 2-symbol)
-    // move_right is 1 for R, 0 for L
-    // state is 0=A, 1=B, etc
-    // signal(((state << 2) | ((move_right&0x1) << 1) | (write & 0x1)) ^ rand_xor);
-    signal(((state << 2) | ((move_right&0x1) << 1) | (write & 0x1)));
-}
 void end_target_fn(void) __attribute__((section(".targetfn")));
 void end_target_fn(void) {
 }

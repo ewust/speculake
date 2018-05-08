@@ -111,6 +111,9 @@ void check_probes() {
 uint64_t jmp_ptr;
 
 
+uint64_t space[100];
+
+
 #define TURING_TAPE_LEN 1024*512
 uint8_t *turing_tape;
 uint64_t turing_state;
@@ -133,264 +136,6 @@ void updateState(uint8_t write, uint8_t move_right, uint8_t state){
     // true_max_i = (state<<2)| (0 << 1) | (*turing_tape & 0x1);
 }
 
-void true_turing(void){
-
-    // 3-state, 2-symbol turing machine that wins Busy Beaver
-    //    A   B   C
-    //0   1RB 0RC 1LC
-    //1   1RH 1RB 1LA
-    // 4-state 2-symbol
-        //  A   B   C   D
-    //  0   1RB 1LA 1RH 1RD
-    //  1   1LB 0LC 1LD 0RA
-    //
-    //  5-state 2-symbol
-    //          A   B   C   D   E
-    //      0   1RB 1RC 1RD 1LA 1RH
-    //      1   1LC 1RB 0LE 1LD 0LA
-    //
-    uint8_t symbol = *turing_tape;
-    true_max_i = lookup[symbol][true_turing_state];
-    #ifdef STATE4
-    switch(true_max_i) {
-        case 0:
-            true_write = 1;
-            true_move_right = 1;
-            true_turing_state = 1;
-            break;
-        case 1:
-            true_write = 1;
-            true_move_right = 0;
-            true_turing_state = 0;
-            break;
-        case 2:
-            true_write = 1;
-            true_move_right = 1;
-            true_turing_state = 4;
-            break;
-        case 3:
-            true_write = 1;
-            true_move_right = 1;
-            true_turing_state = 3;
-            break;
-        case 4:
-            true_write = 1;
-            true_move_right = 0;
-            true_turing_state = 1;
-            break;
-        case 5:
-            true_write = 0;
-            true_move_right = 0;
-            true_turing_state = 2;
-            break;
-        case 6:
-            true_write = 1;
-            true_move_right = 0;
-            true_turing_state = 3;
-            break;
-        case 7:
-            true_write = 0;
-            true_move_right = 1;
-            true_turing_state = 0;
-            break;
-    }
-    #else
-    if (turing_state == 0) {    // A
-        if (symbol == 0) updateState(1, R, 1);
-        else             updateState(1, L, 2);
-    } else if (turing_state == 1) { // B
-        if (symbol == 0) updateState(1, R, 2);
-        else             updateState(1, R, 1);
-    } else if (turing_state == 2) { // C
-        if (symbol == 0) updateState(1, R, 3);
-        else             updateState(0, L, 4);
-    } else if (turing_state == 3) { // D
-        if (symbol == 0) updateState(1, L, 0);
-        else             updateState(1, L, 3);
-    } else if (turing_state == 4) { // E
-        if (symbol == 0) updateState(1, R, 5);
-        else             updateState(0, L, 0);
-    }
-    // switch(true_max_i) {
-    //     case 2:
-    //         true_write = 1;
-    //         true_move_right = 1;
-    //         true_turing_state = 1;
-    //         break;
-    //     case 7:
-    //         true_write = 1;
-    //         true_move_right = 1;
-    //         true_turing_state = 2;
-    //         break;
-    //     case 0:
-    //         true_write = 1;
-    //         true_move_right = 1;
-    //         true_turing_state = 3;
-    //         break;
-    //     case 6:
-    //         true_write = 1;
-    //         true_move_right = 0;
-    //         true_turing_state = 0;
-    //         break;
-    //     case 3:
-    //         true_write = 1;
-    //         true_move_right = 1;
-    //         true_turing_state = 5;
-    //         break;
-    //     case 5:
-    //         true_write = 1;
-    //         true_move_right = 0;
-    //         true_turing_state = 2;
-    //         break;
-    //     case 4:
-    //         true_write = 1;
-    //         true_move_right = 1;
-    //         true_turing_state = 1;
-    //         break;
-    //     case 8:
-    //         true_write = 0;
-    //         true_move_right = 0;
-    //         true_turing_state = 4;
-    //         break;
-    //     case 1:
-    //         true_write = 1;
-    //         true_move_right = 0;
-    //         true_turing_state = 3;
-    //         break;
-    //     case 9:
-    //         true_write = 0;
-    //         true_move_right = 0;
-    //         true_turing_state = 0;
-    //         break;
-    // }
-    #endif
-}
-
-void updateLocalState(uint8_t max_i, uint8_t *write, uint8_t *move_right){
-    #ifdef STATE4
-    switch(max_i) {
-        case 0:
-            *write = 1;
-            *move_right = 1;
-            turing_state = 1;
-            break;
-        case 1:
-            *write = 1;
-            *move_right = 0;
-            turing_state = 0;
-            break;
-        case 2:
-            *write = 1;
-            *move_right = 1;
-            turing_state = 4;
-            break;
-        case 3:
-            *write = 1;
-            *move_right = 1;
-            turing_state = 3;
-            break;
-        case 4:
-            *write = 1;
-            *move_right = 0;
-            turing_state = 1;
-            break;
-        case 5:
-            *write = 0;
-            *move_right = 0;
-            turing_state = 2;
-            break;
-        case 6:
-            *write = 1;
-            *move_right = 0;
-            turing_state = 3;
-            break;
-        case 7:
-            *write = 0;
-            *move_right = 1;
-            turing_state = 0;
-            break;
-    }
-    #else
-    // original
-    turing_state = max_i >> 2;
-    *move_right = (max_i >> 1) & 0x1;
-    *write = max_i & 0x1;
-
-    // update everything local
-/*
-    turing_state = max_i >> 2;
-    uint8_t symbol = max_i & 0x1;
-    if (turing_state == 0) {    // A
-        if (symbol == 0) {*write = 1; *move_right = 1; turing_state = 1;}
-        else             {*write = 1; *move_right = 0; turing_state = 2;}
-    } else if (turing_state == 1) { // B
-        if (symbol == 0) {*write = 1; *move_right = 1; turing_state = 2;}
-        else             {*write = 1; *move_right = 1; turing_state = 1;}
-    } else if (turing_state == 2) { // C
-        if (symbol == 0) {*write = 1; *move_right = 1; turing_state = 3;}
-        else             {*write = 0; *move_right = 0; turing_state = 4;}
-    } else if (turing_state == 3) { // D
-        if (symbol == 0) {*write = 1; *move_right = 0; turing_state = 0;}
-        else             {*write = 1; *move_right = 0; turing_state = 3;}
-    } else if (turing_state == 4) { // E
-        if (symbol == 0) {*write = 1; *move_right = 1; turing_state = 5;}
-        else             {*write = 0; *move_right = 0; turing_state = 0;}
-    }
-*/
-    // switch(max_i) {
-    //     case 2:
-    //         *write = 1;
-    //         *move_right = 1;
-    //         turing_state = 1;
-    //         break;
-    //     case 7:
-    //         *write = 1;
-    //         *move_right = 1;
-    //         turing_state = 2;
-    //         break;
-    //     case 0:
-    //         *write = 1;
-    //         *move_right = 1;
-    //         turing_state = 3;
-    //         break;
-    //     case 6:
-    //         *write = 1;
-    //         *move_right = 0;
-    //         turing_state = 0;
-    //         break;
-    //     case 3:
-    //         *write = 1;
-    //         *move_right = 1;
-    //         turing_state = 5;
-    //         break;
-    //     case 5:
-    //         *write = 1;
-    //         *move_right = 0;
-    //         turing_state = 2;
-    //         break;
-    //     case 4:
-    //         *write = 1;
-    //         *move_right = 1;
-    //         turing_state = 1;
-    //         break;
-    //     case 8:
-    //         *write = 0;
-    //         *move_right = 0;
-    //         turing_state = 4;
-    //         break;
-    //     case 1:
-    //         *write = 1;
-    //         *move_right = 0;
-    //         turing_state = 3;
-    //         break;
-    //     case 9:
-    //         *write = 0;
-    //         *move_right = 0;
-    //         turing_state = 0;
-    //         break;
-    // }
-    #endif
-}
 bool possible_i(uint64_t mi) {
     for(int i = 0; i < 9; i++){
         if (possible_max_i[i] == mi)
@@ -400,41 +145,38 @@ bool possible_i(uint64_t mi) {
     return false;
 }
 
-bool test_Turing(uint8_t move_right, uint8_t write, uint64_t max_i){
-    bool ret = true; 
-    if (true_turing_state != turing_state) {
-        // printf("wrong state: %d, should be: %d\n", turing_state, true_turing_state);
-        ret = false;
-    }
-    if (true_move_right != move_right) {
-        // printf("wrong move_right: %d, should be: %d\n", move_right, true_move_right);
-        ret = false;
-    }
-    if (true_write != write) {
-        // printf("wrong write: %d, should be: %d\n", write, true_write);
-        ret = false;
-    }
-    // if (max_i != true_max_i) {
-    //     // printf("wrong max_i: %lu, should be: %lu\n", max_i, true_max_i);
-    //     ret = false;
-    // }
-    // if (!possible_i(max_i)){
-    //     // printf("impossible max_i attained, max_i: %lu\n", max_i);
-    //     ret = false;
-    // }
-    // if (!possible_i(true_max_i)){
-    //     // printf("impossible true_max_i attained, max_i: %lu\n", true_max_i);
-    //     ret = false;
-    // }
+void getStateUpdate(uint8_t sig, uint8_t *write, uint8_t *move_right, uint8_t *new_state)
+{
+    *write      = sig & 0x1;
+    *move_right = (sig >> 1) & 0x1;
+    *new_state  = (sig >> 2);
+}
 
-    return ret;
+uint8_t true_turing(uint8_t cur_state, uint8_t cur_symbol) {
+
+    if (cur_state == 0) {    // A
+        if (cur_symbol == 0)    return 7;
+        else                    return 9;
+    } else if (cur_state == 1) { // B
+        if (cur_symbol == 0)    return 11;
+        else                    return 7;
+    } else if (cur_state == 2) { // C
+        if (cur_symbol == 0)    return 15;
+        else                    return 16;
+    } else if (cur_state == 3) { // D
+        if (cur_symbol == 0)    return 1;
+        else                return 13;
+    } else if (cur_state == 4) { // E
+        if (cur_symbol == 0)    return 23;
+        else                    return 0;
+    }
 }
 
 
 // const int MINJUMPS = 2;
 #define MINJUMPS 50
 // const int MAXJUMPS = 10;
-#define MAXJUMPS 500 
+#define MAXJUMPS 50
 // const int JUMPINC = 2;
 #define INCJUMPS 10 
 uint64_t numInstrs[((MAXJUMPS-MINJUMPS)/INCJUMPS + 1)][1000];
@@ -467,8 +209,15 @@ void measure() {
         fprintf(fp, "jump: %d\n", jump);
         fprintf(fp2, "jump: %d\n", jump);
         fprintf(fp3, "jump: %d\n", jump);
+        printf("&jmp_ptr:       @%p\n", &jmp_ptr);
+        printf("&turing_state:  @%p\n", &turing_state);
+        printf("&turing_tape:   @%p\n", &turing_tape);
+        printf("turing_tape:    @%p\n", turing_tape);
+
         int experiment = 0;
         usleep(1000);
+        struct timespec tstart={0,0}, tend={0,0};
+        clock_gettime(CLOCK_MONOTONIC, &tstart);
         while(experiment < MAX_EXPERIMENT){
             instr = 0;
             memset(turing_tape_base, 0, TURING_TAPE_LEN);
@@ -488,8 +237,15 @@ void measure() {
                     // rand_xor = (uint8_t) rand() & 0xff;
                     _mm_clflush(&fn_ptr);
                     // _mm_clflush(&jmp_ptr);
-                    turing_state = turing_state & 0xff;
-                    *turing_tape = *turing_tape & 0xff;
+                    //_mm_clflush(&jmp_ptr);
+                    if (instr < 4500) {
+                        //memcpy(map+600, target_fn, end_target_fn-target_fn);
+                    }
+                    if ((instr %10) == 0) {
+                        //if (rand()_mm_clflush(target_fn);
+                        //_mm_clflush(&turing_tape);
+                        //_mm_clflush(&turing_state);
+                    }
                     indirect(&jmp_ptr);
                     //((void(*)(void *))map)(&jmp_ptr);
                     usleep(1);
@@ -505,23 +261,21 @@ void measure() {
                     }
                 }
 
-                if ((max_res > percent*jump) && avg < 50){
+                if (max_res > percent*jump && avg < 90){
                     instr++;
 
-                    true_turing();
                     // Update turing state
                     uint8_t write;
                     uint8_t move_right;
+                    uint8_t new_state;
+
                     uint8_t old_turing_state = turing_state;
                     uint8_t old_symbol = *turing_tape;
-                    // printf("State: %d, symbol: %d\n", turing_state, *turing_tape);
-                    updateLocalState(max_i, &write, &move_right);
-                    if (move_right) {
-                        *turing_tape++ = write;
-                    } else {
-                        *turing_tape-- = write;
-                    }
-                    bool correct = test_Turing(move_right, write, max_i);
+
+                    uint8_t correct_max_i = true_turing(turing_state, *turing_tape);
+                    getStateUpdate(correct_max_i, &write, &move_right, &new_state);
+                    //printf("[%f] State: %d, symbol: %d, sig: %d, true: %d, write: %d\n", 100*((float)(max_res) / jump), turing_state, *turing_tape, max_i, correct_max_i, write);
+
                     if (instr % 100 == 0){
                         printf("## Run %03d, Step %08lu, | misses: %03d, max_i: %02lu, true_max_i: %02lu, conf: %0.02f\n", experiment, instr, misses, max_i, true_max_i, ((float)max_res)/jump);
                     }
@@ -530,20 +284,32 @@ void measure() {
                     // printf("next max_i = %d\n", lookup[*turing_tape][turing_state]);
 
 
-                    if (!correct){
-                        printf("State: %d, symbol: %d\n", old_turing_state, old_symbol);
-                        printf("incorrect turing computation:\n");
-                        printf("correct state: %d, received state: %lu\n", 
-                            true_turing_state, turing_state);
-                        printf("correct move_right: %d, received move_right: %d\n",
-                            true_move_right, move_right);
-                        printf("correct write: %d, received write: %d\n",
-                            true_write, write);
-                        printf("correct max_i: %lu, received max_i: %lu\n",
-                            true_max_i, max_i);
+                    if (correct_max_i != max_i){
+                        printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
                         printf("number of instructions: %lu\n", instr);
+                        printf("State: %lu, symbol: %d\n", turing_state, *turing_tape);
+                        printf("incorrect turing computation:\n");
+                        printf("correct max_i: %d, received max_i: %lu\n",
+                            correct_max_i, max_i);
+                        printf("correct: %d->state, %c, write: %d\n",
+                            new_state, move_right ? 'R' : 'L', write);
+                        getStateUpdate(max_i, &write, &move_right, &new_state);
+                        printf("got    : %d->state, %c, write: %d\n",
+                            new_state, move_right ? 'R' : 'L', write);
+
+                        getStateUpdate(correct_max_i, &write, &move_right, &new_state);
+                        exit(0);
                         break;
                     }
+
+                    if (move_right) {
+                        *turing_tape++ = write;
+                    } else {
+                        *turing_tape-- = write;
+                    }
+                    turing_state = new_state;
+
+
 
                     // printf("## Run %03d, Step %08lu State: %d, Symbol: %d | misses: %03d, max_i = %lu\n", experiment, instr, turing_state, *turing_tape, misses, max_i);
                     // misses = 0;
@@ -582,15 +348,9 @@ void measure() {
                     }
 
                 } else {
-                    // printf("--[%lu]: %lu, %lu avg cycles ps %ld\n", max_i, max_res, avg, cur_probe_space);
+                    //printf("--[%lu]: %lu, %lu avg cycles ps %ld\n", max_i, max_res, avg, cur_probe_space);
                     misses++;
                     if (misses % 100 == 0){
-                        printf("## Run %03d, Step %08lu, | misses: %03d, max_i: %02lu, true_max_i: %02lu, conf: %0.02f\n", experiment, instr, misses, max_i, true_max_i, ((float)max_res)/jump);
-			if (((float)max_res)/jump >= percent){
-				printf("confidence higher than threshold?\n");
-				printf("max_res: %lu, need to beat: %0.02f\n", max_res, percent*jump);
-				printf("avg: %lu\n", avg);
-			}
                     }
                     cur_probe_space += 63;
                     if (cur_probe_space >= MAX_PROBE_SPACE)
@@ -602,10 +362,11 @@ void measure() {
                 // }
                 usleep(10);
             }
-            clock_t end = clock();
-            double t = ((double) end-start)/CLOCKS_PER_SEC;
+            clock_gettime(CLOCK_MONOTONIC, &tend);
+            double t = ((double)tend.tv_sec + 1.0e-9*tend.tv_nsec) - ((double)tstart.tv_sec + 1.0e-9*tstart.tv_nsec);
 
             printf("## Jump: %03d, Percent: %0.02f, Run %03d, Step %08lu, time: %0.03f | misses: %03d, max_i: %02lu, %lu/%d = %0.5f%% conf, true_max_i: %02lu\n\tcur_probe_space = %lu\n", jump, percent, experiment, instr, t, misses, max_i, max_res, jump, 100*((float)max_res)/jump, true_max_i, cur_probe_space);
+            times[experiment] = t;
             numInstrs[itr][experiment] = instr;
             missedCount[itr][experiment++] = misses;
             // rand_xor = (uint8_t) rand() & 0xff;
@@ -613,7 +374,7 @@ void measure() {
         for (int j = 0; j < MAX_EXPERIMENT; j++){
             fprintf(fp, "%lu ", numInstrs[itr][j]);
             fprintf(fp2, "%lu ", missedCount[itr][j]);
-            fprintf(fp3, "%0.03f", times[j]);
+            fprintf(fp3, "%0.03f ", times[j]);
         }
         fprintf(fp, "\n");
         fprintf(fp2, "\n");
