@@ -13,11 +13,10 @@ such that even a debugger following an instruction-level trace of the
 program cannot tell how its results were computed.
 
 We introduce \emph{\speculake}, which compiles arbitrary malicious code into a
-seemingly-benign payload binary. When a separate trigger program performs a specific
-pattern of indirect jumps, it (mis)trains the CPU's branch predictor. Subsequent
-executions of the payload binary with similar jumps causes the CPU to mispredict its
-branches and speculatively execute a malicious payload, which communicates
-results back to the real world via side channels.
+seemingly-benign payload binary. When a separate trigger program runs on the same
+machine, it mistrains the CPU's branch predictor, causing the payload program to
+\emph{speculatively} execute code, and communicating its results back to the
+rest of the payload program, changing its behavior.
 
 We study the extent and types of execution that can be performed in the
 ``speculative world'', and build tools that enable several computations to be
@@ -32,13 +31,22 @@ trigger program.
 %Finally, we describe defenses, but in all honesty, you're probably not going to like
 %them.
 
-We consider this to be a new thrust in attack vector research that harkens to work 
-done on hardware red-pills and weird machines. We demonstrate that unintended 
-functionality of architechture can be used to compose malicious programs with 
-new and different properties. This technique poses novel and unique challenges for 
-malware modeling efforts, as it forces an environment to either
-faithfully reproduce all hardware behaviors, or overcome a much larger burden of 
-reverse engineering. 
+\speculake demonstrates a new kind of malware that evades existing reverse
+engineering and binary analysis techniques. Because its true functionality can be
+contained in seemingly unreachable dead code, and its control flow driven
+externally by any other program running at the same time, \speculake poses a
+novel threat to state-of-the-art malware analysis techniques.
+
+
+
+
+%We consider this to be a new thrust in attack vector research that harkens to work 
+%done on hardware red-pills and weird machines. We demonstrate that unintended 
+%functionality of architechture can be used to compose malicious programs with 
+%new and different properties. This technique poses novel and unique challenges for 
+%malware modeling efforts, as it forces an environment to either
+%faithfully reproduce all hardware behaviors, or overcome a much larger burden of 
+%reverse engineering. 
 
 
 \end{abstract}
