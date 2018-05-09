@@ -43,7 +43,7 @@ Indirect branch predictors allow the CPU to predict the destination address of a
 branch based solely off its source address and a brief history of previous
 branch sources and destinations. While the inner-working details of modern CPU
 branch predictors are proprietary, it is possible to reverse engineer parts of
-their behavior, which we do in \speculake.
+their behavior, which we do for \speculake.
 
 We observe that Intel CPUs consider three types of x86\_64 indirect branches:
 \texttt{retq}, \texttt{callq *\%rax}, and \texttt{jmpq *\%rax}\footnote{other
