@@ -1,28 +1,34 @@
 
 \section{Conclusion}
 
-In this paper we have presented \speculake, a model for hiding computation in
-speculative execution that is fundamentally different than modern methods of
-obfuscating computation. Through a series of experiments we have classified the
+%In this paper 
+We have presented \speculake, a model for hiding computation in
+speculative execution that is fundamentally different than existing methods of
+code obfuscation. Through a series of experiments we have classified the
 capabilities and limitations of this speculative primitive and demonstrated
-various example applications. We have demonstrated the widely varying
-capabilities of speculative execution, in particular showing that it allows for
-arbitrary computation from a Turing Machine, emulation, transparent and remote
-communication, and process level data encryption. As a result current analysis
-techniques for detecting process cooperation, and describing the behavior of
-program binaries are no longer definitively reliable.
+various example applications. We have demonstrated the potential
+of using speculative execution in several applications, including a Turing
+machine, SPASM emulator, remotely-triggered payloads, and AES decryption.
+Currently analysis techniques for reverse engineering are insufficient to reason
+about the behavior of these programs.
 
 Given the benefits that speculative execution provides to an attacker and the
 ease of such an attack, the feasibility of an \speculake exploit is high and is
 not limited to data side-channels or process isolation violations, as was
 originally thought in the wake of Spectre. The speculative primitive developed
 in this work not only provides a guarded form of computation, but also enables
-cryptographic protection against current analysis and debugging techniques.  
+cryptographic protection against current analysis and debugging techniques.
 
-Software isolation techniques are critical in protecting against exploitation
-models, however, complex optimization has often neglected these principles in
-favor of performance. The stop-gap measures proposed in this work contain
-security and performance trade-offs, though we advocate for a more robust
-solution in future processor generations. Long term solutions may require that
-we take a step backward before we can securely step forward.
+Ultimately, silicon and microarchitecture patches will be needed to secure CPUs
+against this kind of malware. Meanwhile, attackers may
+iterate and find new variants of \speculake-like malware.
+In the meantime, new detection techniques and
+software-level mitigations are desperately needed.
 
+%Software isolation techniques are critical in protecting against exploitation
+%models, however, complex optimization has often neglected these principles in
+%favor of performance. The stop-gap measures proposed in this work contain
+%security and performance trade-offs, though we advocate for a more robust
+%solution in future processor generations. Long term solutions may require that
+%we take a step backward before we can securely step forward.
+%
