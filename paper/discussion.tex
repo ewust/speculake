@@ -9,7 +9,7 @@ We now address possible defenses to detecting and reverse engineering malware th
 \label{subsubsec:malware}
 Like Spectre, \speculake relies on a cache side-channel to transfer
 information from the speculative world to the real world. Since the payload
-program much at least occasionally watch this side channel, it offers a
+program must at least occasionally watch this side channel, it offers a
 potential method for detecting \speculake malware.
 
 Analysts could search for telltale signs of cache inference behavior, such as
@@ -49,7 +49,7 @@ defend against Spectre, but not \speculake.
 
 
 One such solution is a new \texttt{specfence} instruction, that prohibits the
-CPU from speculating past. This instruction would require loads and stores after
+CPU from speculating past. This instruction would require that loads and stores after
 the instruction must wait (and cannot be pre-fetched) until the
 \texttt{specfence} instruction has retired. We note this is distinct from the
 \texttt{mfence} instruction that serializes memory transactions. Speculative
@@ -59,8 +59,8 @@ stream~\cite{intel-software-guide}.
 
 One way to achieve a \texttt{specfence} pseudo-instruction is to fill the ROB
 with enough instructions that the CPU cannot speculate past it. We find that the
-\texttt{rep} instruction is able to do this if it is set to repeat more than 96
-times, presumably as it issues $2*96$ $\mu$-ops, and fills the
+\texttt{rep} prefix for string operations is able to do this if it is set to 
+repeat more than 96 times, presumably as it issues $2*96$ $\mu$-ops, and fills the
 ROB~\cite{intel-instruction-tables}.
 
 However effective such an instruction may be against Spectre, it is not a
@@ -194,7 +194,7 @@ the payload could require multiple trigger programs to be running
 simultaneously, or in a particular order.
 
 This could allow fine-grained targeting of malware. For instance, the attacker
-could distribute trigger programs to different channels to target different sets
+could distribute trigger programs through different channels to target different sets
 of victims, and have the ultimate payload only operate at the intersection of
 these groups. As an example, one trigger program could be distributed to a
 particular country (e.g. Iran), and another to a particular device globally
