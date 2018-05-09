@@ -12,11 +12,12 @@ technique, critical portions of a malicious program's computation can be shielde
 such that even a debugger following an instruction-level trace of the
 program cannot tell how its results were computed.
 
-We introduce \emph{\speculake}, which compiles arbitrary malicious code into a
-seemingly-benign payload binary. When a separate trigger program runs on the same
-machine, it mistrains the CPU's branch predictor, causing the payload program to
-\emph{speculatively} execute code, and communicating its results back to the
-rest of the payload program, changing its behavior.
+We introduce \emph{\speculake}\footnote{Executable Spectre}, which compiles
+arbitrary malicious code into a seemingly-benign payload binary. When a separate
+trigger program runs on the same machine, it mistrains the CPU's branch
+predictor, causing the payload program to \emph{speculatively} execute code, and
+communicating its results back to the rest of the payload program, changing its
+behavior.
 
 We study the extent and types of execution that can be performed in the
 ``speculative world'', and build tools that enable several computations to be
