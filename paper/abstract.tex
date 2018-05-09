@@ -19,8 +19,8 @@ predictor, causing the payload program to \emph{speculatively} execute code, and
 communicating its results back to the rest of the payload program, changing its
 behavior.
 
-We study the extent and types of execution that can be performed in the
-``speculative world'', and build tools that enable several computations to be
+We study the extent and types of execution that can be performed
+speculatively, and build tools that enable several computations to be
 performed covertly. In particular, within speculative execution we are able to
 decrypt memory using AES-NI instructions, and are able to interpret a custom
 virtual machine language to perform arbitrary computation.
@@ -33,9 +33,9 @@ trigger program.
 %them.
 
 \speculake demonstrates a new kind of malware that evades existing reverse
-engineering and binary analysis techniques. Because its true functionality can be
+engineering and binary analysis techniques. Because its true functionality is
 contained in seemingly unreachable dead code, and its control flow driven
-externally by any other program running at the same time, \speculake poses a
+externally by potentially any other program running at the same time, \speculake poses a
 novel threat to state-of-the-art malware analysis techniques.
 
 
