@@ -182,62 +182,6 @@ data dependencies define an upper boundary.
 % - MORE PROCESSORS for testing?
 % - ARM?
 
-\subsubsection{Gadget Location}
-The benefits of \speculake rely on the computation performed in the
-speculative function being well hidden. To this end we have verified 
-certain requirements about the locations that a speculative gadget can 
-be placed within a binary. 
-
-First and foremost the gadget must be in the instruction cache. 
-This does not require that the actual instructions ever run,
- only that they are in cache. We have 
-found that this is not a large barrier to overcome as Intel 
-processors aggressively prefetch cache pages~\cite{measuring-cache}
-and simple access patterns could be established to ensure
-that the required block(s) are accessible. 
-
-We have also confirmed that all speculative code in the payload must be
-stored in executable pages, and that it cannot be stored in non-executable data
-sections. We suspect that this is again due to caching. The processor has no
-reason to cache instructions stored in the data section in the instruction
-cache. If a trigger trains the branch predictor to jump to an address in the
-payload's data section, the payload will not be able to fetch the instructions
-into the execution pipeline. 
-
-
-\subsubsection{Hypervisors}
-For virtual environments that provide guests significant periods of access to 
-hardware resources, we have found that \speculake is viable in certain configurations. 
-
-\texttt{Guest -> Guest (internal)} - When both trigger and payload are run internal to
-a single virtual machine the branch prediction is successfully trained in the payload
-program, though at a notably reduced hit rate. This can be overcome by using an 
-increased number of iterations to establish confidence. 
-
-\texttt{Guest -> Host} - In a configuration where trigger runs on the guest while the 
-payload runs on the host we have found that \speculake also successfully trains the 
-branch predictor well enough retreive a signal. Again, this signal is significantly
-reduced, implying the hypercall context swtich from guest to host requires some 
-overhead. We note that processor affinity in a guest is not mapped to processor 
-affinity in the host, as the host assigns the vm to any available CPU, though 
-eventually the hypervisor will assign the vm back to the same core as the payload 
-program allowing progress to continue.
-
-\texttt{Host -> Guest} - When trigger runs on the host attempting to train the 
-branch predictor to influence a payload process in a guest we have found that 
-the payload receives no signal. This implies that the hypercall context switch 
-from the host to the guest is heavier and has a larger impact on branch history. 
-This matches with work done by the Project Zero team at Google which found that 
-hypervisors can be fingerprinted from within a vm using the branch 
-predictor~\cite{project_zero}.
-
-\texttt{Guest -> Guest (external)} - Configurations where trigger and payload 
-run on coresident virtual machines similarly show no signal for the same 
-reasons that host to guest \speculake fails. However, this has the added difficulty
-that virtual machines must be run on the same core or on a pair of 
-hyperthreaded cores.
-
-
 
 \subsubsection{Hyperthreading}
 
