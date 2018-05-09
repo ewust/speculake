@@ -108,12 +108,13 @@
         \includegraphics[width=0.46\textwidth]{figures/SuccessAndTime}
 
     \caption{The number of instructions and error rate of a the 5-state Busy
-    Beaver configuration were measured as a function of how many iterations into
-    the speculative world were performed. We see that the amount of time to
-    reach a million instructions completed is a linear function of how many
+            Beaver configuration were measured as a function of how many (redundant) iterations into
+    the speculative world were performed. As expected, the amount of time to
+    complete a million instructions is a linear function of how many
     indirect calls into the speculative world we take. Additionally we see that
     it only requires using 10 speculative calls per instruction to achieve a
-    very low number of errors in reaching a million instructions.}
+    very low number of errors in reaching a million instructions, making 10-20
+    iterations an attractive choice for most applications.}
 
     \label{fig:turing_success}
 \end{figure}
