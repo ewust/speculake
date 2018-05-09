@@ -27,12 +27,12 @@ In \speculake, we cause the CPU to mis-speculate the destination of an indirect
 branch in the payload program, causing it to speculatively execute 
 instructions that are never truly executed. We term this speculative destination
 the \emph{speculative entry point}. \speculake uses indirect jumps to allow
-speculatively executing from \emph{any} instruction in the payload process'
+speculative execution from \emph{any} instruction in the payload process'
 address space. Because it can jump to any instruction, the malware analyst has a
 difficult task in determining where a payload program's speculative entry point
 is.
 
-In fact, the location this entry point is not determined by the payload
+In fact, the location of this entry point is not determined by the payload
 program, but rather the corresponding trigger program. This means that with only
 the payload program, an analyst does not posses enough information to find the
 speculative entry point.
