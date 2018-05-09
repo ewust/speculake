@@ -17,16 +17,17 @@
 
 The term \textit{weird machine} comes from work done by Bratus \textit{et al.}
 composing bugs and features of a system to create arbitrary compuatation with
-interesting properties~\cite{weird_machines,bratus2011exploit,weird_exploits}. This 
-encompasses many traditional computer vulnerabilities including 
-buffer overflows~\cite{buffer_overflow}, format string exploits~\cite{format_string_exploit},
-and return oriented programming~\cite{shacham2007geometry}. These exploits
-demonstrate performing arbitrary computation in places that were not originally
-intended to act as computational entities.
+interesting properties~\cite{weird_machines,bratus2011exploit,weird_exploits}.
+This encompasses many traditional computer vulnerabilities including buffer
+overflows~\cite{buffer_overflow}, format string
+exploits~\cite{format_string_exploit}, and return oriented
+programming~\cite{shacham2007geometry}. These exploits demonstrate performing
+arbitrary computation in places that were not originally intended to act as
+computational entities.
 
-As another example, Bangert~\textit{et al.} demonstrate that a turing complete weird machine 
-can be constructed using the page fault handling mechanism in Intel's
-IA32 architecture~\cite{bangert2013page}. 
+As another example, Bangert~\textit{et al.} demonstrate that a Turing complete
+weird machine can be constructed using the page fault handling mechanism in
+Intel's IA32 architecture~\cite{bangert2013page}. 
 
 Unexpected functionality like this is abundant in modern
 processors~\cite{d2015exploiting} as multiple threads share system resources
@@ -117,9 +118,9 @@ faster alternative~\cite{gruss2016flush+flush}.
 \subsection{Speculative Execution}
 
 % Lead in 
-Leading up to the discovery and release of the Spectre and Meltdown vulnerabilities
-multiple teams were working to reverse engineer the mechanisms that implemented in 
-the microcode of various processors and document their
+Leading up to the discovery and release of the Spectre and Meltdown
+vulnerabilities multiple teams were working to reverse engineer the mechanisms
+that implemented in the microcode of various processors and document their
 behavior~\cite{intel-instruction-tables,project_zero,measuring-cache,measuring-rob}.
 Research into branch predictors~\cite{godbolt2016branch}, cache replacement
 policies, and reorder buffer construction~\cite{measuring-rob} paved the way for
@@ -133,10 +134,12 @@ the branch prediction side-channels employed by Spectre (and subsequently
 %dedicated branch prodiction side-channels.
 
 % Discovery & Followup
-Given the numerous directions that were being investigated in reverse engineering 
-Intel processors, multiple teams discovered the Spectre vulnerabilities concurrently including 
-the teams associated with Kocher \textit{et al.}~\cite{spectre}, the Project Zero team 
-at Google~\cite{project_zero},and various others~\cite{evtyushkin2018branchscope,maisuradze2018speculose}. 
+Given the numerous directions that were being investigated in reverse
+engineering Intel processors, multiple teams discovered the Spectre
+vulnerabilities concurrently including the teams associated with Kocher
+\textit{et al.}~\cite{spectre}, the Project Zero team at
+Google~\cite{project_zero}, and various
+others~\cite{evtyushkin2018branchscope,maisuradze2018speculose}. 
 %These works propose multiple variants making use of branch prediction.
 Follow 
 up work on speculative execution side channels has also demonstrated
