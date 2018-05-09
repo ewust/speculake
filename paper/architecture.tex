@@ -174,7 +174,9 @@ spculative environment further in Sections~\ref{subsec:decryption}.
 We find that when executing speculatively, the number of instrutions completed
 is rarely limited by cache miss duration. Instead
 ROB size and processor mechanisms for resolving
-data dependencies define an upper boundary.
+data dependencies define an upper boundary of approximately 150
+instructions\footnote{While \texttt{nop} is able to execute up to the full 220
+ROB capacity, instructions that do useful work cannot reach this limit}.
 
 % TODO: 
 % - Highlist instruction signal variablity (add v mul v aesdec v nop)?
