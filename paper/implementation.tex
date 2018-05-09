@@ -61,14 +61,15 @@ correct inputs and reported the computed result correctly,
 we repeat the execution a number of times and look for the value that was
 detected as present in the cache most often over all the iterations.
 
-Our Turing implementation discovered that 4 repetitions is sufficient for the
+Our Turing implementation discovered that 10 repetitions is sufficient for the
 real world to determine the correct value, as the ``hit rate'' for any one
 iteration observing the correct value loaded in cache was over 80\%.
 
 We implemented the 5 state Busy Beaver configuration which requires over 47
-million steps to complete. We were able to verify that the speculative world
-could correctly compute 20 thousand steps with no errors at a rate of 324
-instructions per second.
+million steps to complete. Figure~\ref{fig:turing_success} shows the
+capabilities of our Turing implementation. We were able to verify that the
+speculative world could correctly compute a million instructions with no errors
+at a rate of 324 instructions per second.
 
 % Target_fn returning next step given access to current state in global vars
 %   - busy beaver
@@ -99,10 +100,10 @@ In this model, the speculative function decrypts a full 16-byte AES block each
 iteration, but only returns the bits specified by the index.
 
 We demonstrate the speed that information can be decrypted via the speculative
-world, and we vary the channel width of the side channel from 1 to 12 bit to
+world, and we vary the channel width of the side channel from 1 to 12 bits to
 measure its performance. At low channel width, reading from the cache side
 channel requires timing reads from only 2 locations, while at 12-bits, the side
-channel requires reading $2^{12}$ locations. On the flip side, there is a fixed
+channel requires reading $2^{12}$ locations. On the other hand, there is a fixed
 overhead per iteration that favors increased channel width to maximize
 bandwidth. As shown in Figure~\ref{fig:spec_bandwidth}, 8 bits is the optimal
 side channel width, allowing us to decrypt over 5,000 bits per second (625
@@ -158,12 +159,13 @@ program that prints to \texttt{stdout}. Next, a \texttt{FizzBuzz} program that
 demonstrates control flow and arithmetic operations while printing to stdout.
 And finally, a \textit{ReverseShell} program that opens and connects to a socket
 before  duplicating I/O file descriptors and executing a local shell. Details of
-the SPASM instruction set can be found in Appendix~\ref{appendix:spasm}.
+the SPASM instruction set can be found in Appendix~\ref{appendix:spasm}. Figure~\ref{fig:spasm_model} details the high-level flow of a SPASM payload.
 
-Expected performance for a given SPASM binary will vary given multiple factors, 
-the most important of which is the \texttt{Flush+Reload} redundancy. This can be tuned
-based on the specific trigger, as it is used to establish confidence that a signal 
-has been identified in the indicess returned from the "speculative world". 
+Expected performance for a given SPASM binary will vary given multiple factors,
+the most important of which is the \texttt{Flush+Reload} redundancy. This can be
+tuned based on the specific trigger, as it is used to establish confidence that
+a signal has been identified in the indices returned from the "speculative
+world". 
 %Thus accomplishing a task using SPASM generally equates to:
 
 % \begin{lstlisting}

@@ -30,10 +30,10 @@ with open(filename, "r") as f:
         means.append(mean)
         l = f.readline() # jump number
 
-means = [float(20000-i)/20000.0 for i in means]
-meds = [float(20000-i)/20000.0 for i in meds]
-mins = [float(20000-i)/20000.0 for i in mins]
-maxes = [float(20000-i)/20000.0 for i in maxes]
+means = [(10**6)*float(i)/100000.0 for i in means]
+meds = [(10**6)*float(i)/100000.0 for i in meds]
+mins = [(10**6)*float(i)/100000.0 for i in mins]
+maxes = [(10**6)*float(i)/100000.0 for i in maxes]
 
 # plt.plot(numJumps, mins, label="minimums")
 # plt.subplot()
@@ -53,8 +53,9 @@ fig, ax1 = plt.subplots()
 
 color = "tab:blue"
 ax1.set_xlabel("Number of iterations")
-ax1.set_ylabel("Average success rate over 20k instructions")
+ax1.set_ylabel("Average number of errors per one million instructions")
 ax1.plot(numJumps, means, label="Success rate", color=color, linewidth=3.0)
+ax1.set_ylim(0,30)
 ax1.tick_params(axis="y", labelcolor=color)
 
 # now plot hitrate
@@ -88,9 +89,11 @@ with open(filename, "r") as f:
         l = f.readline() # jump number
 
 ax2 = ax1.twinx()
+maxes = [10*i for i in maxes]
+means = [10*i for i in means]
 
 color = "tab:red"
-ax2.set_ylabel("Average time (s) to reach 20k instructions",color=color)
+ax2.set_ylabel("Average time (s) to reach 1 million instructions",color=color)
 ax2.plot(numJumps, means, color=color,label="Average time", linewidth=3.0)
 ax2.tick_params(axis="y", labelcolor=color)
 

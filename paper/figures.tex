@@ -76,12 +76,12 @@
 \begin{figure}[t]
     \centering
         \includegraphics[width=0.5\textwidth]{figures/Speculative_bandwidth}
-    \caption{Speculative Bandwidth---Using the speculative primitive 
-        1KB of data can be decrypted and exfiltrated at a speed between 5 and 6 kbps
-        from the speculative world with 20 iterations per
-        round for guaranteed correctness.  Varying the width of the channel 
-        results in competing performance factors -- decreasing the 
-        number of loops vs decreased size of the probe space.}
+    \caption{Speculative Bandwidth---Using the speculative primitive 1KB of data
+        can be decrypted and exfiltrated at a speed between 5 and 6 kbps from
+        the speculative world with 20 iterations per round for guaranteed
+        correctness.  Varying the width of the channel results in competing
+        performance factors -- decreasing the number of loops vs decreased size
+        of the probe space.}
     \label{fig:spec_bandwidth}
 \end{figure}
 }
@@ -92,12 +92,13 @@
 \begin{figure}[b]
     \centering
         \includegraphics[width=0.46\textwidth]{figures/spasm_model.pdf}
-    \caption{This diagram demonstrates the control flow of a \speculake application
-        making use of the decryption gadget and emulation. An encrypted SPASM binary 
-        stored in dead code or data accessible to \textit{Speculative Computation} 
-        is decrypted  and then returned through the primitive. The 
-        \textit{Resultant Computation} performs the SPASM emulation to update the 
-        process state before the next instruction is decrypted.}
+    \caption{This diagram demonstrates the control flow of a \speculake
+        application making use of the decryption gadget and emulation. An
+        encrypted SPASM binary stored in dead code or data accessible to
+        \textit{Speculative Computation} is decrypted  and then returned through
+        the primitive. The \textit{Resultant Computation} performs the SPASM
+        emulation to update the process state before the next instruction is
+        decrypted.}
     \label{fig:spasm_model}
 \end{figure}
 }
@@ -108,13 +109,14 @@
         \includegraphics[width=0.46\textwidth]{figures/SuccessAndTime}
 
     \caption{The number of instructions and error rate of a the 5-state Busy
-            Beaver configuration were measured as a function of how many (redundant) iterations into
-    the speculative world were performed. As expected, the amount of time to
-    complete a million instructions is a linear function of how many
-    indirect calls into the speculative world we take. Additionally we see that
-    it only requires using 10 speculative calls per instruction to achieve a
-    very low number of errors in reaching a million instructions, making 10-20
-    iterations an attractive choice for most applications.}
+            Beaver configuration were measured as a function of how many
+            (redundant) iterations into the speculative world were performed. As
+            expected, the amount of time to complete a million instructions is a
+            linear function of how many indirect calls into the speculative
+            world we take. Additionally we see that it only requires using 10
+            speculative calls per instruction to achieve a very low number of
+            errors in reaching a million instructions, making 10-20 iterations
+            an attractive choice for most applications.}
 
     \label{fig:turing_success}
 \end{figure}
