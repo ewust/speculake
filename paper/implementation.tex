@@ -21,9 +21,10 @@ payload program, which is never directly called
 cache but otherwise need not be accessed directly.
 
 
-
 \subsection{Turing Machine}
 \label{subsec:impl-turing}
+
+\FigTuringSuccess
 
 We implemented a 2-symbol 5-state Busy Beaver Turing machine logic in a  
 payload application. The gadget implementation reads a global state,
@@ -54,24 +55,20 @@ speculative gadget will read from memory. Thus, error correcting codes on
 the reported result do not improve the situation.
 
 
-%In our model the real world keeps track of the Turing state and tape. The
-%speculative world uses this information to load a specific value into cache. The
-%real world then times the loading of these values to determine which value was
-%loaded speculatively. This value is then used to update the state and tape and
-%the process is repeated until a halt state is reached.
 
 In order to have confidence the speculative gadget executed with the
 correct inputs and reported the computed result correctly, 
 we repeat the execution a number of times and look for the value that was
 detected as present in the cache most often over all the iterations.
 
-Our Turing implementation discovered that 50 repetitions is sufficient for
-the real world to determine the correct value, as the ``hit rate'' for any one
+Our Turing implementation discovered that 4 repetitions is sufficient for the
+real world to determine the correct value, as the ``hit rate'' for any one
 iteration observing the correct value loaded in cache was over 80\%.
 
 We implemented the 5 state Busy Beaver configuration which requires over 47
 million steps to complete. We were able to verify that the speculative world
-could correctly compute 20 thousand steps with no errors at a rate of 324 instructions per second.
+could correctly compute 20 thousand steps with no errors at a rate of 324
+instructions per second.
 
 % Target_fn returning next step given access to current state in global vars
 %   - busy beaver
