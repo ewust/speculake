@@ -93,7 +93,7 @@ maxes = [10*i for i in maxes]
 means = [10*i for i in means]
 
 color = "tab:red"
-ax2.set_ylabel("Average time (s) to reach 1 million instructions",color=color)
+ax2.set_ylabel("Average time (s) to reach 1 million instructions")
 ax2.plot(numJumps, means, color=color,label="Average time", linewidth=3.0)
 ax2.tick_params(axis="y", labelcolor=color)
 
