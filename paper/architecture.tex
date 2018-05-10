@@ -206,6 +206,27 @@ number of instructions that can be run in the speculative context.
 Figure~\ref{fig:spec-capacity} shows the instructions that can be run when
 running trigger and payload on a single core vs.\ a pair of hyperthreaded cores.
 
+\subsubsection{Nested Speculation}
+
+We explore the ability for the CPU to ``double speculate'', where a second
+stalled indirect jump while the CPU is already speculating causes it to predict
+the target and
+speculate a second time. For instance, suppose a payload program truly jumps to
+target A, but the CPU is mistrained by a trigger program that jumps to B, thus
+causing the payload program to speculatively execute at B. At B, suppose there
+is a second indirect jump, perhaps using the same register as the first jump
+(which has still not resolved). If the trigger program jumps to C, the payload
+program will speculate a second time and continue speculative execution at C.
+
+We find that not all Intel CPUs support nested speculation. For
+example, it appears Haswell chips do not speculate while already speculating,
+but nonetheless support non-nested \speculake. Both Sandy Bridge (which
+preceeded Haswell) and Kaby Lake (which followed Haswell) support nested
+speculation. We find that when a CPU does support nested speculation, there
+appears to be no limit to nested depth besides the speculative instruction
+limit. We use a 16-deep nested speculation in Section~\ref{subsec:impl-aes}
+to thoroughly protect speculative decryption keys from reverse
+engineering.
 
 \subsection{Speculative Primitive}
 

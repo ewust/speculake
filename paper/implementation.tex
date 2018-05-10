@@ -87,8 +87,13 @@ enough to allow us to compute the key expansion, even using the
 \texttt{aeskeygenassist} instructions. To avoid this, we preload the expanded
 key schedule into the program, rather than the key. We note that an analyst
 could observe the structure of a normal key schedule,
-but we can avoid this by simply selecting 11 random round keys (and encrypting
-using the same 11 round keys). We discuss further methods for obfuscating
+but we can avoid this by simply selecting 11 random round keys.
+While this alternative key schedule variant is not ``true'' AES, we can easily
+make the same change in our respective encryption function to make it compatible.
+We note that
+this should not weaken the security of AES, as we can ensure the round keys are
+not linearly related.
+We discuss further methods for obfuscating
 the key in Section~\ref{subsec:nested-spec}.
 
 
@@ -104,10 +109,60 @@ world, and we vary the channel width of the side channel from 1 to 12 bits to
 measure its performance. At low channel width, reading from the cache side
 channel requires timing reads from only 2 locations, while at 12-bits, the side
 channel requires reading $2^{12}$ locations. On the other hand, there is a fixed
-overhead per iteration that favors increased channel width to maximize
+overhead per speculative iteration that favors increased channel width to maximize
 bandwidth. As shown in Figure~\ref{fig:spec_bandwidth}, 8 bits is the optimal
 side channel width, allowing us to decrypt over 5,000 bits per second (625
 Bytes/sec).
+% Iterations: 20
+
+
+\subsubsection{Obfuscating keys with nested speculation}
+\label{subsec:nested-spec}
+
+An analyst could locate the speculative entry point for our
+decryption gadget by
+searching for AES-NI instructions in the payload program's dead code, ultimately
+discovering the keys that it uses. However, we find it is possible to overcome
+this by having the trigger program communicate the decryption key to the payload
+program via the branch predictor.
+
+To accomplish this, we use multiple speculative entry points, each that derives a
+different decryption key before calling a common decryption routine. Since
+the exact speculative entry point is determined by the trigger program, an
+analyst cannot discover the decryption key directly from the payload program.
+
+An analyst could still enumerate all potential entry points, testing each one
+until they find one that correctly decrypts the ciphertext. In a 1~MB binary,
+there are (at most) only 1~million entry points, providing just 20~bits of
+security.
+
+To increase security, we instead use nested speculation to \emph{chain} entry points
+together. Rather than derive
+the key from a single entry point, we have each potential entry point perform
+another indirect jump that the CPU cannot immediately resolve, forcing it to
+speculate while already executing speculatively. The predicted target of that jump
+will also be determined by the trigger program. For example, if the trigger
+program makes 30 training jumps, followed by 10 additional indirect jumps, and
+the payload program performs the same 30 training jumps before a stall, the CPU
+will predict the payload program will also perform the next 10 jumps. If each
+jump has the potential to land in up to 1024 possible locations, this would
+provide in total $1024^{10} = 2^{100}$ possible keys, or 100~bits of security.
+%We describe our implementation of this nested speculative execution concept in
+%Section~\ref{subsec:nested-spec}.
+
+\smallskip
+
+We implemented this technique, making 256 speculative landing spots, that each
+shifted 8 unique bits into the 128-bit register \texttt{\%xmm0}, and then
+performed an indirect jump. We then had the trigger program perform 16
+indirect jumps that corresponded with 16 randomly-chosen landing spots in the
+payload program, training the branch predictor. When the payload program reaches the
+first speculative jump, it follows the same pattern speculatively, 
+eventually filling
+\texttt{\%xmm0} with the corresponding $16*8$ bits. We then used
+the \texttt{aesenc} instruction to expand these 128-bits to a full
+key schedule, and performed decryption as described previously.
+
 
 
 %While the \speculake model acheives only moderate decryption speed, the 
@@ -242,38 +297,5 @@ Apache benchmark to create thousands of connections with a different cipher
 suite (DHE-RSA-AES128-GCM-SHA256), we similarly received no hit rate. This
 could potentially allow an adversary to use an obscure or uncommon (but still
 supported) cipher suite to trigger a malicious payload program on a remote server.
-
-\subsection{Nested Speculation}
-\label{subsec:nested-spec}
-
-We note that an analyst might attempt to locate the speculative entry point by
-searching for AES-NI instructions in the payload program's dead code, ultimately
-discovering the keys that it uses. However, we find it is possible to overcome
-this by having the trigger program communicate the decryption key to the payload
-program via the branch predictor.
-
-To accomplish this, we use multiple speculative entry points, each that derive a
-different decryption key before calling a common decryption routine. Since
-the exact speculative entry point is determined by the trigger program, an
-analyst cannot discover the decryption key directly from the payload program.
-
-An analyst could still enumerate all potential entry points, testing each one
-until they find one that correctly decrypts the ciphertext. In a 1~MB binary,
-there are (at most) only 1~million entry points, providing just 20~bits of
-security.
-
-To increase security, we \emph{chain} entry points together. Rather than derive
-the key from a single entry point, we have each potential entry point perform
-another indirect jump that the CPU cannot immediately resolve, forcing it to
-speculate while already executing speculatively. The predicted target of that jump
-will also be determined by the trigger program. For example, if the trigger
-program makes 30 training jumps, followed by 10 additional indirect jumps, and
-the payload program performs the same 30 training jumps before a stall, the CPU
-will predict the payload program will also perform the next 10 jumps. If each
-jump has the potential to land in up to 1024 possible locations, this would
-provide in total $1024^{10} = 2^{100}$ possible keys, or 100~bits of security.
-%We describe our implementation of this nested speculative execution concept in
-%Section~\ref{subsec:nested-spec}.
-
 
 %%%%%%%%%%%%%%
