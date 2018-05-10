@@ -196,38 +196,47 @@ a systemcall.
 %instructions. 
 %
 
-In this model of computation there are no instruction arguments, as we must
+In this model of computation there are effectively no instruction arguments, as we must
 return an entire instruction from the speculative world inside the limited-width
 cache side channel. Although other small
 instruction sets exist, they either allow variable instruction
 lengths, are too long even in reduced form, or did not have significant support
 to make them favorable for developers.
 
-We have used 6 bits in the construction of this instruction set as our
+We used 6 bits in the construction of this instruction set as our
 goal is to limit the length of each opcode as much as possible. Note that this
 is different from the goal in maximizing bandwidth, as our goal now is to
-maximize instruction throughput.
+maximize instruction throughput. Given our short instructions, loading values into registers
+requires shifting in 4-bits at a time. SPASM has two registers that act as a
+pointer and working register, that can be used to perform jumps, arbitrary
+memory reads and writes, and basic arithmatic. We also have a \texttt{syscall}
+instruction that makes a real system call to the underlying operating system
+with parameters loaded from the SPASM state, allowing us to interact with the
+real world. Details of
+the SPASM instruction set can be found in Appendix~\ref{appendix:spasm}. 
 
-In SPASM we have implemented multiple example programs that can be run as
-encrypted binaries in an \speculake payload: First, a \textit{HelloWorld}
+In SPASM we have implemented multiple example programs that we encrypted and
+loaded into a \speculake payload, which decrypts and emulates SPASM instructions
+only when the corresponding trigger program is running.
+We first implemented a \textit{HelloWorld}
 program that prints to \texttt{stdout}. Next, a \texttt{FizzBuzz} program that
 demonstrates control flow and arithmetic operations while printing to stdout.
-And finally, a \textit{ReverseShell} program that opens and connects to a socket
-before  duplicating I/O file descriptors and executing a local shell. Details of
-the SPASM instruction set can be found in Appendix~\ref{appendix:spasm}. Figure~\ref{fig:spasm_model} details the high-level flow of a SPASM payload.
+Finally, we implemented a \textit{ReverseShell} program that opens and connects to a socket
+before duplicating I/O file descriptors and executing a local shell.
+Figure~\ref{fig:spasm_model} details the high-level flow of a SPASM payload.
 
-Expected performance for a given SPASM binary will vary given multiple factors,
-the most important of which is the \texttt{Flush+Reload} redundancy. This can be
-tuned based on the specific trigger, as it is used to establish confidence that
-a signal has been identified in the indices returned from the "speculative
-world". 
+%Expected performance for a given SPASM binary will vary given multiple factors,
+%the most important of which is the \texttt{Flush+Reload} overhead. This can be
+%tuned based on the specific trigger, as it is used to establish confidence that
+%a signal has been identified in the indices returned from the "speculative
+%world". 
 %Thus accomplishing a task using SPASM generally equates to:
 
 % \begin{lstlisting}
 %     Redundancy * Probe_Space * Num_Instr
 % \end{lstlisting}
 
-For example, the \textit{ReverseShell} program is 355 SPASM instructions, and
+Our \textit{ReverseShell} program consists of 355 SPASM instructions, and
 makes six system calls to open a socket,
 connect to it, duplicate I/O file descriptors, and perform an \texttt{execve}
 system call to open a shell.
@@ -242,7 +251,7 @@ once triggered.
 \subsection{OpenSSL Trigger}
 \label{subsec:openssl}
 
-Benign programs can act as a trigger program, provided they perform sufficient
+Benign programs can also act as a trigger program, provided they perform sufficient
 indirect jumps to train the branch predictor. We experiment using the OpenSSL
 library as a potential benign trigger, as its source code has gratuitous use of
 function pointers which compile to indirect jumps. In addition, it has many
