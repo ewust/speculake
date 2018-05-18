@@ -9,13 +9,21 @@ endif
 
 all: inject measure
 
+retpoline: inject_retp measure_retp
+
 inject: inject.c indirect.S
+	$(CC) -Wl,-Tlinker.ld $^ -o $@ ${NO_PIE}
+
+inject_retp: inject.c indirect_retpoline.S
 	$(CC) -Wl,-Tlinker.ld $^ -o $@ ${NO_PIE}
 
 trigger: trigger.c indirect.S
 	$(CC) -Wl,-Tlinker.ld $^ -o $@ ${NO_PIE}
 
 measure: target_fn.c measure.c indirect.S decrypt.S
+	$(CC) -Wl,-Tlinker.ld $^ -o $@ ${NO_PIE}
+
+measure_retp: target_fn.c measure.c indirect.S decrypt.S
 	$(CC) -Wl,-Tlinker.ld $^ -o $@ ${NO_PIE}
 
 camellia: target_fn.c camellia-triggered.c decrypt.S
@@ -40,4 +48,4 @@ single: target_fn.S common.c measure.c link-single.ld
 	$(CC) -m64 main.c -lsingle -L./ -o single
 
 clean:
-	$(RM) inject measure *.o trigger
+	$(RM) inject measure *.o trigger inject_retp measure_retp
