@@ -30,10 +30,10 @@ with open(filename, "r") as f:
         means.append(mean)
         l = f.readline() # jump number
 
-means = [(10**6)*float(i)/100000.0 for i in means]
-meds = [(10**6)*float(i)/100000.0 for i in meds]
-mins = [(10**6)*float(i)/100000.0 for i in mins]
-maxes = [(10**6)*float(i)/100000.0 for i in maxes]
+means = [(10**7)*float(i)/100000.0 for i in means]
+meds = [(10**7)*float(i)/100000.0 for i in meds]
+mins = [(10**7)*float(i)/100000.0 for i in mins]
+maxes = [(10**7)*float(i)/100000.0 for i in maxes]
 
 # plt.plot(numJumps, mins, label="minimums")
 # plt.subplot()
@@ -51,12 +51,14 @@ maxes = [(10**6)*float(i)/100000.0 for i in maxes]
 
 fig, ax1 = plt.subplots()
 
-color = "tab:blue"
+# color = "tab:blue"
 ax1.set_xlabel("Number of iterations")
 ax1.set_ylabel("Average number of errors per one million instructions")
-ax1.plot(numJumps, means, label="Success rate", color=color, linewidth=3.0)
+# ax1.plot(numJumps, means, label="Success rate", color=color, linewidth=3.0)
+ax1.plot(numJumps, means, label="Success rate", linewidth=3.0)
 ax1.set_ylim(0,30)
-ax1.tick_params(axis="y", labelcolor=color)
+# ax1.tick_params(axis="y", labelcolor=color)
+ax1.tick_params(axis="y")
 
 # now plot hitrate
 
