@@ -93,7 +93,7 @@ static void hook_syscall(uc_engine *uc, void *user_data)
 {
     printf("in syscall\n");
     uint8_t *p = qemu_get_ram_ptr_arm(uc, 0);
-    printf("p = 0x%lx\n", p);
+    printf("p = %p\n", p);
     uint64_t r7;
     uint64_t r0;
     uint64_t r1;
@@ -102,7 +102,7 @@ static void hook_syscall(uc_engine *uc, void *user_data)
     uint64_t r4;
     uint64_t r5;
 
-    uint64_t opcode;
+    int opcode;
 
     uc_reg_read(uc, UC_ARM_REG_R7, &r7);
     uc_reg_read(uc, UC_ARM_REG_R0, &r0);
@@ -128,6 +128,8 @@ static void hook_syscall(uc_engine *uc, void *user_data)
             opcode = 1;
             break;
     }
+
+    printf("Executing syscall: %d\n", opcode);
 
 
     // printf("\nr7 = %d\n", r7);
