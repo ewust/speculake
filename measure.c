@@ -171,7 +171,8 @@ void measure() {
     int i;
 
     int misses = 0;
-    uint64_t k = 4;
+    uint64_t k = 1;
+    uint64_t width = 10;
     uint64_t top_k_i[k]; 
     uint64_t top_k_res[k]; 
     uint64_t final_i;
@@ -180,7 +181,7 @@ void measure() {
     while (1) {
         for (i=0; i<MAX_ITERATIONS; i++) {
             _mm_clflush(&fn_ptr);
-            //_mm_clflush(&jmp_ptr);
+            _mm_clflush(&jmp_ptr);
             indirect(&jmp_ptr);
             //((void(*)(void *))map)(&jmp_ptr);
             usleep(1);
@@ -192,7 +193,7 @@ void measure() {
         hit_miss = get_top_k(k, top_k_i, top_k_res);
 
         if (hit_miss){
-            final_i = construct_result(k, 8, top_k_i); 
+            final_i = construct_result(k, width, top_k_i); 
             printf("[%08lX]\n\n", final_i);
 
             signal_idx++;
