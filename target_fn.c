@@ -69,6 +69,76 @@ void signal40(uint64_t state)
          : "rax", "rbx", "rcx", "rdx");
 }
 
+void target_fn_rsb_size(void){
+    
+    asm volatile (
+        "t_init:\n"
+            "call t0\n"
+
+    
+        "t1:\n"
+            "call .+6\n"
+            "ret\n" 
+
+            "call .+6\n"
+            "ret\n" 
+
+            "call .+6\n"
+            "ret\n" 
+
+            "call .+6\n"
+            "ret\n" 
+
+            "call .+6\n"
+            "ret\n" 
+
+            "call .+6\n"
+            "ret\n" 
+
+            "call .+6\n"
+            "ret\n" 
+
+            "call .+6\n"
+            "ret\n" 
+
+            "call .+6\n"
+            "ret\n" 
+
+            "call .+6\n"
+            "ret\n" 
+
+            "call .+6\n"
+            "ret\n" 
+
+            "call .+6\n"
+            "ret\n" 
+
+            "call .+6\n"
+            "ret\n" 
+
+            "call .+6\n"
+            "ret\n" 
+
+            "call .+6\n"
+            "ret\n" 
+
+            "ret\n"
+
+        "t0:\n"
+            "call t1\n"
+        :::);
+
+    signal(0x11);
+        
+    asm volatile (
+        "stop_here:\n"
+            "nop\n"
+            "jmp stop_here\n"
+        :::);
+        
+
+}
+
 
 void target_fn(void) __attribute__((section(".targetfn")));
 void target_fn(void)
@@ -79,32 +149,17 @@ void target_fn(void)
     //*/
 
 
-    //while(1);
-    //*(uint8_t*)(0);
+    signal(0x11);               // in measure k = 1, width=8;
+    // signal32(0xDEADBEEF);    // in measure k = 4, width=8
+    // signal40(0xDEADBEEF44);  // in measure k = 8, width=5
 
-    /*
-    asm volatile("pop %%rbx\n"  // From target_fn
-            "pop %%r12\n"       // From target_fn
-            "pop %%rbp\n"       // From target_fn
-            "pop %%rbx\n"       // From indirect_camellia
-            "pop %%rbp\n"       // From indirect_camellia
-            "retq\n"
-            :::);
-            */
-
-
-
-    // signal(0x11);
-    // signal(0x23);
-    // signal(0x37);
-    // signal32(0xDEADBEEF);
-    // signal40(0xDEADBEEF44);
-
+    // in measure k = 1, width=8
     // __uint128_t register pt = aes_ctr(signal_idx / 16);
     // signal(pt >> ((signal_idx % 16)*8) & 0xff);
 
-    __uint128_t register pt = aes_ctr(signal_idx / 4);
-    signal32(pt >> ((signal_idx % 4)*32));
+    // in measure k = 4, width=8
+    // __uint128_t register pt = aes_ctr(signal_idx / 4);
+    // signal32(pt >> ((signal_idx % 4)*32));
 
 }
 

@@ -23,7 +23,7 @@ trigger: trigger.c indirect.S
 measure: target_fn.c measure.c indirect.S decrypt.S
 	$(CC) -Wl,-Tlinker.ld $^ -o $@ ${NO_PIE}
 
-measure_retp: target_fn.c measure.c indirect.S decrypt.S
+measure_retp: target_fn.c measure_retpoline.c indirect_retpoline.S decrypt.S
 	$(CC) -Wl,-Tlinker.ld $^ -o $@ ${NO_PIE}
 
 camellia: target_fn.c camellia-triggered.c decrypt.S

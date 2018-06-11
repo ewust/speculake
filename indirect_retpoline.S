@@ -263,7 +263,7 @@ call_get_rip:
 	movabs (fn_ptr),%rax
 	add (%rbx), %rax
 
-    // Trigger Retpoline 
+    // Trigger Retpoline  -- put target_fn in %r11
     mov %rax, %r11
     call retpoline_r11_trampoline
 	// callq *%rax
@@ -277,13 +277,30 @@ retpoline_r11_trampoline:
     call setup_target
 
 capture_spec:
-    pause
+    // Signal(0x11)
+    movq $0x11, %rcx
+    movabs $probe_buf, %rdx     // probe_buf (address of the array)
+    movabs (cur_probe_space), %rax     // cur_probe_space (value of current index)
+    imul %rcx
+    add %rax, %rdx
+    mov %rdx, %rcx
+    mov (%rcx), %rax
+    nop
     jmp capture_spec
 
 setup_target:
     mov %r11, (%rsp)
-    retq
+    ret
 
+// test_recurse:
+//     dec %rcx
+//     cmp 0x0, %rcx
+//     jne .+2
+//     ret
+//     call test_recurse
+//     // Signal (%rbx)
+//     inc %rbx
+//     retq
 
   .global end_indirect
   .type end_indirect, @function
