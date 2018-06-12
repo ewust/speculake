@@ -96,7 +96,7 @@ bool get_top_k(uint64_t k, uint64_t* output_i, uint64_t* output_res){
     uint64_t top_k[k];
     uint64_t top_k_res[k];
     uint64_t min_i=0;
-    uint64_t min_hits_allowed=10;
+    uint64_t min_hits_allowed=1;
     uint64_t hits=0;
 
     uint64_t i, j, x;
@@ -164,16 +164,74 @@ uint64_t construct_result(uint64_t k, uint64_t width, uint64_t* top_k){
 }
 
 
+void flush_RSB() {
+    asm volatile(
+        ".rept 32\n"
+        "call 1f\n"
+        "pause\n"
+        "lfence\n"
+        "1: \n"
+        ".endr\n"
+        "callq .+0x26\n"//
+        "movq $0x88, %%rcx\n"
+        "mov (cur_probe_space), %%rax\n"
+        "imul %%rcx\n"
+        "mov (probe_buf), %%rdx\n"
+        "add %%rax, %%rdx\n"
+        "mov (%%rdx), %%rax\n"
+        "nop\n"
+        "addq $(8 * 33),%%rsp\n"
+    :::);
+}
+
+
+void retpoline_r11(){
+    asm volatile(
+        "movq (fn_ptr), %%r11\n"
+        "jmp set_up_return\n"
+    "inner_indirect_branch:\n"
+        "call set_up_target\n"
+    "capture_spec:\n"
+        "pause\n"
+//         // Signal(0x11)
+//         "movq $0x11, %%rcx\n"
+//         "mov (cur_probe_space), %%rax\n"
+//         "imul %%rcx\n"
+//         "mov (probe_buf), %%rdx\n"
+//         "add %%rax, %%rdx\n"
+//         "mov (%%rdx), %%rax\n"
+//         "nop\n"
+        "jmp capture_spec\n"
+    "set_up_target:\n"
+        "mov %%r11, (%%rsp)\n"
+        "ret\n"
+    "set_up_return:\n"
+        "call inner_indirect_branch\n"
+    :::);
+}
+
+
+void rt1(){
+    asm volatile(
+        // Signal(0xFF)
+        "movq $0xFF, %%rcx\n"
+        "mov (cur_probe_space), %%rax\n"
+        "imul %%rcx\n"
+        "mov (probe_buf), %%rdx\n"
+        "add %%rax, %%rdx\n"
+        "mov (%%rdx), %%rax\n"
+        "nop\n"
+    :::);
+}
 
 void measure() {
-    fn_ptr = check_probes;
     //jmp_ptr = 0x400e60;
     jmp_ptr = 0;
-    int i;
+    int i, j;
 
     int misses = 0;
-    uint64_t k = 1;
-    uint64_t width = 10;
+    uint64_t k = 2;
+    uint64_t width = 8;
     uint64_t top_k_i[k]; 
     uint64_t top_k_res[k]; 
     uint64_t final_i;
@@ -181,31 +239,22 @@ void measure() {
 
     while (1) {
         for (i=0; i<MAX_ITERATIONS; i++) {
+
+            fn_ptr = rt1;
+                
+            for (j=0; j<100; j++){
+                retpoline_r11();
+                _mm_clflush(&fn_ptr);
+
+            }
+            fn_ptr = check_probes;
             _mm_clflush(&fn_ptr);
-            // _mm_clflush(&jmp_ptr);
-            asm volatile (
-                    "movq (fn_ptr), %%r11\n"
-                    "jmp set_up_return\n"
-                 "inner_indirect_branch:\n"
-                    "call set_up_target\n"
-                "capture_spec:\n"
-                    // "pause\n"
-                    // Signal(0x11)
-                    "movq $0x11, %%rcx\n"
-                    "mov (cur_probe_space), %%rax\n"
-                    "imul %%rcx\n"
-                    "mov (probe_buf), %%rdx\n"
-                    "add %%rax, %%rdx\n"
-                    "mov (%%rdx), %%rax\n"
-                    "nop\n"
-                //     "callq *%%r11\n"
-                    "jmp capture_spec\n"
-                "set_up_target:\n"
-                    "mov %%r11, (%%rsp)\n"
-                    "ret\n"
-                "set_up_return:\n"
-                    "call inner_indirect_branch\n"
-            :::);
+            // Clear probe_buf from cache
+            // for (j=0; j<NUM_PROBES; j++) {
+            //     _mm_clflush(&probe_buf[j*cur_probe_space]);
+            // }
+            flush_RSB(); 
+            retpoline_r11();
 
             //((void(*)(void *))map)(&jmp_ptr);
             usleep(1);
@@ -241,8 +290,8 @@ void measure() {
         usleep(10);
     }
 
-
 }
+
 
 
 int main()

@@ -11,6 +11,9 @@ all: inject measure
 
 retpoline: inject_retp measure_retp
 
+exp_retp1:  target_fn.c retpoline_miss.c indirect_retpoline.S decrypt.S
+	$(CC) -Wl,-Tlinker.ld $^ -o $@ ${NO_PIE}
+
 inject: inject.c indirect.S
 	$(CC) -Wl,-Tlinker.ld $^ -o $@ ${NO_PIE}
 
