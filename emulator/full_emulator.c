@@ -38,12 +38,12 @@ void subString(char s[BUFFSIZE], char t[8], int len) {
 
 int setCode(char c[BUFFSIZE], char s[BUFFSIZE]) {
     int len = min(BUFFSIZE, strlen(s)+1);
-    printf("len = %d\n", len);
+    // printf("len = %d\n", len);
     for (int i = 0; i < len; i += 8){
         char t[8];
         subString(s+i,t,8);
         long tmp = strtol(t, NULL, 16);
-        printf("tmp = %lx\n", tmp);
+        // printf("tmp = %lx\n", tmp);
         int j = 4*(i/8);
         memcpy(c+j, &tmp, 4);
     }
@@ -88,12 +88,20 @@ void printState(uc_engine *uc) {
     printf(">>> SP = 0x%x\n", sp);
 }
 
+
 // callback for SVC instruction (ARM).
 static void hook_syscall(uc_engine *uc, void *user_data)
 {
-    printf("in syscall\n");
     uint8_t *p = qemu_get_ram_ptr_arm(uc, 0);
     printf("p = %p\n", p);
+    // int em_r7;
+    // int em_r0;
+    // int em_r1;
+    // int em_r2;
+    // int em_r3;
+    // int em_r4;
+    // int em_r5;
+    // int em_sp;
     uint64_t r7;
     uint64_t r0;
     uint64_t r1;
@@ -101,9 +109,29 @@ static void hook_syscall(uc_engine *uc, void *user_data)
     uint64_t r3;
     uint64_t r4;
     uint64_t r5;
+    uint64_t sp;
 
     int opcode;
 
+    // uc_reg_read(uc, UC_ARM_REG_R7, &em_r7);
+    // uc_reg_read(uc, UC_ARM_REG_R0, &em_r0);
+    // uc_reg_read(uc, UC_ARM_REG_R1, &em_r1);
+    // uc_reg_read(uc, UC_ARM_REG_R2, &em_r2);
+    // uc_reg_read(uc, UC_ARM_REG_R3, &em_r3);
+    // uc_reg_read(uc, UC_ARM_REG_R4, &em_r4);
+    // uc_reg_read(uc, UC_ARM_REG_R5, &em_r5);
+    // uc_reg_read(uc, UC_ARM_REG_SP, &em_sp);
+    // int em_pc;
+    // uc_reg_read(uc, UC_ARM_REG_PC, &em_pc);
+    // printf("pc = %02x\n", em_pc);
+    // printf("sp = %02x\n", em_sp);
+    // printf("r0 = %02x\n", em_r0);
+    // printf("r1 = %02x\n", em_r1);
+    // printf("r2 = %02x\n", em_r2);
+    // printf("r3 = %02x\n", em_r3);
+    // printf("r4 = %02x\n", em_r4);
+    // printf("r5 = %02x\n", em_r5);
+    // printf("r7 = %02x\n", em_r7);
     uc_reg_read(uc, UC_ARM_REG_R7, &r7);
     uc_reg_read(uc, UC_ARM_REG_R0, &r0);
     uc_reg_read(uc, UC_ARM_REG_R1, &r1);
@@ -111,25 +139,60 @@ static void hook_syscall(uc_engine *uc, void *user_data)
     uc_reg_read(uc, UC_ARM_REG_R3, &r3);
     uc_reg_read(uc, UC_ARM_REG_R4, &r4);
     uc_reg_read(uc, UC_ARM_REG_R5, &r5);
+    uc_reg_read(uc, UC_ARM_REG_SP, &sp);
     int pc;
     uc_reg_read(uc, UC_ARM_REG_PC, &pc);
-    printf("pc = %02x\n", pc);
+    printf("pc = 0x%02x\n", pc);
+    printf("sp = 0x%02lx\n", sp);
+    printf("r0 = 0x%02lx\n", r0);
+    printf("r1 = 0x%02lx\n", r1);
+    printf("r2 = 0x%02lx\n", r2);
+    printf("r3 = 0x%02lx\n", r3);
+    printf("r4 = 0x%02lx\n", r4);
+    printf("r5 = 0x%02lx\n", r5);
+    printf("r7 = 0x%02lx\n", r7);
 
-    // int t = 0xf76f8d08;
-    // int *tmp = mmap(&t, 2*1024*1024, PROT_READ | PROT_WRITE, 0, -1, 0);
-    // printf("mem = %p\n", tmp);
-    // printf("tmp = %d\n", *tmp);
-
-    switch(r7) {
+    // uint64_t r1;
+    // switch(em_r7) {
+    //     case 0x1:
+    //         opcode = 60;
+    //         break;
+    //     case 0x4:
+    //         opcode = 1;
+    //         // converts emulated address to physical address. Uses dictated ADDRESS 
+    //         // subtracts this from the given address, adds this to addr (the base)
+    //         // address and returns this.
+    //         p = p + (em_r1 - ADDRESS);
+    //         printf("new p = %p\n", p);
+    //         r1 = (uint64_t) p;
+    //         printf("new r1 = 0x%02lx\n", r1);
+    //         break;
+    //     case 0x119:
+    //         opcode = 0x29;
+    //         break;
+    // }
+    switch((int)r7) {
         case 0x1:
             opcode = 60;
             break;
         case 0x4:
             opcode = 1;
+            // converts emulated address to physical address. Uses dictated ADDRESS 
+            // subtracts this from the given address, adds this to addr (the base)
+            // address and returns this.
+            p = p + ((int)r1 - ADDRESS);
+            printf("new  p = %p\n", p);
+            r1 = (uint64_t) p;
+            printf("new r1 = 0x%02lx\n", r1);
+            r2 = (int) r2;
+            printf("new r2 = 0x%02lx\n", r2);
+            break;
+        case 0x119:
+            opcode = 0x29;
             break;
     }
 
-    printf("Executing syscall: %d\n", opcode);
+    printf("Executing syscall: 0x%x\n", opcode);
 
 
     // printf("\nr7 = %d\n", r7);
@@ -140,6 +203,18 @@ static void hook_syscall(uc_engine *uc, void *user_data)
     // printf("r10 = %d\n", r3);
     // printf("r8 = %d\n", r4);
     // printf("r9 = %d\n", r5);
+    // asm volatile(
+    //     "movq %q[r0], %%rdi\n"
+    //     "movq %q[r1], %%rsi\n"
+    //     "movq %q[r2], %%rdx\n"
+    //     "movq %q[r3], %%r10\n"
+    //     "movq %q[r4], %%r8\n"
+    //     "movq %q[r5], %%r9\n"
+    //     "movq %q[opcode], %%rax\n"
+    //     "syscall\n"
+    //     : 
+    //     : [r0] "r" (em_r0), [r1] "r" (r1), [r2] "r" (em_r2), [r3] "r" (em_r3), [r4] "r" (em_r4), [r5] "r" (em_r5), [opcode] "r" (opcode)
+    //     : "rdi", "rsi", "rdx", "r10", "r8", "r9", "rax");
     asm volatile(
         "movq %q[r0], %%rdi\n"
         "movq %q[r1], %%rsi\n"
