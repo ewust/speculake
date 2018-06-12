@@ -106,6 +106,7 @@ bool get_top_k(uint64_t k, uint64_t* output_i, uint64_t* output_res){
         top_k_res[i]=0;
     }
 
+    printf("results[0x11] = %ld\n", results[0x11]);
     for (i=0; i<NUM_PROBES; i++) {
 
         if (results[i] < min_hits_allowed){
@@ -185,19 +186,20 @@ void measure() {
             asm volatile (
                     "movq (fn_ptr), %%r11\n"
                     "jmp set_up_return\n"
-                "inner_indirect_branch:\n"
+                 "inner_indirect_branch:\n"
                     "call set_up_target\n"
                 "capture_spec:\n"
                     // "pause\n"
                     // Signal(0x11)
                     "movq $0x11, %%rcx\n"
-                    "movabs $probe_buf, %%rdx\n"
-                    "movabs $cur_probe_space, %%rax\n"
+                    "mov (cur_probe_space), %%rax\n"
                     "imul %%rcx\n"
+                    "mov (probe_buf), %%rdx\n"
                     "add %%rax, %%rdx\n"
                     "mov %%rdx, %%rcx\n"
                     "mov (%%rcx), %%rax\n"
                     "nop\n"
+                //     "callq *%%r11\n"
                     "jmp capture_spec\n"
                 "set_up_target:\n"
                     "mov %%r11, (%%rsp)\n"
