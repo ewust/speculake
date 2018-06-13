@@ -1,3 +1,4 @@
+#include <elf.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -6,14 +7,15 @@
 #include <unistd.h>
 
 #include "full_emulator.h"
-#define ADDRESS 0x1000000
+#define ADDRESS 0x10000
 // code to be emulated
-#define ARM_CODE "\x04\xb0\x8b\xe2\x04\xb0\x8b\xe2" // mov r0, #0x37; sub r1, r2, r3
 
+// initialize the Unicorn engine, create the memory and set the 
+// stack pointer
 void initializeUnicorn(uc_engine *uc){
     // int r_2 = 0x7;     
     // int r_3 = 0x8;     
-    int sp = 0x1001234;
+    int sp = 0x101234;
     // map 2MB memory for this emulation
     uc_mem_map(uc, ADDRESS, 2 * 1024 * 1024, UC_PROT_ALL);
     uc_reg_write(uc, UC_ARM_REG_SP, &sp);
@@ -21,6 +23,7 @@ void initializeUnicorn(uc_engine *uc){
     // uc_reg_write(uc, UC_ARM_REG_R3, &r_3);
 }
 
+// compute min of two numbers, used in setCode
 int min(int a, int b){
     if (a < b){
         return a;
@@ -29,6 +32,8 @@ int min(int a, int b){
     }
 }
 
+// computes substring of size 8 of given string, used
+// for converting string of hex to hex.
 void subString(char s[BUFFSIZE], char t[8], int len) {
     for (int i = 0; i < 8; i++) {
         t[i] = s[i];
@@ -36,22 +41,24 @@ void subString(char s[BUFFSIZE], char t[8], int len) {
 
 }
 
+// necessary when reading code copied into a file,
+// converts code from ascii to hex
 int setCode(char c[BUFFSIZE], char s[BUFFSIZE]) {
     int len = min(BUFFSIZE, strlen(s)+1);
-    // printf("len = %d\n", len);
+    printf("len = %d\n", len);
     for (int i = 0; i < len; i += 8){
         char t[8];
         subString(s+i,t,8);
         long tmp = strtol(t, NULL, 16);
-        // printf("tmp = %lx\n", tmp);
+        printf("tmp = %lx\n", tmp);
         int j = 4*(i/8);
         memcpy(c+j, &tmp, 4);
     }
-    // printf("code = \t\t0x");
-    // for (int i = 0; i < len; i++){
-    //     printf("%02x",c[i]);
-    // }
-    // printf("\n");
+    printf("code = \t\t0x");
+    for (int i = 0; i < len; i++){
+        printf("%02x",c[i]);
+    }
+    printf("\n");
 
     return (8*(len/9))+1;
 }
@@ -229,17 +236,14 @@ static void hook_syscall(uc_engine *uc, void *user_data)
         : "rdi", "rsi", "rdx", "r10", "r8", "r9", "rax");
 }
 
-static void test_arm(void)
+static void test_arm(FILE *fp)
 {
     uc_engine *uc;
     uc_err err;
     uc_hook trace1;
     char code[BUFFSIZE];
     char str[BUFFSIZE];
-
-    FILE *fp;
  
-    fp = fopen("bytes", "r");
     int r0 = 0x1234;     // R0 register
     int r2 = 0x6789;     // R1 register
     int r3 = 0x3333;     // R2 register
@@ -271,12 +275,16 @@ static void test_arm(void)
     uc_hook_add(uc, &trace1, UC_HOOK_INTR, hook_syscall, NULL, 1, 0);
 
     bzero(str, BUFFSIZE);
-    while(fgets(str, BUFFSIZE, fp))
-    {
+    int len;
+    while((len = fread(str, sizeof(char), BUFFSIZE, fp)) > 0) {
         memset(code, 0, BUFFSIZE);
-        printf("Received: %s\n",str);
-        int len = setCode(code, str);
-        updateUnicorn(code, uc, len);
+        printf("code = \t\t0x");
+        for (int i = 0; i < 10; i++){
+            printf("%02x",str[i]);
+        }
+        printf("\n");
+        // int len = setCode(code, str);
+        updateUnicorn(str, uc, len);
         // printState(uc);
  
         bzero(str, BUFFSIZE);
@@ -303,9 +311,88 @@ static void test_arm(void)
     uc_close(uc);
 }
 
+bool is_elf(Elf32_Ehdr eh){
+    if(!strncmp((char*)eh.e_ident, "\177ELF", 4)) {
+            /* IS a ELF file */
+            return true;
+        } else {
+            /* Not ELF file */
+            return false;
+    }
+}
+
+void read_section_header_table(int32_t fd, Elf32_Ehdr eh, Elf32_Shdr sh_table[])
+{
+	uint32_t i;
+
+	lseek(fd, (off_t)eh.e_shoff, SEEK_SET);
+
+	for(i=0; i<eh.e_shnum; i++) {
+		read(fd, (void *)&sh_table[i], eh.e_shentsize);
+	}
+
+}
+
+char * read_section(int32_t fd, Elf32_Shdr sh)
+{
+	char* buff = malloc(sh.sh_size);
+	if(!buff) {
+		printf("%s:Failed to allocate %ld bytes\n",
+			__func__, sh.sh_size);
+	}
+
+	// assert(buff != NULL);
+	lseek(fd, (off_t)sh.sh_offset, SEEK_SET);
+	read(fd, (void *)buff, sh.sh_size);
+
+	return buff;
+}
+
+// This function will find the offset of the .text
+// section and forward the FILE pointer to this.
+void forwardToText(FILE *fp, Elf32_Ehdr eh) {
+    // need the symbol table:
+    Elf32_Shdr *sh_tbl;
+    sh_tbl = malloc(eh.e_shentsize * eh.e_shnum);
+    int fd = fileno(fp);
+
+    read_section_header_table(fd, eh, sh_tbl);
+    char* sh_str;	/* section-header string-table is also a section. */
+
+	/* Read section-header string-table */
+	sh_str = read_section(fd, sh_tbl[eh.e_shstrndx]);
+    int i;
+
+	for(i=0; i<eh.e_shnum; i++) {
+        if (strncmp(sh_str+sh_tbl[i].sh_name, ".text", 5) == 0){
+            printf("found .text section!\n");
+            printf("offset = 0x%08lx\n", sh_tbl[i].sh_offset);
+            lseek(fd, sh_tbl[i].sh_offset, SEEK_SET);
+            break;
+        }
+	}
+
+    free(sh_tbl);
+}
+
 int main(int argc, char **argv, char **envp)
 {
-    test_arm();
+    FILE *fp;
+    if (argc < 2) {
+        printf("Usage: ./full_emulator <ELF-file>\n");
+        exit(1);
+    }
+    fp = fopen(argv[1], "r");
+    Elf32_Ehdr eh;
+    read(fileno(fp), (void *) &eh, sizeof(Elf32_Ehdr));
+    if(!is_elf(eh)){
+        printf("Must submit an ELF file\n");
+        exit(2);
+    }
+    forwardToText(fp,eh);
+    printf("current location of fp = 0x%02lx\n", ftell(fp));
+    test_arm(fp);
+    fclose(fp);
 
     return 0;
 }
