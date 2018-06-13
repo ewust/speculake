@@ -163,13 +163,46 @@ uint64_t construct_result(uint64_t k, uint64_t width, uint64_t* top_k){
     return final_result;
 }
 
+void clear_RSB() {
+    asm volatile (
+    "clear_rsb:\n"
+        "jmp go\n"
+    "get_rip:\n"
+        "pop %%rax\n"
+        "add $0x25, %%rax\n"    // Add offset to jump over signal
+        ".rept 33\n"
+        "push %%rax\n"
+        ".endr\n"
+        "ret\n"
+    "go:\n"
+        "call get_rip\n"
 
-void flush_RSB() {
+        //Signal(0x22)
+        "movq $0x22, %%rcx\n"
+        "mov (cur_probe_space), %%rax\n"
+        "imul %%rcx\n"
+        "mov (probe_buf), %%rdx\n"
+        "add %%rax, %%rdx\n"
+        "mov (%%rdx), %%rax\n"
+
+        "ret\n"
+    :::);
+}
+
+void dilute_RSB() {
     asm volatile(
         ".rept 32\n"
         "call 1f\n"
-        "pause\n"
-        "lfence\n"
+        // "pause\n"
+        // "lfence\n"
+        
+        "movq $0x88, %%rcx\n"
+        "mov (cur_probe_space), %%rax\n"
+        "imul %%rcx\n"
+        "mov (probe_buf), %%rdx\n"
+        "add %%rax, %%rdx\n"
+        "mov (%%rdx), %%rax\n"
+
         "1: \n"
         ".endr\n"
         "callq .+0x26\n"//
@@ -250,10 +283,10 @@ void measure() {
             fn_ptr = check_probes;
             _mm_clflush(&fn_ptr);
             // Clear probe_buf from cache
-            // for (j=0; j<NUM_PROBES; j++) {
-            //     _mm_clflush(&probe_buf[j*cur_probe_space]);
-            // }
-            flush_RSB(); 
+            for (j=0; j<NUM_PROBES; j++) {
+                _mm_clflush(&probe_buf[j*cur_probe_space]);
+            }
+            clear_RSB(); 
             retpoline_r11();
 
             //((void(*)(void *))map)(&jmp_ptr);
