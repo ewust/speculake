@@ -8,6 +8,9 @@ typedef struct Sections {
     uint64_t text_offset;
     uint64_t data_offset;
     uint64_t rodata_offset;
+    uint64_t text_addr;
+    uint64_t data_addr;
+    uint64_t rodata_addr;
     uint64_t text_size;
     uint64_t data_size;
     uint64_t rodata_size;

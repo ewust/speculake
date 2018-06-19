@@ -8,7 +8,8 @@
 
 #include "full_emulator.h"
 // #define ADDRESS 0x10000
-uint64_t ADDRESS;
+uint64_t ADDRESS = 0x10000;
+int instrCount = 0;
 // code to be emulated
 
 // initialize the Unicorn engine, create the memory and set the 
@@ -16,16 +17,34 @@ uint64_t ADDRESS;
 void initializeUnicorn(uc_engine *uc, Sections sect){
     // int r_2 = 0x7;     
     // int r_3 = 0x8;     
-    // int sp = 0x101234;
+    int sp = 0x111234;
     // map 2MB memory for this emulation
     // assumes ordering is text, data, rodata
-    ADDRESS = sect.text_offset;
-    uc_mem_map(uc, sect.text_offset, (size_t) 2 * (sect.rodata_offset-sect.text_offset+ sect.rodata_size), UC_PROT_ALL);
-    // uc_reg_write(uc, UC_ARM_REG_SP, &sp);
+    // ADDRESS = sect.text_addr;
+    // ADDRESS = 0x10000;
+    // printf("starting address = 0x%lx\n", ADDRESS);
+    if(uc_mem_map(uc, ADDRESS, 2 * 1024 * 1024, UC_PROT_ALL)){
+        printf("error creating uc\n");
+        exit(2);
+    }
+    uc_reg_write(uc, UC_ARM_REG_SP, &sp);
     // uc_reg_write(uc, UC_ARM_REG_R2, &r_2);
     // uc_reg_write(uc, UC_ARM_REG_R3, &r_3);
 }
 
+
+static void hook_code(uc_engine *uc, uint64_t address, uint32_t size, void *user_data)
+{
+    instrCount++;
+    printf(">>> Tracing instruction at 0x%"PRIx64 ", instruction size = 0x%x, instruction count = %d\n", address, size, instrCount);
+    int tmp;
+    uc_mem_read(uc,address,&tmp, sizeof(tmp));
+    printf("instruction run: 0x%0x\n", tmp);
+    // if (instrCount == 50){
+    //     printf("exiting\n");
+    //     exit(3);
+    // }
+}
 
 // compute min of two numbers, used in setCode
 int min(int a, int b){
@@ -70,16 +89,25 @@ int setCode(char c[BUFFSIZE], char s[BUFFSIZE]) {
 void runUnicorn(uc_engine *uc, uint64_t start, Sections sect) {
     uc_err err;
     // emulate code in infinite time, unlimited number of instructions
-    err = uc_emu_start(uc, start, sect.rodata_offset + sect.rodata_size - 1, 0, 0);
-    if (err) {
-        printf("failed on uc_emu_start() with error returned %u: %s\n",
-                err, uc_strerror(err));
+    while(true){
+        err = uc_emu_start(uc, start, sect.rodata_offset + sect.rodata_size - 1, 0, 0);
+        if (err) {
+            printf("failed on uc_emu_start() with error returned %u: %s\n",
+                    err, uc_strerror(err));
+            int tmp;
+            uc_reg_read(uc, UC_ARM_REG_LR, &tmp);
+
+            printf("next address = 0x%02x\n", tmp);
+            start = tmp;
+        }
     }
+
 }
 
 int updateUnicorn(char code[BUFFSIZE], uint64_t start, uc_engine *uc, int len){
     uc_err err;
     // write machine code to be emulated to memory
+    // printf("start here is: 0x%lx\nlen is: 0x%x\n", start, len);
     if (uc_mem_write(uc, start, code, len - 1)) {
         printf("Failed to write emulation code to memory, quit!\n");
         return -1;
@@ -202,6 +230,14 @@ static void hook_syscall(uc_engine *uc, void *user_data)
             r2 = (int) r2;
             printf("new r2 = 0x%02lx\n", r2);
             break;
+        case 0x7a:
+            // uname syscall, move r0 to coorect address.
+            opcode = 0x3f;
+            p = p + ((int)r0 - ADDRESS);
+            printf("new  p = %p\n", p);
+            r0 = (uint64_t) p;
+            printf("new r0 = 0x%02lx\n", r0);
+            break;
         case 0x119:
             opcode = 0x29;
             break;
@@ -230,6 +266,7 @@ static void hook_syscall(uc_engine *uc, void *user_data)
     //     : 
     //     : [r0] "r" (em_r0), [r1] "r" (r1), [r2] "r" (em_r2), [r3] "r" (em_r3), [r4] "r" (em_r4), [r5] "r" (em_r5), [opcode] "r" (opcode)
     //     : "rdi", "rsi", "rdx", "r10", "r8", "r9", "rax");
+    uint64_t ret;
     asm volatile(
         "movq %q[r0], %%rdi\n"
         "movq %q[r1], %%rsi\n"
@@ -239,25 +276,30 @@ static void hook_syscall(uc_engine *uc, void *user_data)
         "movq %q[r5], %%r9\n"
         "movq %q[opcode], %%rax\n"
         "syscall\n"
-        : 
+        : "=r" (ret)
         : [r0] "r" (r0), [r1] "r" (r1), [r2] "r" (r2), [r3] "r" (r3), [r4] "r" (r4), [r5] "r" (r5), [opcode] "r" (opcode)
         : "rdi", "rsi", "rdx", "r10", "r8", "r9", "rax");
+
+    // now move ret to r0
+    uc_reg_write(uc, UC_ARM_REG_R0, &ret);
 }
 
-void addSection(FILE *fp, uc_engine *uc, uint64_t addr, uint64_t maxAddr) {
+void addSection(FILE *fp, uc_engine *uc, uint64_t addr, uint64_t maxAddr, uint64_t offset) {
     char code[BUFFSIZE];
     char str[BUFFSIZE];
     bzero(str, BUFFSIZE);
     int len;
-    lseek(fileno(fp), (off_t) addr, SEEK_SET);
+    // printf("from: 0x%lx to 0x%lx\n", addr, maxAddr);
+    lseek(fileno(fp), (off_t) offset, SEEK_SET);
     while((len = fread(str, sizeof(char), BUFFSIZE, fp)) > 0) {
         memset(code, 0, BUFFSIZE);
-        printf("code = \t\t0x");
-        for (int i = 0; i < 10; i++){
-            printf("%02x",str[i]);
-        }
-        printf("\n");
+        // printf("code = \t\t0x");
+        // for (int i = 0; i < 10; i++){
+        //     printf("%02x",str[i]);
+        // }
+        // printf("\n");
         // int len = setCode(code, str);
+        // printf("len = %d\n", len);
         updateUnicorn(str, addr, uc, len);
         addr += len;
         // printState(uc);
@@ -272,7 +314,7 @@ static void test_arm(FILE *fp, uint64_t entryPoint, Sections sect)
 {
     uc_engine *uc;
     uc_err err;
-    uc_hook trace1;
+    uc_hook trace1,trace2;
  
     int r0 = 0x1234;     // R0 register
     int r2 = 0x6789;     // R1 register
@@ -304,15 +346,23 @@ static void test_arm(FILE *fp, uint64_t entryPoint, Sections sect)
     // add hook for syscall
     uc_hook_add(uc, &trace1, UC_HOOK_INTR, hook_syscall, NULL, 1, 0);
 
-    uint64_t addr = sect.text_offset;
-    uint64_t maxAddr = sect.text_offset + sect.text_size;
-    addSection(fp, uc, addr, maxAddr);
-    addr = sect.data_offset;
-    maxAddr = sect.data_offset + sect.data_size;
-    addSection(fp, uc, addr, maxAddr);
-    addr = sect.rodata_offset;
-    maxAddr = sect.rodata_offset + sect.rodata_size;
-    addSection(fp, uc, addr, maxAddr);
+    uc_hook_add(uc, &trace2, UC_HOOK_CODE, hook_code, NULL, ADDRESS, ADDRESS+(2*1024*1024));
+
+    uint64_t offset = sect.text_offset;
+    uint64_t addr = sect.text_addr;
+    uint64_t maxAddr = sect.text_addr + sect.text_size;
+    // printf("Adding .text Section\n");
+    addSection(fp, uc, addr, maxAddr, offset);
+    offset = sect.data_offset;
+    addr = sect.data_addr;
+    maxAddr = sect.data_addr + sect.data_size;
+    // printf("Adding .data Section\n");
+    addSection(fp, uc, addr, maxAddr, offset);
+    offset = sect.rodata_offset;
+    addr = sect.rodata_addr;
+    maxAddr = sect.rodata_addr + sect.rodata_size;
+    // printf("Adding .rodata Section\n");
+    addSection(fp, uc, addr, maxAddr, offset);
 
     runUnicorn(uc, entryPoint, sect);
     // emulate machine code in infinite time (last param = 0), or when
@@ -400,25 +450,28 @@ uint32_t forwardToText(FILE *fp, Elf32_Ehdr eh, Sections *sect) {
 	// }
 
 	for(i=0; i<eh.e_shnum; i++) {
-        if (strncmp(sh_str+sh_tbl[i].sh_name, ".text", 5) == 0){
+        if (strncmp(sh_str+sh_tbl[i].sh_name, ".text", 8) == 0){
             printf("found .text section!\n");
             printf("offset = 0x%08x\n", sh_tbl[i].sh_offset);
             // lseek(fd, sh_tbl[i].sh_offset, SEEK_SET);
             sect->text_offset = (uint64_t) sh_tbl[i].sh_offset;
+            sect->text_addr = (uint64_t) sh_tbl[i].sh_addr;
             sect->text_size = (uint64_t) sh_tbl[i].sh_size;
             continue;
-        } else if (strncmp(sh_str+sh_tbl[i].sh_name, ".data", 5) == 0){
+        } else if (strncmp(sh_str+sh_tbl[i].sh_name, ".data", 8) == 0){
             printf("found .data section!\n");
             printf("offset = 0x%08x\n", sh_tbl[i].sh_offset);
             // lseek(fd, sh_tbl[i].sh_offset, SEEK_SET);
             sect->data_offset = (uint64_t) sh_tbl[i].sh_offset;
+            sect->data_addr = (uint64_t) sh_tbl[i].sh_addr;
             sect->data_size = (uint64_t) sh_tbl[i].sh_size;
             continue;
-        } else if (strncmp(sh_str+sh_tbl[i].sh_name, ".rodata", 7) == 0){
+        } else if (strncmp(sh_str+sh_tbl[i].sh_name, ".rodata", 8) == 0){
             printf("found .rodata section!\n");
             printf("offset = 0x%08x\n", sh_tbl[i].sh_offset);
             // lseek(fd, sh_tbl[i].sh_offset, SEEK_SET);
             sect->rodata_offset = (uint64_t) sh_tbl[i].sh_offset;
+            sect->rodata_addr = (uint64_t) sh_tbl[i].sh_addr;
             sect->rodata_size = (uint64_t) sh_tbl[i].sh_size;
             continue;
         }
@@ -532,7 +585,7 @@ int main(int argc, char **argv, char **envp)
     } else {
         entryPoint = (uint64_t) forwardToText(fp, eh, &sect);
     }
-    printf("current location of fp = 0x%02lx\n", ftell(fp));
+    // printf("current location of fp = 0x%02lx\n", ftell(fp));
     printf("Entry point: 0x%lx\n", entryPoint);
     test_arm(fp, entryPoint, sect);
     fclose(fp);
