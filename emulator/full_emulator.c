@@ -46,46 +46,6 @@ static void hook_code(uc_engine *uc, uint64_t address, uint32_t size, void *user
     // }
 }
 
-// compute min of two numbers, used in setCode
-int min(int a, int b){
-    if (a < b){
-        return a;
-    } else {
-        return b;
-    }
-}
-
-// computes substring of size 8 of given string, used
-// for converting string of hex to hex.
-void subString(char s[BUFFSIZE], char t[8], int len) {
-    for (int i = 0; i < 8; i++) {
-        t[i] = s[i];
-    }
-
-}
-
-// necessary when reading code copied into a file,
-// converts code from ascii to hex
-int setCode(char c[BUFFSIZE], char s[BUFFSIZE]) {
-    int len = min(BUFFSIZE, strlen(s)+1);
-    printf("len = %d\n", len);
-    for (int i = 0; i < len; i += 8){
-        char t[8];
-        subString(s+i,t,8);
-        long tmp = strtol(t, NULL, 16);
-        printf("tmp = %lx\n", tmp);
-        int j = 4*(i/8);
-        memcpy(c+j, &tmp, 4);
-    }
-    printf("code = \t\t0x");
-    for (int i = 0; i < len; i++){
-        printf("%02x",c[i]);
-    }
-    printf("\n");
-
-    return (8*(len/9))+1;
-}
-
 void runUnicorn(uc_engine *uc, uint64_t start, Sections sect) {
     uc_err err;
     // emulate code in infinite time, unlimited number of instructions
@@ -136,7 +96,7 @@ void printState(uc_engine *uc) {
 static void hook_syscall(uc_engine *uc, void *user_data)
 {
     uint8_t *p = qemu_get_ram_ptr_arm(uc, 0);
-    printf("p = %p\n", p);
+    // printf("p = %p\n", p);
     // int em_r7;
     // int em_r0;
     // int em_r1;
@@ -185,15 +145,15 @@ static void hook_syscall(uc_engine *uc, void *user_data)
     uc_reg_read(uc, UC_ARM_REG_SP, &sp);
     int pc;
     uc_reg_read(uc, UC_ARM_REG_PC, &pc);
-    printf("pc = 0x%02x\n", pc);
-    printf("sp = 0x%02lx\n", sp);
-    printf("r0 = 0x%02lx\n", r0);
-    printf("r1 = 0x%02lx\n", r1);
-    printf("r2 = 0x%02lx\n", r2);
-    printf("r3 = 0x%02lx\n", r3);
-    printf("r4 = 0x%02lx\n", r4);
-    printf("r5 = 0x%02lx\n", r5);
-    printf("r7 = 0x%02lx\n", r7);
+    // printf("pc = 0x%02x\n", pc);
+    // printf("sp = 0x%02lx\n", sp);
+    // printf("r0 = 0x%02lx\n", r0);
+    // printf("r1 = 0x%02lx\n", r1);
+    // printf("r2 = 0x%02lx\n", r2);
+    // printf("r3 = 0x%02lx\n", r3);
+    // printf("r4 = 0x%02lx\n", r4);
+    // printf("r5 = 0x%02lx\n", r5);
+    // printf("r7 = 0x%02lx\n", r7);
 
     // uint64_t r1;
     // switch(em_r7) {
@@ -224,19 +184,19 @@ static void hook_syscall(uc_engine *uc, void *user_data)
             // subtracts this from the given address, adds this to addr (the base)
             // address and returns this.
             p = p + ((int)r1 - ADDRESS);
-            printf("new  p = %p\n", p);
+            // printf("new  p = %p\n", p);
             r1 = (uint64_t) p;
-            printf("new r1 = 0x%02lx\n", r1);
+            // printf("new r1 = 0x%02lx\n", r1);
             r2 = (int) r2;
-            printf("new r2 = 0x%02lx\n", r2);
+            // printf("new r2 = 0x%02lx\n", r2);
             break;
         case 0x7a:
             // uname syscall, move r0 to coorect address.
             opcode = 0x3f;
             p = p + ((int)r0 - ADDRESS);
-            printf("new  p = %p\n", p);
+            // printf("new  p = %p\n", p);
             r0 = (uint64_t) p;
-            printf("new r0 = 0x%02lx\n", r0);
+            // printf("new r0 = 0x%02lx\n", r0);
             break;
         case 0x119:
             opcode = 0x29;
@@ -282,6 +242,7 @@ static void hook_syscall(uc_engine *uc, void *user_data)
 
     // now move ret to r0
     uc_reg_write(uc, UC_ARM_REG_R0, &ret);
+    printf("\n");
 }
 
 void addSection(FILE *fp, uc_engine *uc, uint64_t addr, uint64_t maxAddr, uint64_t offset) {
@@ -323,7 +284,7 @@ static void test_arm(FILE *fp, uint64_t entryPoint, Sections sect)
     int sp = 0x4321;     // SP register
     int fp_r;     // FP register
 
-    printf("Emulate ARM code\n");
+    printf("Emulate ARM code\n\n");
 
     // Initialize emulator in ARM mode
     err = uc_open(UC_ARCH_ARM, UC_MODE_ARM, &uc);
@@ -348,21 +309,28 @@ static void test_arm(FILE *fp, uint64_t entryPoint, Sections sect)
 
     // uc_hook_add(uc, &trace2, UC_HOOK_CODE, hook_code, NULL, ADDRESS, ADDRESS+(2*1024*1024));
 
-    uint64_t offset = sect.text_offset;
-    uint64_t addr = sect.text_addr;
-    uint64_t maxAddr = sect.text_addr + sect.text_size;
-    // printf("Adding .text Section\n");
-    addSection(fp, uc, addr, maxAddr, offset);
-    offset = sect.data_offset;
-    addr = sect.data_addr;
-    maxAddr = sect.data_addr + sect.data_size;
-    // printf("Adding .data Section\n");
-    addSection(fp, uc, addr, maxAddr, offset);
-    offset = sect.rodata_offset;
-    addr = sect.rodata_addr;
-    maxAddr = sect.rodata_addr + sect.rodata_size;
-    // printf("Adding .rodata Section\n");
-    addSection(fp, uc, addr, maxAddr, offset);
+    uint64_t offset, addr, maxAddr;
+    if (sect.text_offset != -1){
+        offset = sect.text_offset;
+        addr = sect.text_addr;
+        maxAddr = sect.text_addr + sect.text_size;
+        // printf("Adding .text Section\n");
+        addSection(fp, uc, addr, maxAddr, offset);
+    }
+    if (sect.data_offset != -1){
+        offset = sect.data_offset;
+        addr = sect.data_addr;
+        maxAddr = sect.data_addr + sect.data_size;
+        // printf("Adding .data Section\n");
+        addSection(fp, uc, addr, maxAddr, offset);
+    }
+    if (sect.rodata_offset != -1){
+        offset = sect.rodata_offset;
+        addr = sect.rodata_addr;
+        maxAddr = sect.rodata_addr + sect.rodata_size;
+        // printf("Adding .rodata Section\n");
+        addSection(fp, uc, addr, maxAddr, offset);
+    }
 
     runUnicorn(uc, entryPoint, sect);
     // emulate machine code in infinite time (last param = 0), or when
@@ -451,24 +419,24 @@ uint32_t forwardToText(FILE *fp, Elf32_Ehdr eh, Sections *sect) {
 
 	for(i=0; i<eh.e_shnum; i++) {
         if (strncmp(sh_str+sh_tbl[i].sh_name, ".text", 8) == 0){
-            printf("found .text section!\n");
-            printf("offset = 0x%08x\n", sh_tbl[i].sh_offset);
+            // printf("found .text section!\n");
+            // printf("offset = 0x%08x\n", sh_tbl[i].sh_offset);
             // lseek(fd, sh_tbl[i].sh_offset, SEEK_SET);
             sect->text_offset = (uint64_t) sh_tbl[i].sh_offset;
             sect->text_addr = (uint64_t) sh_tbl[i].sh_addr;
             sect->text_size = (uint64_t) sh_tbl[i].sh_size;
             continue;
         } else if (strncmp(sh_str+sh_tbl[i].sh_name, ".data", 8) == 0){
-            printf("found .data section!\n");
-            printf("offset = 0x%08x\n", sh_tbl[i].sh_offset);
+            // printf("found .data section!\n");
+            // printf("offset = 0x%08x\n", sh_tbl[i].sh_offset);
             // lseek(fd, sh_tbl[i].sh_offset, SEEK_SET);
             sect->data_offset = (uint64_t) sh_tbl[i].sh_offset;
             sect->data_addr = (uint64_t) sh_tbl[i].sh_addr;
             sect->data_size = (uint64_t) sh_tbl[i].sh_size;
             continue;
         } else if (strncmp(sh_str+sh_tbl[i].sh_name, ".rodata", 8) == 0){
-            printf("found .rodata section!\n");
-            printf("offset = 0x%08x\n", sh_tbl[i].sh_offset);
+            // printf("found .rodata section!\n");
+            // printf("offset = 0x%08x\n", sh_tbl[i].sh_offset);
             // lseek(fd, sh_tbl[i].sh_offset, SEEK_SET);
             sect->rodata_offset = (uint64_t) sh_tbl[i].sh_offset;
             sect->rodata_addr = (uint64_t) sh_tbl[i].sh_addr;
@@ -527,22 +495,22 @@ uint64_t forwardToText64(FILE *fp, Elf64_Ehdr eh, Sections *sect) {
 
 	for(i=0; i<eh.e_shnum; i++) {
         if (strncmp(sh_str+sh_tbl[i].sh_name, ".text", 5) == 0){
-            printf("found .text section!\n");
-            printf("offset = 0x%08lx\n", sh_tbl[i].sh_offset);
+            // printf("found .text section!\n");
+            // printf("offset = 0x%08lx\n", sh_tbl[i].sh_offset);
             // lseek(fd, sh_tbl[i].sh_offset, SEEK_SET);
             sect->text_offset = sh_tbl[i].sh_offset;
             sect->text_size = sh_tbl[i].sh_size;
             break;
         } else if (strncmp(sh_str+sh_tbl[i].sh_name, ".data", 5) == 0){
-            printf("found .data section!\n");
-            printf("offset = 0x%08lx\n", sh_tbl[i].sh_offset);
+            // printf("found .data section!\n");
+            // printf("offset = 0x%08lx\n", sh_tbl[i].sh_offset);
             // lseek(fd, sh_tbl[i].sh_offset, SEEK_SET);
             sect->data_offset = sh_tbl[i].sh_offset;
             sect->data_size = sh_tbl[i].sh_size;
             break;
         } else if (strncmp(sh_str+sh_tbl[i].sh_name, ".rodata", 7) == 0){
-            printf("found .rodata section!\n");
-            printf("offset = 0x%08lx\n", sh_tbl[i].sh_offset);
+            // printf("found .rodata section!\n");
+            // printf("offset = 0x%08lx\n", sh_tbl[i].sh_offset);
             // lseek(fd, sh_tbl[i].sh_offset, SEEK_SET);
             sect->rodata_offset = sh_tbl[i].sh_offset;
             sect->rodata_size = sh_tbl[i].sh_size;
@@ -577,7 +545,7 @@ int main(int argc, char **argv, char **envp)
         exit(2);
     }
     uint64_t entryPoint;
-    Sections sect;
+    Sections sect = {-1,-1,-1,-1,-1,-1,-1,-1,-1};
     if (is64Bit(eh)) {
         Elf64_Ehdr eh64;
         read(fileno(fp), (void *) &eh, sizeof(Elf64_Ehdr));
@@ -586,7 +554,7 @@ int main(int argc, char **argv, char **envp)
         entryPoint = (uint64_t) forwardToText(fp, eh, &sect);
     }
     // printf("current location of fp = 0x%02lx\n", ftell(fp));
-    printf("Entry point: 0x%lx\n", entryPoint);
+    // printf("Entry point: 0x%lx\n", entryPoint);
     test_arm(fp, entryPoint, sect);
     fclose(fp);
 
