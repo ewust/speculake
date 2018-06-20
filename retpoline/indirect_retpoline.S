@@ -6,8 +6,8 @@ fn_ptr:
 	.space 8
 
 .section .indirect, "ax"
-    .global indirect
-    .type indirect, @function
+  .global indirect
+  .type indirect, @function
 indirect:
 	push	%rbp
 	mov		%rsp,%rbp
@@ -30,17 +30,16 @@ do_jmps:
     .endr
 
 skip_jumps:
-    // Do some indirect calls
+            // Do some indirect calls
 	jmp call_get_rip
-
 get_rip:
     pop %rax
     push %rax
     ret
-
 call_get_rip:
 	call get_rip
-    add $6, %rax    // indirect jump onto the series of jumps 
+    // len("add (rbx), rax") + len("add $9, rax") + len("jmpq *rax") => 9
+    add $9, %rax
 
     .rept   28
     jmpq    *%rax
@@ -50,11 +49,28 @@ call_get_rip:
     // Do indirect jump
 	movabs (fn_ptr),%rax
 	add (%rbx), %rax
-	callq *%rax
+
+    // Trigger Retpoline  -- put target_fn in %r11
+    mov %rax, %r11
+    call retpoline_r11_trampoline
+
 	add	$0x18,%rsp
 	pop %rbx
 	pop %rbp
 	retq
+
+retpoline_r11_trampoline:
+    call setup_target
+
+capture_spec:
+    pause
+    lfence
+    jmp capture_spec
+
+setup_target:
+    mov %r11, (%rsp)
+    ret
+
   .global end_indirect
   .type end_indirect, @function
 end_indirect:
