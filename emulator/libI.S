@@ -1,37 +1,33 @@
-.intel_syntax noprefix
+
 .global _start, make_syscall
 _start:
-    xor rbp, rbp
-    pop rdi
-    mov rsi, rsp
-    and rsp, -16
-
     /*call main function*/
-    call main
+    bl main
     /* exit program*/
 
-    mov rdi, 0x3c
-    mov rsi, rax  /*return value from main*/
-    call make_syscall
+    mov r0, #0x01
+    mov r1, r0 /*return value from main*/
+    bl make_syscall
 
 make_syscall:
-    /* params: rdi - syscall number
-    rsi - first parameter,
-    rdx - second parameter,
-    rcx - third parameter,
-    r8 - fourth parameter,
-    r9 - fifth parameter*/
-    push rbp
-    mov rbp, rsp
+    /* params: r0 - syscall number
+    r1 - first parameter,
+    r2 - second parameter,
+    r3 - third parameter,
+    stack - rest of parameters, sp, sp+4, sp+8, sp+12, sp+16 (before two pushes)
+    */
+    push {fp}
+    add fp, sp, #0
 
-    mov rax, rdi /* put syscall in rax, and now shift parameters*/
-    mov rdi, rsi
-    mov rsi, rdx
-    mov rdx, rcx
-    mov rcx, r8
-    mov r8, r9
-    mov r9, [rbp+0x10]
-    syscall
+    mov r7, r0 /* put syscall in rax, and now shift parameters*/
+    mov r0, r1
+    mov r1, r2
+    mov r2, r3
+    ldr r3, [fp, #4]
+    ldr r4, [fp, #8]
+    ldr r5, [fp, #0xc]
+    svc 0
 
-    leave
-    ret
+    sub sp, fp, #0
+    pop {fp}
+    bx lr

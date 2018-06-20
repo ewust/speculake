@@ -346,7 +346,7 @@ static void test_arm(FILE *fp, uint64_t entryPoint, Sections sect)
     // add hook for syscall
     uc_hook_add(uc, &trace1, UC_HOOK_INTR, hook_syscall, NULL, 1, 0);
 
-    uc_hook_add(uc, &trace2, UC_HOOK_CODE, hook_code, NULL, ADDRESS, ADDRESS+(2*1024*1024));
+    // uc_hook_add(uc, &trace2, UC_HOOK_CODE, hook_code, NULL, ADDRESS, ADDRESS+(2*1024*1024));
 
     uint64_t offset = sect.text_offset;
     uint64_t addr = sect.text_addr;
