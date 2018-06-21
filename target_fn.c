@@ -94,7 +94,7 @@ void target_fn(void)
 
 
 
-    // signal(0x11);
+    signal(0x11);
     // signal(0x23);
     // signal(0x37);
     // signal32(0xDEADBEEF);
@@ -103,8 +103,8 @@ void target_fn(void)
     // __uint128_t register pt = aes_ctr(signal_idx / 16);
     // signal(pt >> ((signal_idx % 16)*8) & 0xff);
 
-    __uint128_t register pt = aes_ctr(signal_idx / 4);
-    signal32(pt >> ((signal_idx % 4)*32));
+    // __uint128_t register pt = aes_ctr(signal_idx / 4);
+    // signal32(pt >> ((signal_idx % 4)*32));
 
 }
 
