@@ -1,0 +1,29 @@
+
+
+\section{Trigger Programs}
+Easy answer: custom program that mistrains branch predictor
+
+\subsection{Benign Triggers}
+Could also be any program on the system, and potentially remote!
+
+
+\subsection{Complex Triggers}
+When considering packers and crypters used in modern malware it is not uncommon to see 
+a malicious sample packed using multiple stages with different unpacking conditions. 
+Whether that be red pills, or environent checks, or network triggers, the reliance is on
+complexity to fool any reverse engineer out of finding the correct conditions to 
+release the full payload.
+
+Similarly \speculake can be instrumented to use more than one trigger. Multiple stages 
+can be designed used any combination of crafted or benign trigger programs. Only when all
+stages have been run to completion in order will the malicious payload be revealed.  
+In conjunction with this each stage cna use a randomized ISA to a common emulator, or 
+they can use differnt emulators all together. 
+
+Alternatively each stage could be used to decrypt the next AES key-schedule to decrypt 
+a subsequent layer. Using this model we can instrument \speculake malware as a crypter 
+with the keys hidden in data or dead code which static and dynamic reverse engineering 
+methods will overlook. 
+
+
+%%%%%%%%%%%%%%

@@ -1,0 +1,142 @@
+\pagebreak
+\section{SPASM Instruction Set}
+\label{appendix:spasm}
+\renewcommand{\thefootnote}{\fnsymbol{footnote}}
+
+SPASM is a 6 bit instruction set that we have developed to make use of the 
+speculative primitive investigated in this work. The instruction set uses two 
+functional registers, PTR and VAL, and a stack. This instruction set has been 
+designed to be emulated in x86 and x86\_64 environments, though the emulator 
+could be implemented to run on other systems. 
+
+The progamming model used by SPASM builds up values on the maintained stack
+and stores them in specially reserved offsets equivalent to x86 registers 
+in order to perform system calls. Using the \texttt{UVAL} instruction
+an immediate can be assigned into the lowest 4 bits of VAL, which 
+can subsequenty be shifted to allow futher bits to be entered. In this way
+immediates can be built up incrementally, stored, operated on, or pushed 
+onto the maintained stack. Control Flow, including conditional jumps, 
+is implemented by modifying the maintained instruction pointer SRIP. 
+
+Using this we have implemented various example programs including 
+\textit{HelloWorld}, \textit{FizzBuzz}, and \textit{ReverseShell}.
+See Figure~\ref{fig:spasm_model} for a diagram of the SPASM emulator's
+usage in an \speculake application.
+
+
+\subsection{Instructions}
+\begin{description}
+  \setlength\itemsep{1em}
+\item[UVAL] (0x3?) - 
+The lower 4 bits of any instructions matching this wildcard are 
+assigned onto the lowest 4 bits of VAL. This is used
+for assigning immediates and computing offsets.
+  
+\item[SYSCALL] (0x1F) - 
+Copies the values stored from the appropriate state struct registers 
+into the equivalent physical registers and perform a syscall instruction. 
+The result is copied back to the state struct in SRAX.
+
+\item[BASE] (0x1E) - 
+Set PTR to a \textit{uint64\_t*} pointing to the head of the state struct.  
+
+\item[SHVAL] (0x1D) - 
+Shift VAL to the left by 4 bits and store the result back into VAL. This is
+used with UVAL to assign immediates.
+
+\item[MREG] (0x1C) - 
+Multiply VAL by 8 and store the result back into VAL. This is used to index 
+into the state struct at the correct byte as the speculative register place
+holders are at fixed offsets in the struct.
+
+\item[PUSH] (0x1B) -
+Push an item onto the stack maintained by the state struct and update the 
+stack pointer SRSP accordingly. 
+ 
+\item[POP] (0x1A) - 
+Pop an item from the stack maintained by the state struct and update the 
+stack pointer SRSP accordingly. 
+
+\item[APTR] (0x19) - 
+Set the value at the address in PTR equal to VAL.
+
+\item[DPTR] (0x18) - 
+Set VAL equal to the value at the address in PTR. 
+
+\item[SWAP] (0x17) - 
+Swap the values in the VAL and PTR.
+
+\item[JZ] (0x13) - 
+If VAL is equal to zero set SRIP equal to the value in PTR, else add one to SRIP.
+
+\item[J] (0x12) - 
+Assign SRIP to the value in PTR.
+
+\item[CALL] (0x11) - 
+Push the current SRIP onto the stack and set SRIP equal to the value in PTR.
+
+\item[CMP] (0x10) - 
+Compare the values in VAL and PTR, if PTR is greater than or equal to VAL
+set VAL equal to 1; otherwise set VAL equal to 0. 
+
+\item[ADD] (0x0F) - 
+Add the values in PTR and VAL and store the result in PTR.
+
+\item[2CMP] (0x0E) - 
+Perform 2's compliment operation on VAL and store the result into VAL.
+Used to implement subtraction operations.
+
+\item[DADD] (0x0D) - 
+Dereference the value in PTR, add VAL and store the result back into the dereference 
+of PTR. 
+
+\item[DMUL] (0x0C) - 
+Dereference the value in PTR, multiply VAL and store the result back into the dereference
+ of PTR. 
+
+\item[DDIV] (0x0B) - 
+Dereference the value in PTR, divide by VAL and store the result back into the 
+dereference of PTR. 
+
+\item[DSHL] (0x09) - 
+Dereference the value in PTR, shift left by VAL and store the result back into the 
+dereference of PTR. 
+
+\item[DSHR] (0x08) - 
+Dereference the value in PTR, shift right by VAL and store the result back into the 
+dereference of PTR. 
+
+\item[DAND] (0x07) - 
+Dereference the value in PTR, bitwise and with VAL and store the result back into the 
+dereference of PTR. 
+
+\item[DOR] (0x06) - 
+Dereference the value in PTR, bitwise or with VAL and store the result back into the 
+dereference of PTR. 
+
+\item[DXOR] (0x05) - 
+Dereference the value in PTR, bitwise xor with VAL and store the result back into the 
+dereference of PTR. 
+
+\item[NOT] (0x04) - 
+Perform a bitwise not on VAL and store the result back into VAL. 
+
+\item[CLR] (0x02) - 
+Set VAL equal to 0. 
+
+\item[NOP] (0x00) - 
+No-op instruction.
+\end{description}
+
+% \subsection{Programming Model}
+
+% \subsubsection{Macros}
+% \begin{description}
+% \item[EUVAL] test
+% \item[ECALL] test
+% \item[EPUSH] test
+% \item[EGET]  test
+% \item[ESET]  test
+% \end{description}
+
+\renewcommand{\thefootnote}{\arabic{footnote}}

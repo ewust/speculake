@@ -4,6 +4,10 @@
 #include <string.h>
 #include <stdlib.h>
 
+
+void __attribute__((section(".fnptr"))) (*fn_ptr)(void);
+
+
 typedef struct jump_st {
     uint64_t from;
     uint64_t to;
@@ -11,7 +15,7 @@ typedef struct jump_st {
 
 #define PAGE_SIZE 0x1000
 #define MAX_PAGES 100
-#define NUM_JUMPS 31
+#define NUM_JUMPS 16
 
 
 
@@ -54,116 +58,60 @@ void load_page(uint64_t addr)
     memset(map, '\xc3', PAGE_SIZE);
 }
 
+jump addrs[NUM_JUMPS] = {
+        // in openssl-accept.repeats2}, //254 repeats (line 14491502):
+        // part of EC_GFp_nistp224_method()
+        /*
+        {0x7ffff785a74b, 0x7ffff785c256}, //  retq   
+        {0x7ffff785a926, 0x7ffff785c261}, //  retq   
+        {0x7ffff785ae37, 0x7ffff785c277}, //  retq   
+
+        {0x7ffff785a74b, 0x7ffff785c28f}, //  retq   
+        {0x7ffff785a74b, 0x7ffff785c2a2}, //  retq   
+        {0x7ffff785abfc, 0x7ffff785c2b5}, //  retq   
+        {0x7ffff785ae37, 0x7ffff785c2cd}, //  retq   
+
+        {0x7ffff785a34a, 0x7ffff785c2e3}, //  retq   
+        {0x7ffff785a27e, 0x7ffff785c2f3}, //  retq   
+        {0x7ffff785a74b, 0x7ffff785ac1d}, //  retq   
+        {0x7ffff785a74b, 0x7ffff785ac28}, //  retq   
+
+        {0x7ffff785abfc, 0x7ffff785ac36}, //  retq   
+        {0x7ffff785ac40, 0x7ffff785c3c5}, //  retq   
+        {0x7ffff785ae37, 0x7ffff785c3d0}, //  retq   
+        {0x7ffff785a74b, 0x7ffff785c3e3}, //  retq   
+
+        */
+        {0x7ffff785a926, 0x7ffff785c3f3}, //  retq   
+        {0x7ffff785ae37, 0x7ffff785c3ff}, //  retq   
+        {0x7ffff785a34a, 0x7ffff785c4b7}, //  retq   
+        {0x7ffff785a27e, 0x7ffff785c4c9}, //  retq   
+
+        {0x7ffff785a27e, 0x7ffff785c538}, //  retq   
+        {0x7ffff785a74b, 0x7ffff785c543}, //  retq   
+        {0x7ffff785a926, 0x7ffff785c54e}, //  retq   
+        {0x7ffff785ae37, 0x7ffff785c55e}, //  retq   
+
+        {0x7ffff785a34a, 0x7ffff785c569}, //  retq   
+        {0x7ffff785a41a, 0x7ffff785c61d}, //  retq   
+        {0x7ffff785a74b, 0x7ffff785c628}, //  retq   
+        {0x7ffff785abfc, 0x7ffff785c638}, //  retq   
+
+        {0x7ffff785a926, 0x7ffff785c645}, //  retq   
+        {0x7ffff785a5f0, 0x7ffff785c798}, //  retq   
+        {0x7ffff785ae37, 0x7ffff785c847}, //  retq   
+        {0x7ffff785c858, 0x7ffff785ea59}, //  retq   
+
+    };
 
 
-int main()
+
+
+void setup()
 {
-
-
     memset(loaded_pages, 0, sizeof(uint64_t)*MAX_PAGES);
-    jump addrs[NUM_JUMPS] = {
-        // CAMELLIA256-SHA / EVP_MD_CTX_init...
-        {0x7ffff780d32d, 0x7ffff780d3ff}, //  retq   
-        {0x7ffff788a28b, 0x7ffff788a3b1}, //  retq   
-        {0x7ffff77fedad, 0x7ffff77fe8f0}, //  callq  *0x36d5f5(%rip)        # 0x7ffff7b6c3a8
-        {0x7ffff77fe8f7, 0x7ffff7458a80}, //  jmpq   *%rax
-        {0x7ffff745687e, 0x7ffff7458ae0}, //  retq   
-        {0x7ffff7458b29, 0x7ffff77fedb3}, //  retq   
-        {0x7ffff77fede3, 0x7ffff788a513}, //  retq   
-        {0x7ffff77fdb40, 0x7ffff7470a30}, //  jmpq   *0x36e68a(%rip)        # 0x7ffff7b6c1d0
-        {0x7ffff7470a71, 0x7ffff788a40a}, //  retq   
-        {0x7ffff788a495, 0x7ffff780cc39}, //  retq   
-        {0x7ffff788a28b, 0x7ffff788a3b1}, //  retq   
-        {0x7ffff77fedad, 0x7ffff77fe8f0}, //  callq  *0x36d5f5(%rip)        # 0x7ffff7b6c3a8
-        {0x7ffff77fe8f7, 0x7ffff7458a80}, //  jmpq   *%rax
-        {0x7ffff745687e, 0x7ffff7458ae0}, //  retq   
-        {0x7ffff7458b29, 0x7ffff77fedb3}, //  retq   
-        {0x7ffff77fede3, 0x7ffff788a513}, //  retq   
-        {0x7ffff77fdb40, 0x7ffff7470a30}, //  jmpq   *0x36e68a(%rip)        # 0x7ffff7b6c1d0
-        {0x7ffff7470a71, 0x7ffff788a40a}, //  retq   
-        {0x7ffff788a495, 0x7ffff780cc5d}, //  retq   
-        {0x7ffff788a28b, 0x7ffff788a3b1}, //  retq   
-        {0x7ffff77fedad, 0x7ffff77fe8f0}, //  callq  *0x36d5f5(%rip)        # 0x7ffff7b6c3a8
-        {0x7ffff77fe8f7, 0x7ffff7458a80}, //  jmpq   *%rax
-        {0x7ffff745687e, 0x7ffff7458ae0}, //  retq   
-        {0x7ffff7458b29, 0x7ffff77fedb3}, //  retq   
-        {0x7ffff77fede3, 0x7ffff788a513}, //  retq   
-        {0x7ffff77fdb40, 0x7ffff7470a30}, //  jmpq   *0x36e68a(%rip)        # 0x7ffff7b6c1d0
-        {0x7ffff7470a71, 0x7ffff788a40a}, //  retq   
-        {0x7ffff788a495, 0x7ffff780cc6e}, //  retq   
-        {0x7ffff780cc45, 0x7ffff780d437}, //  retq   
-        {0x7ffff780d407, 0x7ffff789730b}, //  retq   
-        {0x7ffff7897318, 0x7ffff788a420}, //  retq  
-    };
-        /* AES something
-        {0x7ffff7837bd9, 0x7ffff7834da4}, //  retq   
-        {0x7ffff77fd9f0, 0x7ffff74628d0}, //  jmpq   *0x36e732(%rip)        # 0x7ffff7b6c128
-        {0x7ffff783bf4c, 0x7ffff7834dd0}, //  retq   
-        {0x7ffff77fd9f0, 0x7ffff74628d0}, //  jmpq   *0x36e732(%rip)        # 0x7ffff7b6c128
-        {0x7ffff74629c6, 0x7ffff783bf08}, //  retq   
-        {0x7ffff783bf4c, 0x7ffff7834e08}, //  retq   
-        {0x7ffff783f5d4, 0x7ffff7834fcf}, //  retq   
-        {0x7ffff783f768, 0x7ffff7834ff8}, //  retq   
-        {0x7ffff783f5d4, 0x7ffff7834fcf}, //  retq   
-        {0x7ffff783f768, 0x7ffff7834ff8}, //  retq   
-        {0x7ffff7837ac3, 0x7ffff7837bd6}, //  retq   
-        {0x7ffff7837bd9, 0x7ffff783c038}, //  retq   
-        {0x7ffff783c0fd, 0x7ffff783507f}, //  retq   
-        {0x7ffff7838bd2, 0x7ffff78350cd}, //  retq   
-        {0x7ffff7834cec, 0x7ffff783db35}, //  retq   
-        {0x7ffff7838ab2, 0x7ffff783a322}, //  retq   
-        {0x7ffff783f5d4, 0x7ffff78391ff}, //  retq   
-        {0x7ffff783929d, 0x7ffff783a390}, //  retq   
-        {0x7ffff7838bd2, 0x7ffff783a3e2}, //  retq   
-        {0x7ffff783a3f2, 0x7ffff783daab}, //  retq   
-        {0x7ffff783f728, 0x7ffff7834718}, //  retq   
-        {0x7ffff78347a3, 0x7ffff7834b15}, //  retq   
-        {0x7ffff7834b24, 0x7ffff783dac1}, //  retq   
-        {0x7ffff7838ab2, 0x7ffff7834d40}, //  retq   
-        {0x7ffff7838036, 0x7ffff7838c45}, //  retq   
-        {0x7ffff7838c56, 0x7ffff7834d48}, //  retq   
-        {0x7ffff7838036, 0x7ffff7838c45}, //  retq   
-        {0x7ffff7838c56, 0x7ffff7834d53}, //  retq   
-        {0x7ffff7838036, 0x7ffff7838c45}, //  retq   
-        {0x7ffff7838c56, 0x7ffff7834d5f}, //  retq   
-    };*/
-
-    // Camellia write (I think SSL_CTX_clean or something)
-    /*
-        {0x7ffff788a28b, 0x7ffff788a3b1},    // :   retq   
-        {0x7ffff77fedad, 0x7ffff77fe8f0},    // :   callq  *0x36d5f5(%rip)        # 0x7ffff7b6c3a8
-        {0x7ffff77fe8f7, 0x7ffff7458a80},    // :   jmpq   *%rax
-        {0x7ffff745687e, 0x7ffff7458ae0},    // :   retq   
-        {0x7ffff7458b29, 0x7ffff77fedb3},    // :   retq   
-        {0x7ffff77fede3, 0x7ffff789726c},    // :   retq   
-        {0x7ffff77fe3f7, 0x00418980    },    //:   jmpq   *%rax
-        {0x004189cb, 0x7ffff77fe877    },    //:   retq   
-        {0x7ffff77fe3f7, 0x00418980    },    //:   jmpq   *%rax
-        {0x004189cb, 0x7ffff77fe896    },    //:   retq   
-        {0x7ffff77fe8a3, 0x7ffff78972b0},    //:   retq   
-        {0x7ffff7897308, 0x7ffff780d3f0},    //:   callq  *0x10(%rax)
-        {0x7ffff77fedad, 0x7ffff77fe8f0},    //:   callq  *0x36d5f5(%rip)        # 0x7ffff7b6c3a8
-        {0x7ffff77fe8f7, 0x7ffff7458a80},    //:   jmpq   *%rax
-        {0x7ffff745687e, 0x7ffff7458ae0},    //:   retq   
-        {0x7ffff7458b29, 0x7ffff77fedb3},    //:   retq   
-        {0x7ffff77fede3, 0x7ffff780d2df},    //:   retq   
-        {0x7ffff780d32d, 0x7ffff780d3ff},    //:   retq   
-        {0x7ffff788a28b, 0x7ffff788a3b1},    //:   retq   
-        {0x7ffff77fedad, 0x7ffff77fe8f0},    //:   callq  *0x36d5f5(%rip)        # 0x7ffff7b6c3a8
-        {0x7ffff77fe8f7, 0x7ffff7458a80},    //:   jmpq   *%rax
-        {0x7ffff745687e, 0x7ffff7458ae0},    //:   retq
-        {0x7ffff7458b29, 0x7ffff77fedb3},    //:   retq
-        {0x7ffff77fede3, 0x7ffff788a513},    //:   retq
-        {0x7ffff77fdb40, 0x7ffff7470a30},    //:   jmpq   *0x36e68a(%rip)        # 0x7ffff7b6c1d0
-        {0x7ffff7470a71, 0x7ffff788a40a},    //:   retq
-        {0x7ffff788a495, 0x7ffff780cc39},    //:   retq
-        {0x7ffff788a28b, 0x7ffff788a3b1},    //:   retq
-    };
-    */
-
 
     int i;
-    // Setup
     for (i=0; i<NUM_JUMPS-1; i++) {
         load_page(addrs[i].from);
         load_page(addrs[i].to);
@@ -185,27 +133,79 @@ int main()
         }
     }
 
+    load_page(addrs[NUM_JUMPS-1].to);
+
+    uint8_t stalled_jmp[] = {
+                            0x90, 0x90,
+                            0x90,                               // nop
+            0x48, 0x8b, 0x04, 0x25, 0x00, 0x00, 0x44, 0x00,     // mov (0x440000),%rax
+                            //0x90, 0x90,                         // nop, nop
+                            //0x50,                               // push %rax
+                            0x90,
+                            0x90,                               // nop
+                            //0x90, 0x90,                         // nop, nop
+                            //0xeb, 0x02,                          // jmp +2
+                            0x90, 0x90,                         // nop, no
+                            //0xc3, 0x90,                       // ret, nop
+                            0xff, 0xd0,                         // callq *%rax
+                            0x90};
+
+    memcpy((void*)addrs[NUM_JUMPS-2].to, stalled_jmp, 20);
+
+    fn_ptr = (void*)addrs[NUM_JUMPS-1].to;
+    //memcpy((void*)jump_addrs[NUM_JUMPS-1].to, target_fn, end_target_fn-target_fn);
+
+}
+
+void bar()
+{
+    asm volatile("mov (0x440000),%%rax\n"
+                    "callq *%%rax\n":::);
+}
+
+
+void nop()
+{
+}
+
+int main()
+{
 
     // Do the jumps
-    void *x = &&come_home;
-    push((uint64_t)x);
+    //void *x = &&come_home;
+    //push((uint64_t)x);
+    //asm volatile ("push %%rax\n" :: "a"(x):);
+    setup();
+    printf("setup1\n");
 
-    // Do the pushes then call!
-    for (i=NUM_JUMPS-2; i>=0; i--) {
-        push(addrs[i].to);
+    /*
+    uint8_t *p = (uint8_t*)(addrs[NUM_JUMPS-1].to);
+    *p++ = 0xe9;
+    int32_t from = (uint64_t)&&done_jumps - addrs[NUM_JUMPS-1].to - 5;
+    memcpy(p, &from, 4);
+    */
+
+    printf("setup done\n");
+
+    int i;
+    while (1) {
+
+        asm volatile ("push %%rax\n" :: "a"(&&done_jumps):);
+        // Do the pushes then call!
+        for (i=NUM_JUMPS-1; i>=0; i--) {
+            //push(addrs[i].to);
+            asm volatile ("push %%rax\n" :: "a"(addrs[i].to):);
+        }
+
+        // Call the first thing in the chain. See ya!
+        void (*fn_ptr)(void);
+        fn_ptr = (void (*)(void))addrs[0].from;
+        //(*fn_ptr)();
+        //printf("calling...\n");
+        call(fn_ptr);
+done_jumps:
+        //printf("returned\n");
+        i = 0;
+
     }
-
-    // Call the first thing in the chain. See ya!
-    void (*fn_ptr)(void);
-    fn_ptr = (void (*)(void))addrs[0].from;
-    //(*fn_ptr)();
-    call(fn_ptr);
-
-
-    // We won't actually return here...
-    printf("look ma, no return\n");
-
-    //asm volatile("come_home:\n" :::);
-come_home:
-    printf("AND WE'RE BACK!!!\n");
 }

@@ -1,0 +1,260 @@
+
+\section{Discussion}
+
+\subsection{Defenses}
+We now address possible defenses to detecting and reverse engineering malware that uses
+\speculake. 
+
+\subsubsection{Malware Detection}
+\label{subsubsec:malware}
+Like Spectre, \speculake relies on a cache side-channel to transfer
+information from the speculative world to the real world. Since the payload
+program must at least occasionally watch this side channel, it offers a
+potential method for detecting \speculake malware.
+
+Analysts could search for telltale signs of cache inference behavior, such as
+the use of \texttt{clflush} instructions or reading cycle timings. However,
+while this would allow detection of \speculake malware, it does not directly
+help in reverse engineering the malware's behavior. We also note that our
+implementation of \speculake used the \texttt{Flush+Reload} cache side channel
+method, but other methods (such as \texttt{Prime+Probe}) could be used in its
+place.
+
+
+In addition, the malware can also employ more subtle and less direct methods
+of measuring what is in the cache. For example, creating race conditions between
+multiple threads that results in different behaviors depending on which threads
+values are cached.
+
+Finally, \speculake could also use another side channel method that
+avoids the cache
+to exfiltrate information from the speculative gadgets, such as the branch
+predictor itself~\cite{evtyushkin2018branchscope}, memory bandwidth, or power
+utilization of the system.
+
+
+%While the notion of simply adapting current defenses to recognize this new
+%strain of malware may be simplest, we caution that the methods introduced by
+%\speculake are very general and can be accomplished in numerous ways and simply
+%attempting to recognize one method will undoubtedly be circumvented by future
+%generations of this malware.
+
+\subsubsection{Hardware-level defenses}
+Ultimately, speculative execution vulnerabilities stem from problems in
+hardware, and are best fixed there. However, we note that fixing problems in
+order to prevent Spectre may not necessarily prevent \speculake malware. In Spectre, an application is
+coerced against its will to mis-speculate branches, but in \speculake, the
+application willfully encourages the mis-speculation. Thus, some solutions may
+defend against Spectre, but not \speculake.
+
+
+One such solution is a new \texttt{specfence} instruction, that prohibits the
+CPU from speculating past. This instruction would require that loads and stores after
+the instruction must wait (and cannot be pre-fetched) until the
+\texttt{specfence} instruction has retired. We note this is distinct from the
+\texttt{mfence} instruction that serializes memory transactions. Speculative
+reads and out-of-order execution can still occur past an \texttt{mfence}, and
+the instruction does not serialize the instruction
+stream~\cite{intel-software-guide}.
+
+One way to achieve a \texttt{specfence} pseudo-instruction is to fill the ROB
+with enough instructions that the CPU cannot speculate past it. We find that the
+\texttt{rep} prefix for string operations is able to do this if it is set to 
+repeat more than 96 times, presumably as it issues $2*96$ $\mu$-ops, and fills the
+ROB~\cite{intel-instruction-tables}.
+
+However effective such an instruction may be against Spectre, it is not a
+defense against \speculake. A malicious \speculake malware author would simply
+not include such an instruction in either their payload or trigger programs.
+% Could add:
+%This demonstrates the versatility of speculative execution in general. While
+%defenses against Spectre are needed, a more general purpose solution to
+%speculative execution as a whole is necessary to address the wide range of its
+%capabilities.
+
+
+\paragraph{Operating System Defense}
+Hardware could also provide the operating system with a privileged instruction
+that gives it more control over the interaction between programs. For example,
+the OS could use a privileged instruction to copy out the Branch History Buffer
+(BHB) state when it context switches between processes, restoring it when the
+process is restored. This would prevent cross-process interactions with the
+branch predictor, and prevent multi-process \speculake malware. However, it does
+not prevent a single-process \speculake, and it does not fully address the
+Spectre vulnerability.
+
+
+%\subsubsection{Cache Poisoning}
+%As mentioned in Section~\ref{subsubsec:malware} a vital component of \speculake
+%is the ability to perform cache timings. Any mechanism that modifies the cache
+%can affect the success of \speculake-like attacks.
+%
+%Drastic methods such as completely poisoning the cache will hinder this attack
+%while also forcing almost all loads to result in a cache miss, effectively
+%nullifying the point of cache.
+%
+%However, more conservative methods such as randomly loading values into cache
+%can have a negative affect on \speculake-like attacks (causing the cache timing
+%to predict incorrect values) while not having too detrimental of an affect on
+%programs as a whole.
+%
+%In response to this method of defense \speculake-like attacks can modify the
+%number of iterations and confidence thresholds necessary to determine a value.
+%As mentioned in Section~\ref{subsec:impl-turing} our experiments found that it
+%was only necessary to perform 50 iterations of our \texttt{target\_fn} in order
+%to gain 80\% confidence in the value returned. While only 50 iterations are
+%necessary, increasing this value to higher levels can lead to a significantly
+%higher confidence with very little performance detriment (especially in the
+%case of AES decryption).
+
+\subsection{Resilience of \speculake}
+%Spectre works to use a cache side-channel to leak information from a process. As
+%such defenses to Spectre work to limit the information available to a
+%speculatively executing program. 
+%
+
+\subsubsection{Gadget Location}
+The benefits of \speculake rely on the computation performed in the
+speculative function being well hidden. To this end we have verified 
+certain requirements about the locations that a speculative gadget can 
+be placed within a binary. 
+
+First and foremost the gadget must be in the instruction cache. 
+This does not require that the actual instructions ever run,
+ only that they are in cache. We have 
+found that this is not a large barrier to overcome as Intel 
+processors aggressively prefetch cache pages~\cite{measuring-cache}
+and simple access patterns could be established to ensure
+that the required block(s) are accessible. 
+
+We have also confirmed that all speculative code in the payload must be
+stored in executable pages, and that it cannot be stored in non-executable data
+sections. This is somewhat surprising, given the nature of the Meltdown
+vulnerability that enabled speculative execution past page faults. However, in
+the case of Meltdown, the speculative computation still occurs in pages marked
+as executable.
+
+%We suspect that this is again due to caching. The processor has no
+%reason to cache instructions stored in the data section in the instruction
+%cache. If a trigger trains the branch predictor to jump to an address in the
+%payload's data section, the payload will not be able to fetch the instructions
+%into the execution pipeline. 
+
+
+\subsubsection{Hypervisors}
+For virtual environments that provide guests significant periods of access to 
+hardware resources, we have found that \speculake is viable in certain configurations. 
+
+\texttt{Guest1 -> Guest1}---When both trigger and payload are run internal to a
+single virtual machine the branch prediction is successfully trained in the
+payload program, though at a notably reduced hit rate. This can be overcome by
+using an increased number of iterations to establish confidence. 
+
+\texttt{Guest -> Host}---In a configuration where trigger runs on the guest
+while the payload runs on the host we have found that \speculake also
+successfully trains the branch predictor well enough retreive a signal. Again,
+this signal is significantly reduced, implying the hypercall context swtich from
+guest to host requires some overhead. We note that processor affinity in a guest
+is not mapped to processor affinity in the host, as the host assigns the VM to
+any available CPU, though eventually the hypervisor will assign the VM back to
+the same core as the payload program allowing progress to continue.
+
+\texttt{Host -> Guest}---When trigger runs on the host attempting to train the
+branch predictor to influence a payload process in a guest we have found that
+the payload receives no signal. This implies that the hypercall context switch
+from the host to the guest is heavier and has a larger impact on branch history.
+This matches with work done by the Project Zero team at Google which found that
+hypervisors can be fingerprinted from within a VM using the branch
+predictor~\cite{project_zero}.
+
+\texttt{Guest1 -> Guest2}---Configurations where trigger and payload run on
+co-resident virtual machines similarly show no signal for the same reasons that
+host to guest \speculake fails. However, this has the added difficulty that
+virtual machines must be run on the same core or on a pair of hyperthreaded
+cores.
+
+
+
+
+\subsection{Future Work}
+\label{subsec:future-work}
+
+This work demonstrates a general model for hiding execution in 
+the speculative world and examines the implications and limitations on 
+Intel processors. Given the wide-spread nature of the Spectre vulnerability 
+and the ubiquity of cache side-channels we believe that this work can 
+be directly extended to AMD, ARM, and other processors making use of
+speculative branch prediction.
+
+\subsubsection{Multiple Triggers}
+To create further difficulties for an analyst, or to further target the
+execution environment it is possible to have the payload program test a series
+of separate jump patterns. Instead of requiring only a single trigger program,
+the payload could require multiple trigger programs to be running
+simultaneously, or in a particular order.
+
+This could allow fine-grained targeting of malware. For instance, the attacker
+could distribute trigger programs through different channels to target different sets
+of victims, and have the ultimate payload only operate at the intersection of
+these groups. As an example, one trigger program could be distributed to a
+particular country (e.g. Iran), and another to a particular device globally
+(centrifuge controllers), resulting in the malicious payload (Stuxnet) only
+being revealed and executed on the intersection of these two groups.
+
+
+\smallskip
+
+Alternatively multiple triggers could be used make individual state changes in
+the payload program, and write in data from a local, or (as demonstrated in
+Section~\ref{subsec:openssl}) remote processes. For example, a payload program
+can check a series of three distinct jump patterns corresponding to three
+different triggers. If the first trigger is detected the payload shifts in a 1
+to the state; if the second is detected it shifts in a 0. If the third trigger
+is detected it discontinues listening to the three triggers and executes the
+data shifted into the state.
+This could be a direct form of \speculake using emulation and
+decryption or more traditional malicious behavior. Using this method a payload
+program can be distributed without the encrypted data section all together,
+instead having the data written into the process at run-time without ever
+connecting out to any other resource.
+
+\subsubsection{Benign Triggers}
+We have demonstrated that a using \allowbreak OpenSSL as a benign trigger allows for
+\speculake payloads to be triggered remotely, and discussed the minimum
+requirements for identifying a benign trigger. However, we have not classified
+typical system resources that might be used as benign triggers. This is a
+promising direction for future investigation as various system libraries present
+juicy targets for trigger design. For exmaple, if a sufficient series of jumps
+is found to exist in the TCP stack implemented in the UNIX kernel (i.e. in the
+TCP Checksum library) an attacker could reasonably trigger a \speculake payload
+remotely, from a spoofed IP address. This attack would rely on a payload
+defeating KASLR, however, this has been demonstrated to be
+feasible~\cite{gruss2017kaslr,evtyushkin2016jump}.
+
+%% Approximate Computing 
+\subsubsection{Approximate Computing}
+Approximate Computing prioritizes the computation of quick results that are
+potentially incorrect. This form of computation often leverages some type of
+machine learning to determine how well individual results fit with a crowd of
+approximately computed results. As mentioned in Section~\ref{subsec:impl-turing}
+occasionally values necessary for computation in the speculative world are not
+in cache and thus must be speculated themselves. In this situation error
+correcting codes are useless given that the mistake is not a mutation of the
+correct input, but rather a guess at what the input might be. The mechanisms
+used in approximate computing may be beneficial here, allowing computation to
+run speculatively and have an outer process that is tolerant of errors or
+mis-steps by the speculative world.
+
+
+
+\subsubsection{Alternative Applications}
+We have proposed the \speculake model as a new malware threat, however, this
+model of hidden computation applies more broadly. As of now there are no ways of
+debugging speculative computation, meaning that the computation done there is
+effectively isolated and difficult to extract by third-parties. While not a true
+trusted execution environment, it could be used like one, offering potential
+uses in Digitial Rights Management (DRM), and whitebox cryptography.
+
+
+
+%%%%%%%%%%%%%%

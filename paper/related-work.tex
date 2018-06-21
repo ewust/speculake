@@ -1,0 +1,194 @@
+
+\section{Related Work}
+\label{sec:related-work}
+
+% Many resourcess have been useful in developing the \speculake exploit 
+% model.  
+
+\subsection{Weird Machines \& Red-Pills}
+
+%Hardware side effects often leave behind unexpected state transitions 
+%that are not, or cannot be, accounted for in modeling environments. Malware
+%has historically made use of these bugs to create "weird" models of 
+%computation~\cite{weird_machines}. These state transitions can also leak 
+%information about the environment in which a program is running, which 
+%malware has used to detect honey-pots and emulated 
+%environments~\cite{balzarotti2010efficient}.
+
+The term \textit{weird machine} comes from work done by Bratus \textit{et al.}
+composing bugs and features of a system to create arbitrary compuatation with
+interesting properties~\cite{weird_machines,bratus2011exploit,weird_exploits}.
+This encompasses many traditional computer vulnerabilities including buffer
+overflows~\cite{buffer_overflow}, format string
+exploits~\cite{format_string_exploit}, and return oriented
+programming~\cite{shacham2007geometry}. These exploits demonstrate performing
+arbitrary computation in places that were not originally intended to act as
+computational entities.
+
+As another example, Bangert~\textit{et al.} demonstrate that a Turing complete
+weird machine can be constructed using the page fault handling mechanism in
+Intel's IA32 architecture~\cite{bangert2013page}. 
+
+Unexpected functionality like this is abundant in modern
+processors~\cite{d2015exploiting} as multiple threads share system resources
+cooperatively and optimizations are often done across the process
+isolation boundary. \speculake takes advantage of cooperative hardware
+resources, and constructs a hardware weird machine
+using speculative branching and \texttt{Flush+Reload}.
+
+\smallskip
+
+Hardware minutia have also been used to identify and fingerprint execution
+environments --- in malware this is know as a red-pill~\cite{red-pill} and 
+is typically used by malware to detect when it is under emulation or
+a debugging environment~\cite{lindorfer2011detecting, balzarotti2010efficient}. Paleari
+\textit{et al.} automate the process of discovering red-pills by
+fuzzing emulated and physical environments and identifying
+differences between the two~\cite{paleari2009fistful}.
+%This is still by no means an exhaustive list of red-pills for a given 
+%processor as many rely on timing or race conditions in physical 
+%environments. 
+
+% Hardware bare-metal analysis
+To combat this Kirat~\textit{et al.} propose automated ``bare-metal''
+emulation of malware~\cite{kirat2011barebox}, and methods to determine if malware
+is performing red-pill checks to avoid emulation environments~\cite{kirat2014barecloud}.
+Symbolic execution can also be used to combat red-pills by finding environmental triggers 
+in malicious binaries~\cite{schwartz2010all}. 
+
+\smallskip
+
+Unlike other red-pills based on hardware bugs, \speculake cannot be bypassed
+by patching binaries as the speculation will only occur on bare-metal systems, 
+and the critical functionality is performed speculatively. Similarly, debugging 
+break-points will not be triggered as instructions are never completed in a committed state.
+Symbolic execution will also fail to find the speculative gadgets as it is never on the
+execution pathway.
+
+
+
+\subsection{Cache Side Channels}
+
+The \speculake model relies critically on cache side channel attacks to 
+communicate information from the speculative world. Cache side-channels have 
+been used against a number of processors at essentially all different 
+caching levels -- L1 data cache~\cite{percival2005cache,zhang2012cross,osvik2006cache}, 
+L1 instruction cache~\cite{aciiccmez2010new}, 
+L2 cache~\cite{ristenpart2009hey,percival2005cache}, 
+LLC~\cite{ristenpart2009hey,liu2015last}, 
+and branch prediction cache~\cite{aciiccmez2007power}. 
+These attacks have also been performed in 
+cloud~\cite{ristenpart2009hey,zhang2012cross}, 
+browser~\cite{oren2015spy,google_cache_browser},
+and security critical encryption~\cite{yarom2014recovering,tromer2010efficient}
+environments, demonstrating how ubiquitous hardware side-channel exploits can be. 
+
+Cache side channels come in many
+variants~\cite{neve2006refined,tromer2010efficient,yarom2014flush+,gruss2016flush+flush}.
+In \speculake, we utilize the \texttt{Flush+Reload} method, where we first flush
+all items from cache, wait for the speculative world to reload a value, and then
+time accesses to reloading each potential value. However, we acknowledge that
+the recent \texttt{Flush+Flush} variant may offer a
+faster alternative~\cite{gruss2016flush+flush}.
+
+%\begin{itemize}
+%\item \texttt{Evict+Time} - An attacker with a synchronized clock evicts a series of items 
+%from cache. The victim then proceeds with computation, at which point the attacker can 
+%time accesses to each evicted item to identify which items a victim loaded~\cite{neve2006refined}. 
+%\item \texttt{Prime+Probe} - An attaker performs a computation, then evicts specific 
+%items from the cache before performing the same action again. Information about the cache
+%access patterns can be gained by comparing the timimg of the two 
+%computations~\cite{tromer2010efficient}.
+%\item \texttt{Flush+Reload} - Two cooperating processes  make use of the \texttt{Evict+Time} 
+%model to form a communication channel~\cite{yarom2014flush+}.
+%\item \texttt{Flush+Flush} - Follows the same model as \texttt{Prime+Probe},
+%however clflush is used instead of a load as it resolves much quicker in cases 
+%where the item is not in cache~\cite{gruss2016flush+flush}.
+%\end{itemize}
+
+
+%While other works have demonstrated higher throughput from similar 
+%covert cache side channels~\cite{liu2015last}, \speculake incurrs slightly higher performance 
+%penalties in our implementation as we perform redundancy checks to 
+%ensure the signal strength.  This redundancy combined with the intentional cache misseses
+%which enable speculative execution cost hundreds to thousands of clock cycles
+%per round. 
+
+
+\subsection{Speculative Execution}
+
+% Lead in 
+Leading up to the discovery and release of the Spectre and Meltdown
+vulnerabilities multiple teams were working to reverse engineer the mechanisms
+that implemented in the microcode of various processors and document their
+behavior~\cite{intel-instruction-tables,project_zero,measuring-cache,measuring-rob}.
+Research into branch predictors~\cite{godbolt2016branch}, cache replacement
+policies, and reorder buffer construction~\cite{measuring-rob} paved the way for
+the branch prediction side-channels employed by Spectre (and subsequently
+\speculake).
+%Efforts to examine cache and memory security also preempted the Spectre work, 
+%including Sophia D'Antoine's thesis work developing a side channel based on 
+%instruction interleaving in the CPU~\cite{d2015exploiting}. Similar research into branch 
+%predictors, cache replacement policies, and reorder buffer construction including work by Matt 
+%Godbolt~\cite{godbolt2016branch}, and Henry Wong~\cite{measuring-rob} paved the runway for 
+%dedicated branch prodiction side-channels.
+
+% Discovery & Followup
+Given the numerous directions that were being investigated in reverse
+engineering Intel processors, multiple teams discovered the Spectre
+vulnerabilities concurrently including the teams associated with Kocher
+\textit{et al.}~\cite{spectre}, the Project Zero team at
+Google~\cite{project_zero}, and various
+others~\cite{evtyushkin2018branchscope,maisuradze2018speculose}. 
+%These works propose multiple variants making use of branch prediction.
+Follow 
+up work on speculative execution side channels has also demonstrated
+web-based vulnerabilites~\cite{genkin2018drive} as well as hardware isolation  
+leaks in Intel's SGX~\cite{spectre_sgx}. At the time of writing multiple sources
+have claimed new speculative execution related exploits termed \textit{Spectre-NG}
+have been reported to Intel and assigned CVE numbers, though details are
+not yet available~\cite{spectre_ng_gossip}.
+%We have no details
+%on content, though Intel has labeled four as critical and another four 
+%as intermediate security flaws~\cite{spectre_ng_gossip}.  
+
+
+% defenses
+
+%Much like cache side channel vulnerabilities speculative execution is relatively
+%critical to processor performance and requires significant software and hardware 
+%updates to fully address. 
+Multiple measures have been proposed to combat the 
+individual variants of Spectre.
+
+One popular approach uses compiler level software patches to wrap sensitive 
+function calls. Retpoline replaces indirect jumps with \texttt{retq}
+instructions that read from the cached stack (and are thus less likely to be
+mis-speculated)~\cite{retpoline}.
+Gruss~\textit{et al.} propose the KAISER software patch to enforce address space
+isolation for kernel and user space proceses~\cite{gruss2017kaslr}. 
+Other proposals have considered hypervisor enforced time domain separation at varying 
+granularity~\cite{renau2018securing}, and fuzzy clocks that would reduce the accuracy 
+of any time based exfiltration pathway~\cite{hu1992reducing}. However, none of these defenses
+fundamentally defeat the use of a branch predictor as a cooperative mechanism
+spanning multiple processes. Intel has released microarchitecture updates for
+its most recent CPUs, but older architectures do not support these updates and
+will remain vulnerable~\cite{intel-micro-patch}.
+
+
+Trippel~\textit{et al.} proposes a method of faithfully simulating hardware
+bugs, given a formal model specifying the
+microarchitecture~\cite{trippel2018meltdownprime}. However, such models are
+unlikely to be released by CPU manufacturers, as they generally involve
+closely-guarded trade secrets, making this a less accessible solution for the
+research community.
+
+%\smallskip
+%
+%We can certainly look forward to more vulnerabilities relating to speculative 
+%branching and related hardware side channels. Our work represents an exploit 
+%model for these vulnerabilities reliant upon shared hardware resources. 
+
+
+
+%%%%%%%%%%%%%%

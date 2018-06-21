@@ -1,0 +1,252 @@
+
+
+\section{Architecture}
+
+
+\speculake malware is comprised of two independent programs: a payload program,
+and a trigger program. Both are installed on the victim's computer (e.g. via
+trojan, remote exploit, or phishing), and must run simultaenously on the same
+physical CPU. We note that the constraint of running programs on the same CPU is
+not a signifcant burden: \texttt{taskset} can be used to limit a process to a
+core, or if not available, the attacker can simply run multiple copies of the
+trigger or payload program to coerce the OS scheduler to assign a
+payload/trigger pair to the same core.
+
+At a high level, the trigger program performs a series of indirect jumps in a
+loop, training the branch predictor to this pattern. Meanwhile, the
+payload program performs a subset of this jump pattern, then forces the CPU to
+speculate by stalling the resolution of an indirect branch via a slow memory
+read. The CPU will (mistakenly) predict the jump to follow the pattern performed
+by the trigger program, and speculatively execute that destination in the
+payload program.
+
+\subsection{Indirect jumps}
+
+
+In \speculake, we cause the CPU to mis-speculate the destination of an indirect
+branch in the payload program, causing it to speculatively execute 
+instructions that are never truly executed. We term this speculative destination
+the \emph{speculative entry point}. \speculake uses indirect jumps to allow
+speculative execution from \emph{any} instruction in the payload process'
+address space. Because it can jump to any instruction, the malware analyst has a
+difficult task in determining where a payload program's speculative entry point
+is.
+
+In fact, the location of this entry point is not determined by the payload
+program, but rather the corresponding trigger program. This means that with only
+the payload program, an analyst does not posses enough information to find the
+speculative entry point.
+
+
+
+Indirect branch predictors allow the CPU to predict the destination address of a
+branch based solely off its source address and a brief history of previous
+branch sources and destinations. While the inner-working details of modern CPU
+branch predictors are proprietary, it is possible to reverse engineer parts of
+their behavior, which we do for \speculake.
+
+We observe that Intel CPUs consider three types of x86\_64 indirect branches:
+\texttt{retq}, \texttt{callq *\%rax}, and \texttt{jmpq *\%rax}\footnote{other
+general purpose registers besides \texttt{\%rax} can be used as well}.
+We created a simple trigger program that performs a series of 28 indirect
+branches
+using \texttt{jmpq *\%rax} instructions. Between each jump, we increment
+\texttt{\%rax} to account for the number of bytes between jumps. For the last
+jump, we load a function pointer into \texttt{\%rax} and do a final indirect
+branch using \texttt{callq *\%rax}.
+
+In our payload program, we first perform the same 28 indirect jumps. We ensure
+the source address of these jumps is the same as in the trigger program by
+manually defining their containing function at a fixed address inside a linker
+script. We also do the final indirect call to a function pointer, but with two
+differences. First, the destination of the function pointer is a different
+address, and second, the location of the function pointer in memory is uncached.
+This forces the CPU to predict the destination of the indirect call while it
+waits for the function pointer to load from memory. Due to the similar
+history of branches with the trigger program,
+the CPU will (incorrectly) predict the destination to be the same as the one in
+the trigger program, which determines the speculative entry point for the
+payload. Even though the in-order execution of
+payload program never executes or even reads from this address, the CPU will
+briefly execute instructions there speculatively.
+
+Eventually, the dereference of the uncached function pointer in payload program
+will be resolved, and the CPU will recognize it has incorrectly predicted the
+destination of its \texttt{callq}/\texttt{jmpq}/\texttt{retq} instruction. The
+results from the speculative entry point instructions will be discarded, and the
+CPU will continue executing from the correct destination. However, as the
+speculative code changes what is loaded into the cache based on its results, it
+can covertly communicate its results to the ``real world'' program.
+
+
+
+\subsection{Limits of Speculative Execution}
+
+\FigCacheMiss
+
+\FigSpecMeasure
+
+We performed several experiments to determine how much computation can be
+performed
+speculatively, as well as what components are responsible for the limit.
+We report results from our experiments on an Intel~Xeon-1270,
+though we note we found similar results across other Intel processor generations,
+including an i5-7200U, % jack
+an i5-4300U, % ewust laptop
+and an i5-4590. % ewust desktop
+% For simplicity, we report results from only the Xeon-1270.
+
+
+
+\subsubsection{Cache Miss Duration}
+When executing instructions speculatively we rely on a memory load of a function
+pointer from uncached memory. Thus, one potential limit on our computation comes
+in the form of the time it takes for the memory read to return with a result
+(and for the CPU to determine the result was mis-predicted).
+We measured the number of cycles a
+cache miss takes to return by artificially evicting an item from cache and
+timing reads from its address.
+Figure~\ref{fig:cache-miss} shows the CDF of cycles taken. In the typical case,
+an evicted item takes approximately 300 clock cycles to load from the Level 3 cache (L3), which
+would allow a limit of roughly 200 speculative instructions to be
+executed during that time. We note that when an item is not in L3, it takes
+considerably longer to load, in theory allowing for thousands of speculative
+instructions in a significant fraction of runs.
+
+
+\subsubsection{Reorder Buffer Capacity} \label{sssec:ROB}
+We also measured the capacity of the reorder buffer (ROB) using a method
+outlined by~\cite{measuring-rob}. We measure the maximum number of cycles taken
+to perform two uncached memory reads, and vary the number of filler instructions
+between them. If the number of filler instructions is small, both memory reads
+will fit inside the ROB, and it can issue their memory reads in parallel.
+However, if the filler instructions fill the ROB, the second memory read will
+have to wait for the first to return before it can be issued, causing a
+noticeable step increase in the cycle count. Figure~\ref{fig:spec-capacity}
+shows this step occurs at approximately 220 instructions for our processor,
+suggesting a hard upper bound regardless of how long the cache miss takes to
+resolve.
+
+%TODO: explain why it's noisy? why does the maximum number of cycles drop below
+%this when we're above 220 instructions? Is the step somewhere above that, but
+%other processes have crept in (but occasionally, we get lucky and it's just us)?
+
+\subsubsection{Speculative Instruction Capacity}
+
+To verify the upper limit of speculative instructions, we instrumented our
+trigger and payload programs to test a simple gadget of variable-length before it
+communicated a signal to the real world via a cache side channel. If the cache
+side channel revealed no signal in the real world, then we know the speculative
+execution did not make it to the signal instructions before the mis-speculated
+branch was resolved.
+
+We also tested whether instruction complexity or data dependencies impact the
+number of instructions that can be completed. We find that data dependencies and
+instruction complexity both have an impact on the number of instructions that
+can be executed. Instruction complexity is determined by the number of $\mu$ ops
+that the instruction uses, which appears to be what is tracked in the ROB. For
+instance, on our architecture, the 64-bit \texttt{idiv} instruction takes 59
+$\mu$ ops, and we can execute up to 3 of them in the speculative world.
+Meanwhile, we can execute up to 18 32-bit \texttt{idiv} instructions, which each
+take 9 $\mu$ ops~\cite{intel-instruction-tables}.
+
+We found that the processor can identify some operations that have no effect on
+output registers and allows them to use the entire size provided by the ROB, as
+determined in Section~\ref{sssec:ROB}. This includes idomatic no-ops and zero
+idioms, which have no reliance on register values, for example the instruction
+\texttt{xchg \%rax, \%rax} and \texttt{xor \%rax, \%rax}. However, if an
+instruction is a potential data hazard, it must use an entry in the PRF until it
+reaches the correct stage in the execution pipeline. In this case, the number of
+instructions could be limited by the PRF entries available.
+
+%TODO: is this true? Or better explained by the micro-op story?
+
+Most notably instructions that use the extended x86 registers are still valid
+within the speculative context. Specifically, Intel's hardware accelerated
+AES-NI encryption and decryption instructions, which each use 128-bit registers.
+As shown in Figure~\ref{fig:spec-capacity}, speculative environments can
+complete a significant number of AES rounds -- more than enough to decrypt a
+full block using AES-CBC. We investigate the use of AES instructions in the
+spculative environment further in Sections~\ref{subsec:decryption}.
+
+\medskip
+
+We find that when executing speculatively, the number of instrutions completed
+is rarely limited by cache miss duration. Instead
+ROB size and processor mechanisms for resolving
+data dependencies define an upper boundary of approximately 150
+instructions\footnote{While \texttt{nop} is able to execute up to the full 220
+ROB capacity, instructions that do useful work cannot reach this limit}.
+
+% TODO: 
+% - Highlist instruction signal variablity (add v mul v aesdec v nop)?
+% - Limitation is in the ROB (cite other work that supports this)
+% - MORE PROCESSORS for testing?
+% - ARM?
+
+
+\subsubsection{Hyperthreading}
+
+When running our tests, we assign the payload and trigger program to the same
+core using \texttt{taskset}. We note in the absence of \texttt{taskset}, we can
+run multiple instances of trigger programs to occupy all cores, eventually
+having the payload program and trigger program become co-resident.
+
+We also explore using hyperthreading, where the CPU presents two virtual cores
+for each physical core, allowing the OS to schedule programs to each
+simultaneously. In effect, this can cause the interleaving of instructions
+between two programs to be much finer-grained: at the instruction level rather
+than changing only at the OS-controlled context switch. We find that this
+has two effects on speculative programs. First, the finer-grained interleaving
+allows for a higher hit rate from the cache, suggesting that each indirect jump
+pattern is more likely to result in speculatively executing from the intended
+position. % TODO: can we quantify this?
+Second, because the physical CPU is being shared, it effectively halves the
+number of instructions that can be run in the speculative context.
+Figure~\ref{fig:spec-capacity} shows the instructions that can be run when
+running trigger and payload on a single core vs.\ a pair of hyperthreaded cores.
+
+\subsubsection{Nested Speculation}
+
+We explore the ability for the CPU to ``double speculate'', where a second
+stalled indirect jump while the CPU is already speculating causes it to predict
+the target and
+speculate a second time. For instance, suppose a payload program truly jumps to
+target A, but the CPU is mistrained by a trigger program that jumps to B, thus
+causing the payload program to speculatively execute at B. At B, suppose there
+is a second indirect jump, perhaps using the same register as the first jump
+(which has still not resolved). If the trigger program jumps to C, the payload
+program will speculate a second time and continue speculative execution at C.
+
+We find that not all Intel CPUs support nested speculation. For
+example, it appears Haswell chips do not speculate while already speculating,
+but nonetheless support non-nested \speculake. Both Sandy Bridge (which
+preceeded Haswell) and Kaby Lake (which followed Haswell) support nested
+speculation. We find that when a CPU does support nested speculation, there
+appears to be no limit to nested depth besides the speculative instruction
+limit. We use a 16-deep nested speculation in Section~\ref{subsec:impl-aes}
+to thoroughly protect speculative decryption keys from reverse
+engineering.
+
+\subsection{Speculative Primitive}
+
+We summarize our findings into a \emph{speculative primitive}, which allows us to
+speculatively (and covertly) perform on the order of 100 arbitrary
+instructions while an accompanying trigger program is running, and communicate
+a short (e.g. single byte) result to the real
+world via a cache side channel. These speculative instructions are able to read
+from any real-world memory or registers, but they cannot perform updates or
+writes directly. To update memory, the speculative instructions must communicate
+to the real world through a cache side channel.
+
+We note a performance tradeoff between the size of communication (e.g. 4 bits vs 8
+bits) and the time it takes the real world to recover the result from the side
+channel. Using Flush+Reload~\cite{yarom2014flush+} as our cache side channel,
+recovering the result requires accessing all elements in an array exponential in
+the size of the result (e.g. $2^8$ array reads to recover an 8-bit result). 
+Therefore, there is a
+performance advantage for keeping the size of the result small, and communicating
+out small pieces of information that are aggregated by the real world.
+
+
+%%%%%%%%%%%%%%

@@ -1,0 +1,3 @@
+- Add reference to VMprotect/FinSpy VM
+- Test with microcode updates (Kaby Lake etc)
+- ARM emulator?

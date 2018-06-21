@@ -1,11 +1,495 @@
 
 
 
-@misc{intel-rob-capacity,
-    howpublished={\url{http://blog.stuffedcow.net/2013/05/measuring-rob-capacity/}},
-    author={Henry Wong},
-    year={2013},
-    month={May},
+
+@article{spectre,
+  title={Spectre Attacks: Exploiting Speculative Execution},
+  author={Kocher, Paul and Genkin, Daniel and Gruss, Daniel and Haas, Werner and Hamburg, Mike and Lipp, Moritz and Mangard, Stefan and Prescher, Thomas and Schwarz, Michael and Yarom, Yuval},
+  journal={arXiv preprint arXiv:1801.01203},
+  year={2018}
+}
+
+@article{meltdown,
+  title={Meltdown},
+  author={Lipp, Moritz and Schwarz, Michael and Gruss, Daniel and Prescher, Thomas and Haas, Werner and Mangard, Stefan and Kocher, Paul and Genkin, Daniel and Yarom, Yuval and Hamburg, Mike},
+  journal={arXiv preprint arXiv:1801.01207},
+  year={2018}
 }
 
 
+@inproceedings{malware-packers,
+  title={A study of the packer problem and its solutions},
+  author={Guo, Fanglu and Ferrie, Peter and Chiueh, Tzi-Cker},
+  booktitle={International Workshop on Recent Advances in Intrusion Detection},
+  pages={98--115},
+  year={2008},
+  organization={Springer}
+}
+
+@inproceedings{balzarotti2010efficient,
+  title={Efficient Detection of Split Personalities in Malware.},
+  author={Balzarotti, Davide and Cova, Marco and Karlberger, Christoph and Kirda, Engin and Kruegel, Christopher and Vigna, Giovanni},
+  booktitle={NDSS},
+  year={2010}
+}
+
+@inproceedings{moser2007exploring,
+  title={Exploring multiple execution paths for malware analysis},
+  author={Moser, Andreas and Kruegel, Christopher and Kirda, Engin},
+  booktitle={Security and Privacy, 2007. SP'07. IEEE Symposium on},
+  pages={231--245},
+  year={2007},
+  organization={IEEE}
+}
+
+@inproceedings{schwartz2010all,
+  title={All you ever wanted to know about dynamic taint analysis and forward symbolic execution (but might have been afraid to ask)},
+  author={Schwartz, Edward J and Avgerinos, Thanassis and Brumley, David},
+  booktitle={Security and privacy (SP), 2010 IEEE symposium on},
+  pages={317--331},
+  year={2010},
+  organization={IEEE}
+}
+
+
+@inproceedings{wang2017angr,
+  title={Angr-The Next Generation of Binary Analysis},
+  author={Wang, Fish and Shoshitaishvili, Yan},
+  booktitle={Cybersecurity Development (SecDev), 2017 IEEE},
+  pages={8--9},
+  year={2017},
+  organization={IEEE}
+}
+
+@article{egele2012survey,
+  title={A survey on automated dynamic malware-analysis techniques and tools},
+  author={Egele, Manuel and Scholte, Theodoor and Kirda, Engin and Kruegel, Christopher},
+  journal={ACM computing surveys (CSUR)},
+  volume={44},
+  number={2},
+  pages={6},
+  year={2012},
+  publisher={ACM}
+}
+
+@misc{measuring-rob,
+author={Henry Wong},
+title={Measuring Reorder Buffer Capacity},
+month={may},
+year=2013,
+url={http://blog.stuffedcow.net/2013/05/measuring-rob-capacity/}
+}
+
+
+@misc{measuring-cache,
+author={Henry Wong},
+title={Intel Ivy Bridge Cache Replacement Policy},
+month={jan},
+year=2013,
+url={http://blog.stuffedcow.net/2013/01/ivb-cache-replacement/}
+}
+
+
+@article{intel-instruction-tables,
+  title={Instruction tables: Lists of instruction latencies, throughputs and micro-operation breakdowns for Intel, AMD and VIA CPUs},
+  author={Fog, Agner},
+  journal={Copenhagen University College of Engineering},
+  volume={93},
+  pages={110},
+  year={2011},
+}
+
+
+@misc{project_zero,
+  author={Horn, Jann},
+  title={Project Zero: Reading privileged memory with a side-channel},
+  howpublished={\url{https://googleprojectzero.blogspot.com/2018/01/reading-privileged-memory-with-side.html}},
+  note={Accessed: 2018-05-01},
+  year=2018
+}
+
+@inproceedings{yarom2014flush+,
+  title={FLUSH+ RELOAD: A High Resolution, Low Noise, L3 Cache Side-Channel Attack.},
+  author={Yarom, Yuval and Falkner, Katrina},
+  booktitle={USENIX Security Symposium},
+  pages={719--732},
+  year={2014}
+}
+
+@misc{weird_exploits,
+  author={Richarte, Gerardo},
+  title={About Exploits Writing},
+  url={https://www.coresecurity.com/system/files/publications/2016/05/2002.gera_.About_Exploits_Writing.pdf},
+  note={Accessed: 2018-05-01},
+  year=2002
+}
+
+@misc{weird_machines,
+  title={What Hacker Research Taught Me},
+  author={Bratus, Sergey},
+  howpublished={In Rss},
+  url={http://www.cs.dartmouth.edu/~sergey/hc/rss-hacker-research.pdf},
+  note={Accessed: 2018-05-01},
+  year=2009
+}
+
+@article{bratus2011exploit,
+  title={Exploit programming: From buffer overflows to weird machines and theory of computation},
+  author={Bratus, Sergey and Locasto, Michael and Patterson, Meredith and Sassaman, Len and Shubina, Anna},
+  journal={$\{$USENIX; login:$\}$},
+  year={2011}
+}
+
+@inproceedings{bangert2013page,
+  title={The Page-Fault Weird Machine: Lessons in Instruction-less Computation.},
+  author={Bangert, Julian and Bratus, Sergey and Shapiro, Rebecca and Smith, Sean W},
+  booktitle={WOOT},
+  year={2013}
+}
+
+
+@inproceedings{shacham2007geometry,
+  title={The geometry of innocent flesh on the bone: Return-into-libc without function calls (on the x86)},
+  author={Shacham, Hovav},
+  booktitle={Proceedings of the 14th ACM conference on Computer and communications security},
+  pages={552--561},
+  year={2007},
+  organization={ACM}
+}
+
+@misc{buffer_overflow,
+  author={Aleph One},
+  title={ Smashing the stack for fun and profit.},
+  howpublished={ Phrack Magazine , 49(14), Nov. 1996.},
+  url={phrack.org/issues/49/14.html#article},
+  year=1996
+}
+
+
+@misc{format_string_exploit,
+  author={gera and riq},
+  title={Advances in format string exploiting.},
+  howpublished={Phrack Magazine , 59(7), July 2001.},
+  url={http://www.phrack.org/archives/59/p59-0x07.txt},
+  year=2001
+}
+
+@misc{retpoline,
+  author={Turner, Paul},
+  title={Retpoline: a software construct for preventing branch-target-injection},
+  url={https://support.google.com/faqs/answer/7625886},
+  year=2018
+}
+
+@inproceedings{lindorfer2011detecting,
+  title={Detecting environment-sensitive malware},
+  author={Lindorfer, Martina and Kolbitsch, Clemens and Comparetti, Paolo Milani},
+  booktitle={International Workshop on Recent Advances in Intrusion Detection},
+  pages={338--357},
+  year={2011},
+  organization={Springer}
+}
+
+
+@inproceedings{paleari2009fistful,
+  title={A fistful of red-pills: How to automatically generate procedures to detect CPU emulators},
+  author={Paleari, Roberto and Martignoni, Lorenzo and Roglia, Giampaolo Fresi and Bruschi, Danilo},
+  booktitle={Proceedings of the USENIX Workshop on Offensive Technologies (WOOT)},
+  volume={41},
+  pages={86},
+  year={2009}
+}
+
+
+@inproceedings{kirat2014barecloud,
+  title={BareCloud: Bare-metal Analysis-based Evasive Malware Detection.},
+  author={Kirat, Dhilung and Vigna, Giovanni and Kruegel, Christopher},
+  booktitle={USENIX Security Symposium},
+  pages={287--301},
+  year={2014}
+}
+
+@inproceedings{kirat2011barebox,
+  title={Barebox: efficient malware analysis on bare-metal},
+  author={Kirat, Dhilung and Vigna, Giovanni and Kruegel, Christopher},
+  booktitle={Proceedings of the 27th Annual Computer Security Applications Conference},
+  pages={403--412},
+  year={2011},
+  organization={ACM}
+}
+
+
+@misc{red-pill,
+  title={redpill… or how to detect VMM using (almost) one CPU instruction},
+  author={Rutkowska,Joanna},
+  url={https://blog.invisiblethings.org/papers/},
+  year={2004}
+}
+
+@inproceedings{gruss2016rowhammer,
+  title={Rowhammer. js: A remote software-induced fault attack in javascript},
+  author={Gruss, Daniel and Maurice, Cl{\'e}mentine and Mangard, Stefan},
+  booktitle={International Conference on Detection of Intrusions and Malware, and Vulnerability Assessment},
+  pages={300--321},
+  year={2016},
+  organization={Springer}
+}
+
+@phdthesis{d2015exploiting,
+  title={Exploiting processor side channels to enable cross VM malicious code execution},
+  author={D'Antoine, Sophia M},
+  year={2015},
+  school={Rensselaer Polytechnic Institute}
+}
+
+
+@misc{godbolt2016branch,
+  title={Static branch prediction on newer Intel processors},
+  author={Godbolt, Matt},
+  year=2016,
+  url={https://xania.org/201602/bpu-part-one},
+  note={Accessed: 2018-05-01}
+}
+
+@inproceedings{evtyushkin2018branchscope,
+  title={BranchScope: A New Side-Channel Attack on Directional Branch Predictor},
+  author={Evtyushkin, Dmitry and Riley, Ryan and Abu-Ghazaleh, Nael CSE and Ponomarev, Dmitry and others},
+  booktitle={Proceedings of the Twenty-Third International Conference on Architectural Support for Programming Languages and Operating Systems},
+  pages={693--707},
+  year={2018},
+  organization={ACM}
+}
+
+
+@article{maisuradze2018speculose,
+  title={Speculose: Analyzing the Security Implications of Speculative Execution in CPUs},
+  author={Maisuradze, Giorgi and Rossow, Christian},
+  journal={arXiv preprint arXiv:1801.04084},
+  year={2018}
+}
+
+@inproceedings{gruss2017kaslr,
+  title={Kaslr is dead: long live kaslr},
+  author={Gruss, Daniel and Lipp, Moritz and Schwarz, Michael and Fellner, Richard and Maurice, Cl{\'e}mentine and Mangard, Stefan},
+  booktitle={International Symposium on Engineering Secure Software and Systems},
+  pages={161--176},
+  year={2017},
+  organization={Springer}
+}
+
+
+@article{renau2018securing,
+  title={Securing Processors from Time Side Channels},
+  author={Renau, J},
+  year={2018}
+}
+
+@article{hu1992reducing,
+  title={Reducing timing channels with fuzzy time},
+  author={Hu, Wei-Ming},
+  journal={Journal of computer security},
+  volume={1},
+  number={3-4},
+  pages={233--254},
+  year={1992},
+  publisher={IOS Press}
+}
+
+
+@article{trippel2018meltdownprime,
+  title={MeltdownPrime and SpectrePrime: Automatically-Synthesized Attacks Exploiting Invalidation-Based Coherence Protocols},
+  author={Trippel, Caroline and Lustig, Daniel and Martonosi, Margaret},
+  journal={arXiv preprint arXiv:1802.03802},
+  year={2018}
+}
+
+@article{genkin2018drive,
+  title={Drive-by Key-Extraction Cache Attacks from Portable Code},
+  author={Genkin, Daniel and Pachmanov, Lev and Tromer, Eran and Yarom, Yuval},
+  year={2018}
+}
+
+@misc{spectre_sgx,
+  author={O., Dan},
+  title={spectre-attack-sgx},
+  howpublished={ww.github.com},
+  year=2018,
+  url={https://github.com/lsds/spectre-attack-sgx/commits/master},
+  note={Accessed: 2018-05-01}
+}
+
+@inproceedings{gruss2016flush+flush,
+  title={Flush+ Flush: a fast and stealthy cache attack},
+  author={Gruss, Daniel and Maurice, Cl{\'e}mentine and Wagner, Klaus and Mangard, Stefan},
+  booktitle={International Conference on Detection of Intrusions and Malware, and Vulnerability Assessment},
+  pages={279--299},
+  year={2016},
+  organization={Springer}
+}
+
+
+@article{herken1992universal,
+  title={The Universal Turing Machine. A Half-Century Survey},
+  author={Herken, Rolf},
+  year={1992}
+}
+
+@incollection{chaitin1987computing,
+  title={Computing the busy beaver function},
+  author={Chaitin, Gregory J},
+  booktitle={Open Problems in Communication and Computation},
+  pages={108--112},
+  year={1987},
+  publisher={Springer}
+}
+
+
+@inproceedings{liu2015last,
+  title={Last-level cache side-channel attacks are practical},
+  author={Liu, Fangfei and Yarom, Yuval and Ge, Qian and Heiser, Gernot and Lee, Ruby B},
+  booktitle={Security and Privacy (SP), 2015 IEEE Symposium on},
+  pages={605--622},
+  year={2015},
+  organization={IEEE}
+}
+
+@article{tromer2010efficient,
+  title={Efficient cache attacks on AES, and countermeasures},
+  author={Tromer, Eran and Osvik, Dag Arne and Shamir, Adi},
+  journal={Journal of Cryptology},
+  volume={23},
+  number={1},
+  pages={37--71},
+  year={2010},
+  publisher={Springer}
+}
+
+
+@inproceedings{neve2006refined,
+  title={A refined look at Bernstein's AES side-channel analysis},
+  author={Neve, Michael and Seifert, Jean-Pierre and Wang, Zhenghong},
+  booktitle={Proceedings of the 2006 ACM Symposium on Information, computer and communications security},
+  pages={369--369},
+  year={2006},
+  organization={ACM}
+}
+
+
+@misc{google_cache_browser,
+  title={Issue 508166: Security: Chrome provides high-res timers which allow cache side channel attacks},
+  author={Chromium Project},
+  url={https://bugs.chromium.org/p/chromium/issues/detail?id=508166},
+  howpublished={},
+  year=2015
+}
+
+@inproceedings{oren2015spy,
+  title={The spy in the sandbox: Practical cache attacks in javascript and their implications},
+  author={Oren, Yossef and Kemerlis, Vasileios P and Sethumadhavan, Simha and Keromytis, Angelos D},
+  booktitle={Proceedings of the 22nd ACM SIGSAC Conference on Computer and Communications Security},
+  pages={1406--1418},
+  year={2015},
+  organization={ACM}
+}
+
+@article{yarom2014recovering,
+  title={Recovering OpenSSL ECDSA Nonces Using the FLUSH+ RELOAD Cache Side-channel Attack.},
+  author={Yarom, Yuval and Benger, Naomi},
+  journal={IACR Cryptology ePrint Archive},
+  volume={2014},
+  pages={140},
+  year={2014}
+}
+
+@inproceedings{zhang2012cross,
+  title={Cross-VM side channels and their use to extract private keys},
+  author={Zhang, Yinqian and Juels, Ari and Reiter, Michael K and Ristenpart, Thomas},
+  booktitle={Proceedings of the 2012 ACM conference on Computer and communications security},
+  pages={305--316},
+  year={2012},
+  organization={ACM}
+}
+
+@inproceedings{aciiccmez2007power,
+  title={On the power of simple branch prediction analysis},
+  author={Acii{\c{c}}mez, Onur and Ko{\c{c}}, {\c{C}}etin Kaya and Seifert, Jean-Pierre},
+  booktitle={Proceedings of the 2nd ACM symposium on Information, computer and communications security},
+  pages={312--320},
+  year={2007},
+  organization={ACM}
+}
+
+@inproceedings{ristenpart2009hey,
+  title={Hey, you, get off of my cloud: exploring information leakage in third-party compute clouds},
+  author={Ristenpart, Thomas and Tromer, Eran and Shacham, Hovav and Savage, Stefan},
+  booktitle={Proceedings of the 16th ACM conference on Computer and communications security},
+  pages={199--212},
+  year={2009},
+  organization={ACM}
+}
+
+@misc{percival2005cache,
+  title={Cache missing for fun and profit},
+  author={Percival, Colin},
+  year={2005},
+  publisher={BSDCan}
+}
+
+@inproceedings{aciiccmez2010new,
+  title={New results on instruction cache attacks},
+  author={Ac{\i}i{\c{c}}mez, Onur and Brumley, Billy Bob and Grabher, Philipp},
+  booktitle={International Workshop on Cryptographic Hardware and Embedded Systems},
+  pages={110--124},
+  year={2010},
+  organization={Springer}
+}
+
+@inproceedings{osvik2006cache,
+  title={Cache attacks and countermeasures: the case of AES},
+  author={Osvik, Dag Arne and Shamir, Adi and Tromer, Eran},
+  booktitle={Cryptographers’ Track at the RSA Conference},
+  pages={1--20},
+  year={2006},
+  organization={Springer}
+}
+
+@inproceedings{evtyushkin2016jump,
+  title={Jump over ASLR: Attacking branch predictors to bypass ASLR},
+  author={Evtyushkin, Dmitry and Ponomarev, Dmitry and Abu-Ghazaleh, Nael},
+  booktitle={Microarchitecture (MICRO), 2016 49th Annual IEEE/ACM International Symposium on},
+  pages={1--13},
+  year={2016},
+  organization={IEEE}
+}
+
+@misc{spectre_ng_gossip,
+  url={http://www.guru3d.com/news-story/intel-has-to-delays-patches-for-new-spectre-ng-vulnerabilities.html},
+  title={Intel Has to Delay Patches for new Spectre-NG Vulnerabilities},
+  year=2018,
+  month={may},
+  author={Hagedoorn, Hilbert}
+}
+
+@misc{intel-software-guide,
+    url={https://www.intel.com/content/dam/www/public/us/en/documents/manuals/64-ia-32-architectures-software-developer-vol-2b-manual.pdf},
+    year=2016,
+    month={September},
+    author={Intel},
+    title={Intel 64 and IA-32 Architectures Software Developer’s Manual}
+}
+
+@misc{intel-micro-patch,
+  url={https://newsroom.intel.com/wp-content/uploads/sites/11/2018/04/microcode-update-guidance.pdf},
+  title={Microcode Revision Guidance: April 2 2018}, 
+  year=2018,
+  month={april},
+  author={Intel}
+}
+
+@misc{toms-intelCVE,
+  url={https://www.tomshardware.com/news/intel-spectre-patch-older-chips,36815.html},
+  title={Intel Will No Longer Issue Spectre Patch For Some Older Chips },
+  year=2018,
+  month={april},
+  author={Armasu, Lucian}
+}

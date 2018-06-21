@@ -1,0 +1,165 @@
+
+\section{Introduction}
+
+
+Modern CPU designs use speculative execution to maintain high instruction
+throughput, with the goal of improving performance. In speculative execution,
+CPUs execute likely future instructions while they wait for other slower
+instructions to complete. When the CPU's guess of future instructions is correct, the
+benefit is faster execution performance. When its guess is wrong, the CPU
+simply discards the speculated results and continues executing along the true path.
+
+
+Previously, it was assumed that speculative execution results
+remain invisible if discarded, as careful CPU design maintains strict separation
+between speculative results and updates to architectual state.
+However, recent research has revealed side channels that violate this
+separation, and researchers have demonstrated ways to exfiltrate results from speculative
+computation. Most notably, the Spectre vulnerability allows attackers to leak
+information from purposefully mis-speculated branches in a victim
+process~\cite{spectre}. The Meltdown vulnerability uses speculative results of an
+unauthorized memory read to sidestep page faults and leak protected memory from
+the kernel~\cite{meltdown}. Both of these vulnerabilities focus on extracting
+secret data from a process or operating system.
+
+\medskip
+
+In this paper, we explore another attack enabled by speculative execution:
+\speculake, which \emph{hides computation} within
+the ``speculative world''. Taking advantage of the CPU's speculation to secretly
+perform computation,
+we can produce binaries that thwart existing reverse engineering
+techniques. Because the speculative parts of a program never ``truly'' execute,
+we can hide program functionality in the unreachable dead code in a program.
+Even a full instruction trace, captured by a hardware debugger or software
+emulator, will be unable to capture the logic performed speculatively.
+This technique could lead to sophisticated malware that hides its behavior
+from both static and dynamic analysis.
+
+
+Existing malware use several techniques to evade detection and
+make it difficult for analysts to determine payload behavior of reported malware. 
+For example, binary \emph{packers} or \emph{crypters} encode an executable payload as
+data that must be ``unpacked'' at runtime, making it difficult to tell
+statically what a program will do~\cite{malware-packers}. Malware may also use
+\emph{triggers} that only run the payload when certain conditions are present, preventing
+it from executing when it is inside an analysis sandbox or 
+debugger~\cite{balzarotti2010efficient,red-pill}.
+
+However, with some effort, these existing malware techniques can be defeated.
+Analysts can use
+dynamic execution to unpack malware and reveal its
+behavior~\cite{balzarotti2010efficient}, and can use symbolic execution or code
+coverage fuzzers to determine the inputs or triggers that will reveal malicious
+behavior~\cite{moser2007exploring,schwartz2010all,wang2017angr,egele2012survey}.
+
+
+\speculake provides a new technique to malware authors, allowing them to hide
+program functionality in code that does not execute at runtime.
+
+
+At a high level, \speculake consists of two parts: a payload program, and a
+trigger program. When run by itself, the payload program executes a pattern of
+indirect jumps and measures a cache side channel. While the trigger program is
+not running, the payload program is effectively inactive (and may optionally do
+some decoy operation). When the trigger program runs, it executes a similar
+pattern of indirect jumps (with similar source and destination addresses as the
+payload program), effectively training the CPU's branch predictor to the jump
+pattern specified by the trigger program.
+
+Importantly, the trigger program and payload program's indirect jump patterns
+diverge on the destination of their final jumps. However, because the trigger
+program has trained the CPU's branch predictor, the CPU speculates that the
+payload program will continue following the pattern of the trigger program,
+causing it to execute a \emph{speculative gadget} in the payload
+program. This execution path is shown in Figure~\ref{fig:high-level}.
+
+We emphasize that this gadget is in a region that is neither
+read nor executed by the payload program, and after the CPU discovers the
+mis-speculation in the payload program, it will discard the results from the
+speculative gadget and continue executing from the correct destination. However,
+the payload program has a limited speculative window where it can perform
+computation, and can communicate results back to the ``real world'' payload 
+program via a cache side channel.
+
+%Figure~\ref{fig:high-level}
+
+
+\FigHighLevel
+
+
+
+While it's possible for the trigger and payload programs to be bundled in a
+single program, an analyst aware of \speculake could easily find the speculative
+gadget in the payload program based on the jump pattern in the trigger program.
+However, if the trigger and payload are kept separate, the analyst has a much
+harder job and must identify both.
+Moreover, it is possible that the trigger program be a
+seemingly-unrelated benign program already on the victim's computer. We
+investigate using the OpenSSL library as a benign trigger
+program in Section~\ref{subsec:openssl}. If the trigger program is another benign
+program on the system, the analyst has the difficult task of identifying which
+program, library, or even operating system component is responsible for training
+the CPU's branch predictor, and finding the specific set of jumps that occur at
+runtime. To make matters worse, the payload program can include dummy jump
+patterns that are effectively dead ends for the analyst, as they do not
+ultimately call the hidden speculative gadget.
+
+
+Simulating or modelling the speculative execution path is a difficult task for a
+program analyst hoping to reverse engineer an \speculake binary. First, the
+analyst must reverse engineer and accurately model the closed-source proprietary
+components of the target CPU, including the branch predictor, cache hierarchy,
+out-of-order execution, and hyperthreading. In contrast, the \speculake
+author only has to use a partial model of these components and produce binaries
+that take advantage of them, while the analyst's model must be complete to
+capture all potential \speculake uses. Second, the analyst must run all
+potential trigger programs through the simulator, including benign programs with
+realistic inputs. Both of these contribute to a time-consuming and expensive
+endeavor for would-be analysts.
+
+% Results summary
+In order to study the potential of \speculake, we implement several example
+payload programs and evaluate their performance. We find that the speculative
+window is limited by the reorder buffer and physical register file sizes, which
+allows us to execute between 100 and 200 instructions speculatively on modern
+Intel CPUs. While brief, we are able to perform execution in short steps,
+communicating intermediate results back to the ``real world'' part of the
+payload program. Using this technique, we demonstrate implementing a universal
+Turing machine (demonstrating arbitrary computation), a custom instruction set
+architecture that fits within the constraints of speculative execution, and show
+the ability to perform AES decryption of a text block via AES encrypt/decrypt
+instructions.
+
+Using these building blocks, we demonstrate the practicality of hiding arbitrary
+computation by implementing a reverse shell in our speculative instruction set.
+We show that this simple payload is able to perform several system calls in a
+reasonable time, ultimately launching a dial-back TCP shell in just over
+2~milliseconds after the trigger program starts.
+
+%Using these building blocks, we demonstrate the practicality of hiding arbitrary
+%computation by decrypting an AES-encrypted ARM binary in the speculative world
+%one instruction at a time, returning the decrypted next instruction to the real
+%world part of the payload program, which updates a virtual machine. We show that
+%we are able to decrypt and process approximately 25 instructions per second.
+
+
+% contributions?
+% - explore the limits of speculative execution
+% - propose novel concept of hiding computation in speculative execution
+% - implement example applications using this concept, including decrypting
+%   data speculatively
+% - demonstrate using benign program (openssl) as trigger
+% - identify defenses and discuss ways to counter them
+
+
+
+% Move to discussion:
+% TODO: we don't talk at all about how an analyst might try to enumerate
+% the potential entry points to the speculative world, and how that can be
+% made difficult
+
+
+
+
+%%%%%%%%%%%%%%
