@@ -26,6 +26,9 @@ trigger: trigger.c indirect.S
 measure: target_fn.c measure.c indirect.S decrypt.S
 	$(CC) -Wl,-Tlinker.ld $^ -o $@ ${NO_PIE}
 
+measure_envy: target_fn.c measure_envy.c indirect.S decrypt.S
+	$(CC) -Wl,-Tlinker.ld $^ -o $@ ${NO_PIE}
+
 measure_retp: target_fn.c measure_retpoline.c indirect_retpoline.S decrypt.S
 	$(CC) -Wl,-Tlinker.ld $^ -o $@ ${NO_PIE}
 

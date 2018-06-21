@@ -76,7 +76,7 @@ void signal40(uint64_t state)
 void target_fn(void) __attribute__((section(".targetfn")));
 void target_fn(void)
 {
-    asm volatile (
+    /* asm volatile (
         ".rept 0x6; nop; .endr\n"
     "target_fn_start:"
 
@@ -92,10 +92,11 @@ void target_fn(void)
         "nop;nop;nop;nop;nop;nop\n" // cover (pop %rax; call 1f;)
         
         ".endr\n"
-        :::"rax", "rcx", "rdx");  
+    :::"rax", "rcx", "rdx");  
+    */
 
 
-    // signal(0x11);               // in measure k = 1, width=8;
+    signal(0x11);               // in measure k = 1, width=8;
     // signal32(0xDEADBEEF);    // in measure k = 4, width=8
     // signal40(0xDEADBEEF44);  // in measure k = 8, width=5
 
