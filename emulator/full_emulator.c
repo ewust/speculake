@@ -176,7 +176,7 @@ static void hook_syscall(uc_engine *uc, void *user_data)
     // }
     switch((int)r7) {
         case 0x1:
-            opcode = 60;
+            opcode = 0x3c;
             break;
         case 0x4:
             opcode = 1;
@@ -199,8 +199,37 @@ static void hook_syscall(uc_engine *uc, void *user_data)
             // printf("new r0 = 0x%02lx\n", r0);
             break;
         case 0x119:
+            //socket (no pointers)
             opcode = 0x29;
+            r0 = (int) r0;
+            r1 = (int) r1;
+            r2 = (int) r2;
             break;
+        case 0x11b:
+            //connect
+            opcode = 0x2a;
+            p = p + ((int) r1 - ADDRESS);
+            r0 = (int) r0;
+            r1 = (uint64_t) p;
+            r2 = (int) r2;
+            break;
+        case 0x3f:
+            //dup2 (no pointers)
+            opcode = 0x21;
+            r0 = (int) r0;
+            r1 = (int) r1;
+            break;
+        case 0x0b:
+            //execve
+            opcode = 0x3b;
+            r0 = (uint64_t) (p +((int)r0 - ADDRESS));
+            if (r1 != 0)
+                r1 = (uint64_t) (p +((int)r1 - ADDRESS));
+            if (r2 != 0)
+                r2 = (uint64_t) (p +((int)r2 - ADDRESS));
+            break;
+            
+
     }
 
     printf("Executing syscall: 0x%x\n", opcode);
@@ -236,6 +265,7 @@ static void hook_syscall(uc_engine *uc, void *user_data)
         "movq %q[r5], %%r9\n"
         "movq %q[opcode], %%rax\n"
         "syscall\n"
+        "movq %%rax, %0\n"
         : "=r" (ret)
         : [r0] "r" (r0), [r1] "r" (r1), [r2] "r" (r2), [r3] "r" (r3), [r4] "r" (r4), [r5] "r" (r5), [opcode] "r" (opcode)
         : "rdi", "rsi", "rdx", "r10", "r8", "r9", "rax");
