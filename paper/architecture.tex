@@ -155,9 +155,10 @@ output registers and allows them to use the entire size provided by the ROB, as
 determined in Section~\ref{sssec:ROB}. This includes idomatic no-ops and zero
 idioms, which have no reliance on register values, for example the instruction
 \texttt{xchg \%rax, \%rax} and \texttt{xor \%rax, \%rax}. However, if an
-instruction is a potential data hazard, it must use an entry in the PRF until it
-reaches the correct stage in the execution pipeline. In this case, the number of
-instructions could be limited by the PRF entries available.
+instruction is a potential data hazard, it must use an entry in the Physical 
+Register File (PRF) until it reaches the correct stage in the execution pipeline. 
+In this case, the number of instructions could be limited by the PRF
+entries available.
 
 %TODO: is this true? Or better explained by the micro-op story?
 

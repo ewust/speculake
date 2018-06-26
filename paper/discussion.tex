@@ -145,29 +145,31 @@ as executable.
 For virtual environments that provide guests significant periods of access to 
 hardware resources, we have found that \speculake is viable in certain configurations. 
 
-\texttt{Guest1 -> Guest1}---When both trigger and payload are run internal to a
+\texttt{Guest1 -> Guest1}---When both the trigger and payload are run internal to a
 single virtual machine the branch prediction is successfully trained in the
 payload program, though at a notably reduced hit rate. This can be overcome by
 using an increased number of iterations to establish confidence. 
 
-\texttt{Guest -> Host}---In a configuration where trigger runs on the guest
+\texttt{Guest -> Host}---In a configuration where the trigger runs on the guest
 while the payload runs on the host we have found that \speculake also
-successfully trains the branch predictor well enough retreive a signal. Again,
-this signal is significantly reduced, implying the hypercall context swtich from
+successfully trains the branch predictor well enough retrieve a signal. Again,
+this signal is significantly reduced, implying the hypercall context switch from
 guest to host requires some overhead. We note that processor affinity in a guest
 is not mapped to processor affinity in the host, as the host assigns the VM to
 any available CPU, though eventually the hypervisor will assign the VM back to
 the same core as the payload program allowing progress to continue.
 
-\texttt{Host -> Guest}---When trigger runs on the host attempting to train the
+\texttt{Host -> Guest}---When the trigger program executes on the host
+attempting to train the
 branch predictor to influence a payload process in a guest we have found that
 the payload receives no signal. This implies that the hypercall context switch
 from the host to the guest is heavier and has a larger impact on branch history.
-This matches with work done by the Project Zero team at Google which found that
-hypervisors can be fingerprinted from within a VM using the branch
-predictor~\cite{project_zero}.
+This is also supported by the fact that hypervisors can be fingerprinted from 
+within a VM using the branch predictor as demonstrated by the Project Zero 
+team at Google~\cite{}.
+~\cite{project_zero}.
 
-\texttt{Guest1 -> Guest2}---Configurations where trigger and payload run on
+\texttt{Guest1 -> Guest2}---Configurations where the trigger and payload run on
 co-resident virtual machines similarly show no signal for the same reasons that
 host to guest \speculake fails. However, this has the added difficulty that
 virtual machines must be run on the same core or on a pair of hyperthreaded
@@ -224,7 +226,7 @@ We have demonstrated that a using \allowbreak OpenSSL as a benign trigger allows
 requirements for identifying a benign trigger. However, we have not classified
 typical system resources that might be used as benign triggers. This is a
 promising direction for future investigation as various system libraries present
-juicy targets for trigger design. For exmaple, if a sufficient series of jumps
+juicy targets for trigger design. For example, if a sufficient series of jumps
 is found to exist in the TCP stack implemented in the UNIX kernel (i.e. in the
 TCP Checksum library) an attacker could reasonably trigger a \speculake payload
 remotely, from a spoofed IP address. This attack would rely on a payload
