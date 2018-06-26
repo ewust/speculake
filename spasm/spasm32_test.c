@@ -141,13 +141,14 @@ void test_Pointers(){
 void test_PushPop(){
     printf("------[ Test Push Pop PrintRegs ]-------\n");
     uint_reg R_mock[16] = {9,9,0,0,0,0,0,0,0,0,0, 0,0,0,0,0};
-    uint_reg *R_p = &(R_mock[2]);
+    uint_reg *R_p = &(R_mock);
     uint8_t step = 0x0;
     
     for (step=0; step < 8; step++){
-        doUpdateReg(R_p, step);
-        doSHLReg(R_p);
+        doUpdateReg(R_mock+VAL_OFFSET, step);
+        doSHLReg(R_mock+VAL_OFFSET);
     }
+    R_mock[SRSP_OFFSET] = R_mock + STK_OFFSET;
     printf("Push R: 0x%X\n", *R_p);
     doPushReg( R_p );
     printRegs(R_p, 4);
@@ -155,10 +156,10 @@ void test_PushPop(){
     doPushReg( R_p );
     
     for (step=0xf; step >8 ; step--){
-        doUpdateReg(R_p, step);
-        doSHLReg(R_p);
+        doUpdateReg(R_p+VAL_OFFSET, step);
+        doSHLReg(R_p+VAL_OFFSET);
     }
-    printf("Push R: 0x%X\n", *R_p);
+    printf("Push R: 0x%X\n", *R_p+VAL_OFFSET);
     doPushReg( R_p );
     printRegs(R_p, 6);
     doPopReg(R_p);
@@ -166,7 +167,7 @@ void test_PushPop(){
     doPopReg(R_p);
     printRegs(R_p, 6);
      
-    for (step=0; step < 8; step ++){doSHLReg(R_p);}
+    for (step=0; step < 8; step ++){doSHLReg(R_p+VAL_OFFSET);}
     doPushReg(R_p);
     doPushReg(R_p);
     doPushReg(R_p);
@@ -178,6 +179,7 @@ void test_PushPop(){
     doPopReg(R_p);
     doPopReg(R_p);
     printRegs(R_p, 4);
+    printf(";-;-    ;-;-;--;-;-;;;-;`-;`-;`-;`-;`-;`-;`-;`-`;-`;\n");
 }
 
 
@@ -226,12 +228,12 @@ int test_generic(){
 
 int main(){
     test_printISA_short();
-    test_ControlFlow();
+    //1 test_ControlFlow();
     //1 test_printISA();
     //1 test_asmSyscall();
     //1 test_doSyscall_write();
     //1 test_changeRegs();
-    //1 test_PushPop();
+    test_PushPop();
     //1 test_Pointers();
     // test_generic();
 }

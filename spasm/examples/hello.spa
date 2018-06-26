@@ -1,0 +1,36 @@
+init:
+    ECALL   main
+
+exit:
+    # mov $0x3C, %rax
+    ESET    RAX     0x3C
+    
+    # mov $0x0, %rdi
+    ESET    RDI     0x0
+    
+    SYSCALL
+
+main:
+    CLR
+
+    # mov  %rsi, %rsp
+    ESET    RSI     RSP
+
+    EPUSH   "ABCDEFG\n"     # Only Push 8 bytes at a time otherwise it will 
+    EPUSH   "ABCDEFG\n"     #   write off the end of VAL (future updates may change this)
+    # EPUSH   0x0a47464544434241
+    # EPUSH   0x0a47464544434241
+
+    # mov  $0x1, %rax
+    ESET    RAX     0x1
+
+    # mov  $0x1, %rdi
+    ESET    RDI     0x1
+
+    # mov  $0x10, %rdx
+    ESET    RDX     0x10
+
+    # syscall
+    SYSCALL
+
+    ECALL   exit

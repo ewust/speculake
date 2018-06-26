@@ -31,7 +31,7 @@ Instruction* getInstruction(uint8_t instr) {
 
 void initState(State *state){
     state->regs[SRIP_OFFSET] = 0;
-    state->regs[SRSP_OFFSET] = STK_OFFSET;
+    state->regs[SRSP_OFFSET] = state->regs + STK_OFFSET;
 }
 
 void printInstr(Instruction *instr) {
@@ -280,6 +280,8 @@ void doSyscall(uint_reg *R) {
     // Integer Value returned from Syscall 
     
     // Syscall
+    printRegs(R, 4);
+
     asm volatile (
     #if defined(ENV64)
         "syscall\n"
@@ -307,26 +309,35 @@ void doSHLReg(uint_reg *R) {
 }
 
 void doPushReg(uint_reg *R){
+    uint_reg * srsp_p = R+SRSP_OFFSET;
     uint_reg * val_p  = R+VAL_OFFSET;
-    uint_reg * stk_p = R+(int)*(R+SRSP_OFFSET);
-    // printf("Push: ADDR %016lX - VAL %lX\n", (uint_reg)stk_p, *(val_p));
+    uint_reg * stk_p = *(srsp_p);
+
+    printRegs(R, 4);
+
     *(stk_p) = *(val_p);
-    *(R+SRSP_OFFSET) +=1; 
+    *(srsp_p) +=BYTES_PER_REG; 
+
+    printRegs(R, 4);
 }
 
 void doPopReg(uint_reg *R){
-    *(R+SRSP_OFFSET) -=1; 
     uint_reg * srsp_p = R+SRSP_OFFSET;
     uint_reg * val_p = R+VAL_OFFSET;
-    uint_reg * stk_p = R+(int)*(R+SRSP_OFFSET);
-    // printf("Pop: ADDR %016lX - VAL %lX\n", (uint_reg)stk_p, *(stk_p));
-    if ( *(srsp_p) < STK_OFFSET){
+    uint_reg * stk_p = *(srsp_p);
+
+    printRegs(R, 4);
+
+    *(srsp_p) -=BYTES_PER_REG; 
+    if ( stk_p <= R+STK_OFFSET){
         // Stack is Empty
         // printf("Stack is empty\n");
         *(val_p) = 0x0;
         return;
     }
     *(val_p) = *(stk_p);
+
+    printRegs(R, 4);
 }
 
 void doClrReg(uint_reg *R){
@@ -358,12 +369,18 @@ void doCompare(uint_reg *R) {
 
 void doCall(uint_reg *R){
     uint_reg * srip_p  = R+SRIP_OFFSET;
-    uint_reg * stk_p = R+(int)*(R+SRSP_OFFSET);
-    // printf("CALL: RIP_ADDR %016lX - VAL %lX\n", (uint_reg)srip_p, *(val_p));
+    uint_reg * srsp_p = R+SRSP_OFFSET;
+    uint_reg * stk_p = *(srsp_p);
 
-    // Push SRIP+1
+    // printRegs(R, 3);
+    // printf("SRSP: %08X    - STKP: %08X    - STACK_VALUE: %08X\n", srsp_p, stk_p, *(val_p)); 
+    // printf("SRSP: %016lX    - STKP: %016lX\n", srsp_p, stk_p); 
+    
+    // Push the return address onto the stack
     *(stk_p) = *(srip_p)+1;
-    *(R+SRSP_OFFSET) +=1; 
+
+    // Update the stack pointer
+    *(srsp_p) +=BYTES_PER_REG; 
 
     // JMP PTR
     doSetIP(R, R+PTR_OFFSET); 

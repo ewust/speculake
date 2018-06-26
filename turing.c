@@ -6,7 +6,15 @@
 #include <unistd.h>
 #include <string.h>
 #include <sys/mman.h>
+<<<<<<< Updated upstream:turing.c
 #include "common.h"
+=======
+#include <time.h>
+#include "../common.h"
+#include "../spasm/emulator/spasm.h"
+>>>>>>> Stashed changes:spasm_vm/spasm_vm.c
+
+#define BILLION  1000000000L;
 
 // Defines the bandwidth we can communicate
 // from speculative -> von neuman
@@ -89,11 +97,16 @@ void check_probes() {
 
 uint64_t jmp_ptr;
 
+<<<<<<< Updated upstream:turing.c
 
 #define TURING_TAPE_LEN 1024*512
 uint8_t *turing_tape;
 uint8_t turing_state;
 
+=======
+struct timespec start, stop;
+double accum;
+>>>>>>> Stashed changes:spasm_vm/spasm_vm.c
 void measure() {
     fn_ptr = check_probes;
     //jmp_ptr = 0x400e60;
@@ -106,7 +119,12 @@ void measure() {
     turing_state = 0;
 
     while (1) {
+<<<<<<< Updated upstream:turing.c
         for (i=0; i<50; i++) {
+=======
+        
+        for (i=0; i<5; i++) {
+>>>>>>> Stashed changes:spasm_vm/spasm_vm.c
             _mm_clflush(&fn_ptr);
             _mm_clflush(&jmp_ptr);
             indirect(&jmp_ptr);
@@ -124,6 +142,7 @@ void measure() {
             }
         }
 
+<<<<<<< Updated upstream:turing.c
         if (max_res > 10 && avg < 50){
             printf("[%lu]: %lu / %lu = %0.5f%% hits, %lu avg cycles, ps %ld\n", max_i, max_res, tot_runs, 100*((float)max_res)/tot_runs, avg, cur_probe_space);
             signal_idx++;
@@ -164,6 +183,17 @@ void measure() {
                 printf("halt state reached!\n");
                 exit(0);
             }
+=======
+        if (max_res > 2 && avg < 50){
+            // printf("[%02lX][%02lx]: %04lu / %lu = %0.5f%% hits, %lu avg cycles, ps %ld, #%03d, %d misses\n",
+            //           instr, max_i, max_res, tot_runs, 100*((float)max_res)/tot_runs, avg, cur_probe_space, signal_idx, misses);
+           clock_gettime( CLOCK_REALTIME, &stop);
+           accum = ( stop.tv_sec - start.tv_sec )
+                  + ( stop.tv_nsec - start.tv_nsec )/1000;
+            printf( "%lf\n", accum ); 
+            // Perform the update to the SPASM VM    
+            update(R, (uint8_t) max_i);
+>>>>>>> Stashed changes:spasm_vm/spasm_vm.c
 
         } else {
             printf("--[%lu]: %lu, %lu avg cycles ps %ld\n", max_i, max_res, avg, cur_probe_space);
@@ -202,6 +232,15 @@ int main()
     memcpy(map+600, target_fn, end_target_fn-target_fn);
 
     fn_ptr = check_probes;
+<<<<<<< Updated upstream:turing.c
+=======
+
+    initState(&state);
+    R=state.regs;
+
+    
+    clock_gettime( CLOCK_REALTIME, &start);
+>>>>>>> Stashed changes:spasm_vm/spasm_vm.c
     measure();
 
 }

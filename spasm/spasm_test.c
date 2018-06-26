@@ -136,14 +136,15 @@ void test_Pointers(){
 
 void test_PushPop(){
     printf("------[ Test Push Pop PrintRegs ]-------\n");
-    uint_reg R_mock[16] = {9,9,0,0,0,0,0,0,0,0,0, 0,0,0,0,0};
+    uint_reg R_mock[16] = {0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0};
     uint_reg *R_val = &(R_mock[VAL_OFFSET]);
     uint8_t step = 0x0;
     
 
+    R_mock[SRSP_OFFSET] = R_mock + STK_OFFSET;
     R_mock[SRIP_OFFSET] = 0x18;
-    R_mock[SRSP_OFFSET] = STK_OFFSET;
     R_mock[VAL_OFFSET] = 0xDEADBEEF12345678;
+    printRegs(R_mock, 1);
 
     printf("Push R: 0x%lX\n", *R_val);
     update(R_mock, 0x1B);   // Push VAL
@@ -247,7 +248,7 @@ int main(){
     //1 test_doSyscall_write();
     //1 test_changeRegs();
     //1 test_Pointers();
-    //1 test_PushPop();
+    test_PushPop();
     // test_generic();
 }
     
