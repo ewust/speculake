@@ -12,8 +12,13 @@ exit:
 
 main:
     # mov   %rsp, %rsi
-    EGET    SRSP
-    ESET    SRSI
+    CLR
+    EGET    RSP
+    MREG    
+    BASE
+    ADD
+    SWAP    # VAL = &Stack 
+    ESET    RSI
 
     EPUSH   "ABCDEFG\n"     # Only Push 8 bytes at a time otherwise it will 
     EPUSH   "ABCDEFG\n"     #   write off the end of VAL (future updates may change this)

@@ -14,27 +14,29 @@ uint_reg *R;
 
 
 void run(int num_instr) {
-    Instruction *instr;
     uint_reg rip = *(R+SRIP_OFFSET);
 
     while (true) {
         rip = *(R+SRIP_OFFSET);
 
-        if (( state.instr[ rip ] == 0x1A )  || ( state.instr[ rip ] == 0x1B ) || ( state.instr[ rip ] == 0x11 ) || ( state.instr[ rip ] == 0x1F ))  {
-           printRegs(R, 3);
-        }
-        printReg((R+SRIP_OFFSET),  "SRIP ");
-        printReg((R+SRSP_OFFSET),   "SRSP  "); 
-        printReg((R+VAL_OFFSET),   "VAL  "); 
-        // printReg((R+SRAX_OFFSET), "SRAX");
-        if ( state.instr[ rip ] == 0x00 ) {
-            break;
-        }
+        // if (( state.instr[ rip ] == 0x1A )  || ( state.instr[ rip ] == 0x1B ) || ( state.instr[ rip ] == 0x11 ) || ( state.instr[ rip ] == 0x13 ))  {
+        //    printRegs(R, 3);
+        // }
+        // printReg((R+SRIP_OFFSET),  "SRIP ");
+        // printReg((R+VAL_OFFSET),   "VAL  "); 
+        // printReg((R+PTR_OFFSET),   "PTR  "); 
+        // // printReg((R+SRAX_OFFSET), "SRAX");
+        // if ( state.instr[ rip ] == 0x1E ) {
+        //     printRegs(R, 3);
+        // }
+        // if ( state.instr[ rip ] == 0x00 ) {
+        //     break;
+        // }
 
-        instr = getInstruction(state.instr[rip]);
-        printInstr(instr);
+        // instr = getInstruction(state.instr[rip]);
+        // printInstr(instr);
         update(R, state.instr[ rip ]);
-        usleep(250000);
+        // usleep(250000);
     }
 }
 

