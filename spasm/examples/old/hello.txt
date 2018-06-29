@@ -18,7 +18,7 @@
 0x18        *PTR = VAL
 0x02        CLR VAL
 
-      //mov $0x0a41424344454647, %rax           42 = 0x2a    33 = 0x21    59 = 0x3b    60 = 0x3c
+      //mov $0x0a41424344454647, %rax
 0x02        CLR VAL
 0x17        SWAP
 0x02        CLR VAL

@@ -17,71 +17,50 @@ key_schedule:
 	.quad 0xc1d38f0297b36395, 0xff5fe2ff496d7f41
 
 ctext:   // Dialback Shell                 
-    .quad 0x4cc5fabc529c7f72, 0xb246bf9a072691c4    
-    .quad 0x1614ea67fb81667a, 0x1cbbdca18b115764    
-    .quad 0x9fa8b87d5a7886ff, 0xb8b899864bb7d446    
-    .quad 0x54e4869e512a654e, 0x3ada5836213794a7    
-    .quad 0xbdca70c9ce650c87, 0xafc31c08d0aa542e    
-    .quad 0x03ea00addf2c4274, 0x5f836a7e8685bb85    
-    .quad 0x7e2e5ca3fc3edddf, 0xf6b6a67463e25cd6    
-    .quad 0x042366d6ce1bc58e, 0xf40836f71b3728b6    
-    .quad 0x8e7aa4e01060cbc7, 0x85e452ca70f83992    
-    .quad 0x3e0b00f7ce12d96a, 0x6b3e061d41565f51    
-    .quad 0x18e9a1b20c43cced, 0x1c5eac9e04937171    
-    .quad 0xcf896c8cc2942470, 0xad1c97fcf58b2eaf    
-    .quad 0x3ee8b6dd6ee10473, 0x1f935006bfe7bf7d    
-    .quad 0xd1c062955e01f984, 0x39199ca73f9993d7    
-    .quad 0x7c0f2ae94bd3ddb6, 0xbfee51d0d2a30906    
-    .quad 0xb0b15c6582fd4a9c, 0xf095c448ba1770a6    
-    .quad 0xa9bce0806c79f33e, 0x22c061a62ff657d7    
-    .quad 0xd55b9156da589dc3, 0x0ee37400a1a28f7c    
-    .quad 0x72a10a4cc4fa6bc9, 0xa51dec7b5904682b    
-    .quad 0x1a0978aeac1aa0e9, 0x2a9788746060534d    
-    .quad 0xfd9b52c1553ff78a, 0x37b5a13550c0c39a    
-    .quad 0x43b5057c863297fd, 0xb73b554ab727f35f    
-    .quad 0x9eb6a5d82e722bc8, 0xe20840570af96dc1    
-    .quad 0x593c47a7ececca83, 0x2f43eecde3d637ca
-
-    // HelloWorld (test SPASM)
     /*
-    .quad 0x63d7d499609f5478, 0x8d45939e382790d8
-    .quad 0x171ce951fe877946, 0x0280de978211446b
-    .quad 0x80859c54754e94d7, 0x919586ad4eb5cb7d
-    .quad 0x4de7ae9342024352, 0x20f57700331db08d
-    .quad 0xa1c958c4dd4d2b9b, 0xa8ea2e05c3827d32
-    .quad 0x06e31f90c1174042, 0x5e996f558b969eac
-    .quad 0x621642a1e723cdd9, 0xe8a0b5514cfe46e8
-    .quad 0x19137be6d32bd8be, 0xe9382bc6192f32b9
-    */
-
-
-     // FizzBuzz Simple (test Control Flow)
-    /*
-    .quad 0x45c5fba36d9d7b71, 0x80488d9008269fc4
-    .quad 0x1634fb79d2a37956, 0x06b6cf89ac0d446b
-    .quad 0xa9ae83776a6293ec, 0x909e99874890d957
-    .quad 0x4ac8a99e452f524c, 0x0cdc682c1429a2a5
-    .quad 0xbdde75f1cc492387, 0xbfc71514c787613f
-    .quad 0x14ce0186d23f6f5e, 0x4393657e93869aaa
-    .quad 0x6d0a76bfe53ed0d9, 0xf0a0b55050e245c3
-    .quad 0x2f0e4ffbea36eea3, 0xd3251cdb233205bb
-    .quad 0x8b7bbbdf1161c8f5, 0x83c440e559d926bd
-    .quad 0x12092cdef900f040, 0x403b021d55787b7f
-    .quad 0x2fea8fb83340e0e9, 0x235fad9d369c5e76
-    .quad 0xea8c6b93fc8a1f72, 0x981597ffda99078a
-    .quad 0x32e8b6dd6de1026c, 0x2592530587f8927a
-    .quad 0xc0de44937632f497, 0x123380bd148293d7
-    .quad 0x662c3ffc4df4db80, 0xa5d050d5ceb42430
-    .quad 0xa89e794182f46cb8, 0xdfa6c945993e6f8c
-    .quad 0xb7bef8bb7b5be606, 0x3ce5689d2ddf67c4
-    .quad 0xd7598966d85781f4, 0x10e16c30a3ad9344
-    .quad 0x68ae1675daf870de, 0xaa03f06256185935
-    .quad 0x073f6591b128bdda, 0x37a0954c7d565155
-    .quad 0xe78449fe480deab8, 0x2a83bc0c4df6dea4
-    .quad 0x5e84184c9b028acd, 0xaa0b487aaa17f145
+    .quad 0x4cc5fabc529c7f72, 0xb246bf9a072691c4
+    .quad 0x1614ea67fb81667a, 0x1cbbdca18b115764
+    .quad 0x9fa8b87d5a7886ff, 0xb8b899864bb7d446
+    .quad 0x54e4869e512a654e, 0x3ada5836213794a7
+    .quad 0xbdca70c9ce650c87, 0xafc31c08d0aa542e
+    .quad 0x03ea00addf2c4274, 0x5f836a7e8685bb85
+    .quad 0x53145abbe835eadf, 0xe8b4b0674ecd40d6
+    .quad 0x2a0e44fbe436e8a3, 0xd9251bdb293202a4
+    .quad 0x91518bcd3d48e6ea, 0xa8c07ae45dda1db8
+    .quad 0x152629d2e639f143, 0x43162e2a47515f54
+    .quad 0x36c1899a216be1c5, 0x317381b329be545c
+    .quad 0xce935e8be989335c, 0x873397e8dca105b0
+    .quad 0x1ec6b6ca43c42873, 0x08be792abfeab953
+    .quad 0xfdc072915a1df487, 0x16379cb013ac82c9
+    .quad 0x780a36e448f3f2b6, 0xa8c374fcd2b4242f
+    .quad 0xbdb27c4982ea67b9, 0xdc95d365933b70b6
+    .quad 0x87bcf7a74954f329, 0x05e94ca63ff251cb
+    .quad 0xce569557c65583ec, 0x20e3632c94b3915c
+    .quad 0x5bb32168e2e546dc, 0xb219ff7e6f065b2e
+    .quad 0x3522538c88358bc7, 0x09bda351424b6348
+    .quad 0xd79979e37810daba, 0x3099a31772ebecb9
+    .quad 0x5e84184c9b029bda, 0x981679679a0ac158
     .quad 0x9eb6a5d82e722bc8, 0xe20840570ae87af3
     .quad 0x593c47a7ececca83, 0x2f43eecde3d637ca
     */
+
+    // HelloWorld (test SPASM) 
+    .quad 0x4cc5fabc529c7f72, 0xb246bf9a072691c4
+    .quad 0x1614ea67fb81667a, 0x1cbbdca18b115764
+    .quad 0xa5ae837b717595d2, 0x92a499864bb7d446
+    .quad 0x62e181816a2b6a4d, 0x0cdf50363631a2a5
+    .quad 0x8bcc5bdbe64c2198, 0x84c61817ebab562d
+    .quad 0x06e400a9c0174377, 0x5cb56f5e8b82b386
+    .quad 0x7f225f93fa1dcff2, 0xf79bb45c4fc843e1
+    .quad 0x1b1c67dfcd29c08f, 0xeb3737f2072d2988
+    .quad 0x8e7abbcf1565cbc6, 0x9ad253ce73c53c94
+    .quad 0x080723d8e63ef147, 0x43132e2f47545f51
+    .quad 0x2df494af3c5efcf0, 0x2c439c83348e496c
+    .quad 0xd0915c91f3962b6c, 0x9a0295e7c0961bb2
+    .quad 0x06f6b4c55ffc3671, 0x108f6418bde5a567
+    .quad 0xcfc27d8d6e03f698, 0x0e079ebf0f9b9ccb
+    .quad 0x643e28e657ebc3b4, 0xa7df4ce2d0ac1532
+    .quad 0xbfad647b80e57b81, 0xc297cb548e0972b9
 
 
 

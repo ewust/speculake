@@ -31,7 +31,7 @@ Instruction* getInstruction(uint8_t instr) {
 
 void initState(State *state){
     state->regs[SRIP_OFFSET] = 0;
-    state->regs[SRSP_OFFSET] = STK_OFFSET;
+    state->regs[SRSP_OFFSET] = (uint_reg) &(state->regs) + STK_OFFSET*BYTES_PER_REG;
 }
 
 void printInstr(Instruction *instr) {
@@ -307,26 +307,29 @@ void doSHLReg(uint_reg *R) {
 }
 
 void doPushReg(uint_reg *R){
+    uint_reg * srsp_p = R+SRSP_OFFSET;
     uint_reg * val_p  = R+VAL_OFFSET;
-    uint_reg * stk_p = R+(int)*(R+SRSP_OFFSET);
+    uint_reg * stk_p = (uint_reg*) *(srsp_p);
     // printf("Push: ADDR %016lX - VAL %lX\n", (uint_reg)stk_p, *(val_p));
     *(stk_p) = *(val_p);
-    *(R+SRSP_OFFSET) +=1; 
+    *(srsp_p) += 1*BYTES_PER_REG; 
 }
 
 void doPopReg(uint_reg *R){
-    *(R+SRSP_OFFSET) -=1; 
     uint_reg * srsp_p = R+SRSP_OFFSET;
     uint_reg * val_p = R+VAL_OFFSET;
-    uint_reg * stk_p = R+(int)*(R+SRSP_OFFSET);
+    uint_reg * stk_p = (uint_reg*) *(srsp_p);
+    *(srsp_p) -= 1*BYTES_PER_REG;
     // printf("Pop: ADDR %016lX - VAL %lX\n", (uint_reg)stk_p, *(stk_p));
-    if ( *(srsp_p) < STK_OFFSET){
+    // printf("stk_p: %lx -- ?< %lx\n",(uint_reg*) *(srsp_p) , (R+STK_OFFSET));
+    if ( (uint_reg*) *(srsp_p) < R + STK_OFFSET){
         // Stack is Empty
-        // printf("Stack is empty\n");
+        printf("stack is empty!\n");
         *(val_p) = 0x0;
+        *(srsp_p) = (uint_reg) R + STK_OFFSET*BYTES_PER_REG;
         return;
     }
-    *(val_p) = *(stk_p);
+    *(val_p) = *((uint_reg*) *(srsp_p));
 }
 
 void doClrReg(uint_reg *R){
@@ -357,13 +360,14 @@ void doCompare(uint_reg *R) {
 
 
 void doCall(uint_reg *R){
+    uint_reg * srsp_p = R+SRSP_OFFSET;
     uint_reg * srip_p  = R+SRIP_OFFSET;
-    uint_reg * stk_p = R+(int)*(R+SRSP_OFFSET);
+    uint_reg * stk_p = (uint_reg*) *(srsp_p);
     // printf("CALL: RIP_ADDR %016lX - VAL %lX\n", (uint_reg)srip_p, *(val_p));
 
     // Push SRIP+1
     *(stk_p) = *(srip_p)+1;
-    *(R+SRSP_OFFSET) +=1; 
+    *(srsp_p) += 1*BYTES_PER_REG; 
 
     // JMP PTR
     doSetIP(R, R+PTR_OFFSET); 

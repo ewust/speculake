@@ -1,44 +1,23 @@
 # SPASM
 
-v1.2.0 -- 4/5/2018
+v1.3.0 -- 6/29/2018
 
 #### Latest Updates:
 
-Multiple New instructions.
+Changed functionality of the SRSP pseudo-register. It now holds a
+pointer to the top of the stack instead of an index into the 
+structure that functions as register table. 
 
-Both arithmetic and logical Operations have been changed to dereference PTR before applying the operation.
-This allows The skipping of multiple instructions for `GET SR_X` and `SET SR_X`. 
+Underflow prevention is ensured by bounds check -> returns 0 if stack is empty.
 
-```
-NEW:
-    0A  - PTR >> VAL 
-    09  - *PTR += VAL
-    06  - PTR |= VAL 
-    05  - PTR ^= VAL 
+Updated `hello_world`, `hello_world32`, and `rev_shell` to accomodate this 
+new manner of functionality. 
 
-DELETED:
-    07  - CLR BOTH REPEAT 
-    05  - CLR PTR REPEAT
-    03  - CLR BOTH 
-    01  - CLR PTR
-
-MOVED: 
-    1E -> 1F  - SYSCALL
-    13 -> 1E  - PTR = BASE_ADDR
-    0D -> 1C  - VAL *= 8 (reg_size)
-    12 -> 19  - VAL = *PTR
-    11 -> 18  - *PTR = VAL
-    10 -> 17  - SWAP   PTR <-> VAL
-    18 -> 13  - JZ   ||  SRIP = (VAL==0)? PTR : SRIP+1
-    1F -> 12  - J    ||  SRIP = PTR
-    17 -> 11  - CALL ||  PUSH SRIP+1; SRIP=PTR; //PUSH REGS?
-    19 -> 10  - CMP  ||  VAL = (VAL <= PTR)? 1 : 0
-    0A -> 09  - *PTR << VAL
-    09 -> 07  - *PTR &= VAL
-    08 -> 04  - NOT VAL
-    06 -> 03  - CLR VAL REPEAT
-    04 -> 01  - NOP REPEAT
-```
+#### Upcoming:
+1. SRIP conversion to pointer.
+2. Relative addressing & label addressing.
+3. Control Flow Macros.
+4. Full example programs 32 and 64
 
 ## Usage
 
@@ -155,4 +134,48 @@ See the example programs in the `examples/` directory. All files that end `.spa`
 are spasm assembly files (probably written by hand), and all .sp files are spasm
 binary files to be run through an emulator.
 
+
+
+
+### Previous updates
+
+---
+
+v1.2.0 -- 4/5/2018
+
+Multiple New instructions.
+
+Both arithmetic and logical Operations have been changed to dereference PTR before applying the operation.
+This allows The skipping of multiple instructions for `GET SR_X` and `SET SR_X`. 
+
+```
+NEW:
+    0A  - PTR >> VAL 
+    09  - *PTR += VAL
+    06  - PTR |= VAL 
+    05  - PTR ^= VAL 
+
+DELETED:
+    07  - CLR BOTH REPEAT 
+    05  - CLR PTR REPEAT
+    03  - CLR BOTH 
+    01  - CLR PTR
+
+MOVED: 
+    1E -> 1F  - SYSCALL
+    13 -> 1E  - PTR = BASE_ADDR
+    0D -> 1C  - VAL *= 8 (reg_size)
+    12 -> 19  - VAL = *PTR
+    11 -> 18  - *PTR = VAL
+    10 -> 17  - SWAP   PTR <-> VAL
+    18 -> 13  - JZ   ||  SRIP = (VAL==0)? PTR : SRIP+1
+    1F -> 12  - J    ||  SRIP = PTR
+    17 -> 11  - CALL ||  PUSH SRIP+1; SRIP=PTR; //PUSH REGS?
+    19 -> 10  - CMP  ||  VAL = (VAL <= PTR)? 1 : 0
+    0A -> 09  - *PTR << VAL
+    09 -> 07  - *PTR &= VAL
+    08 -> 04  - NOT VAL
+    06 -> 03  - CLR VAL REPEAT
+    04 -> 01  - NOP REPEAT
+```
 

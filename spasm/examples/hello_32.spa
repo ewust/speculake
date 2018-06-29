@@ -1,0 +1,35 @@
+init:
+    ECALL   main
+
+exit:
+    # mov $0x3C, %rax
+    ESET    RAX     0x1
+    
+    # mov $0x0, %rdi
+    ESET    RDI     0x0
+    
+    SYSCALL
+
+main:
+    # mov   %rsp, %rsi
+    ESET    SRCX    SRSP
+
+    # Only Push 4 bytes (VAL size) at a time otherwise it wil push things out 
+    EPUSH   "GFED"
+    EPUSH   "CBA\n"
+    EPUSH   "gfed"
+    EPUSH   "cba\n"
+
+    # mov  $0x1, %rax
+    ESET    RAX     0x4
+
+    # mov  $0x1, %rdi
+    ESET    RBX     0x1
+
+    # mov  $0x10, %rdx
+    ESET    RDX     0x10
+
+    # syscall
+    SYSCALL
+
+    ECALL   exit

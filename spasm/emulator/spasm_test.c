@@ -142,8 +142,10 @@ void test_PushPop(){
     
 
     R_mock[SRIP_OFFSET] = 0x18;
-    R_mock[SRSP_OFFSET] = STK_OFFSET;
+    R_mock[SRSP_OFFSET] = R_mock+STK_OFFSET;
     R_mock[VAL_OFFSET] = 0xDEADBEEF12345678;
+
+    printRegs(R_mock, 0);
 
     printf("Push R: 0x%lX\n", *R_val);
     update(R_mock, 0x1B);   // Push VAL
@@ -203,7 +205,7 @@ void test_CallConventions(){
     uint_reg R_mock[16] = {0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0};
     
     R_mock[SRIP_OFFSET] = 0x1234;
-    R_mock[SRSP_OFFSET] = STK_OFFSET;
+    R_mock[SRSP_OFFSET] = (uint_reg) R_mock + STK_OFFSET*BYTES_PER_REG;
     R_mock[SRDX_OFFSET] = 0xC;
 
     R_mock[PTR_OFFSET] = 0xDEAD;
@@ -211,7 +213,7 @@ void test_CallConventions(){
     
     printRegs(R_mock, 2 );
 
-    update(R_mock, 0x17);   // CALL 
+    update(R_mock, 0x11);   // CALL 
 
     printRegs(R_mock, 2 );
 
@@ -219,9 +221,9 @@ void test_CallConventions(){
 
     printRegs(R_mock, 2 );
 
-    update(R_mock, 0x10);   // SWAP
+    update(R_mock, 0x17);   // SWAP
     update(R_mock, 0x02);   // CLR VAL
-    update(R_mock, 0x18);   // JMP
+    update(R_mock, 0x12);   // JMP
 
     printRegs(R_mock, 2 );
 }
@@ -240,14 +242,14 @@ int test_generic(){
 int main(){
     // printISA();
     printISA_short();
-    //1 test_CallConventions();
-    //1 test_ControlFlow();
-    //1 printISA();
-    //1 test_asmSyscall();
-    //1 test_doSyscall_write();
-    //1 test_changeRegs();
-    //1 test_Pointers();
-    //1 test_PushPop();
+    // test_CallConventions();
+    // test_ControlFlow();
+    // printISA();
+    // test_asmSyscall();
+    // test_doSyscall_write();
+    // test_changeRegs();
+    // test_Pointers();
+    test_PushPop();
     // test_generic();
 }
     

