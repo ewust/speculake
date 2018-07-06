@@ -1,0 +1,20 @@
+New Instructions:
+    XOR -- VAL ^= PTR
+    ARCH -- Detect 32 v 64 bit arch
+        xor eax, eax
+        db 0x40
+        ret eax  -> if 0 then 64 bit \\ if 1 then 32 bit
+    
+Stack Frames for call / return convention
+
+MAKE SURE THAT EGET RETURNS BOTH VALUE AND ADDRESS IN VAL AND PTR
+    VAL = RAX
+    PTR = &RAX
+
+Relative jumps (though this is going to be very hard to judge w/ macros)
+    probably useful for compiler
+
+    jumps relative to label
+
+
+Compiler
