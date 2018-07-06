@@ -39,7 +39,7 @@ get_rip:
 call_get_rip:
 	call get_rip
     // len("add (rbx), rax") + len("add $9, rax") + len("jmpq *rax") => 9
-    add $9, %rax
+    add $6, %rax
 
     .rept   28
     jmpq    *%rax
