@@ -2,13 +2,44 @@
 import shlex
 from instr_spasm import *
 
-MACROS = ["EUVAL", "ESET", "EGET", "ECALL", "EPUSH"]
-        # TODO: "CMPJE", "CMPJNE", "CMPJZ", "CMPJNZ", "CMPJL", "CMPJLE", "CMPJG", "CMPJGE"]
+MACROS = ["EUVAL", "ESET", "EGET", "ECALL", "EPUSH"
+            "CJZ", "CJNZ", "CJE", "CJNE", "CJL", "CJLE", "CJG", "CJGE"]
+
+CTRL_FLOW = ["CJZ", "CJNZ", "CJE", "CJNE", "CJL", "CJLE", "CJG", "CJGE"]
 
 REGISTERS = {"SRIP":0, "SRSP":1, "SRAX":4, "SRBX":5, "SRCX":6, "SRDX":7,
              "RIP":0, "RSP":1, "RAX":4, "RBX":5, "RCX":6, "RDX":7,
              "SRSI":8, "SRDI":9, "SRBP":10, "SR8":11, "SR9":12,
              "RSI":8, "RDI":9, "RBP":10, "R8":11, "R9":12}
+
+
+def str2hex(string):
+    # Purpose 
+    #   take a string and return an ascii string of hex to go into instrs
+    string_d = bytes(string, "utf-8").decode("unicode_escape") 
+    out = []
+    for c in string_d[::-1]:
+        out.append(format(ord(c), 'x'))
+    return  ''.join(out)
+    
+
+class ParseError(Exception):
+    def __init__(self, message, line):
+        super().__init__(message)
+    
+        self.line = line
+
+    def print_summary(self):
+        print(self.line)
+
+class ParseMacroError(ParseError):
+
+    def __init__(self, message, line):
+        super().__init__(message, line)
+    
+    def print_summary(self):
+        print("Error with Macro Parseing - Macro does not exist")
+        super().print_summary()
 
 
 # 8 Half words gives 32 bits for addressing - should be plenty
@@ -84,7 +115,7 @@ class Parser:
         if instr[0].upper() in MACROS:
             return True
         else:
-             return False
+            return False
         
 
     def expand_macro(self, instr):
@@ -107,6 +138,8 @@ class Parser:
             n, expanded_instrs = self.expand_ESET(instr)
         elif op == "EGET":   # GET [reg] 
             n, expanded_instrs = self.expand_EGET(instr)
+        elif op in CTRL_FLOW:
+            n, expanded_instrs = self.expand_JMP(instr)
         else:
             raise ParseMacroError("Attempting to expand undefined Macro", instr)
     
@@ -125,7 +158,7 @@ class Parser:
         else:
             try:
                 # USING HEX
-                immed = format(int(instr[1], 16), 'x')
+                immed = format(int(instr[1], 0), 'x')
                 n, expanded_instrs = self.expand_EUVAL(["EUVAL", instr[1]])
                 expanded_instrs.append(Instr(["PUSH"]))
             except ValueError as e:
@@ -165,7 +198,7 @@ class Parser:
 
     def expand_EGET(self, instr):
         if instr[1] not in REGISTERS:
-            raise ParseMacroError("Unknown Register", instr)
+            raise ParseMacroError("EGET Parse Error - Unknown Register", instr)
         else:
             reg_index = REGISTERS[instr[1]]
             expanded_instrs = [
@@ -175,7 +208,7 @@ class Parser:
                 Instr(["MREG"]),
                 Instr(["ADD"]),
                 Instr(["DPTR"]) ]
-            return (len(expanded_instrs), expanded_instrs) 
+             return (len(expanded_instrs), expanded_instrs) 
         
 
     def expand_ESET(self, instr):
@@ -207,7 +240,7 @@ class Parser:
             else: 
                 # USING HEX VALUE
                 try:
-                    immed = format(int(instr[2], 16), 'x')
+                    immed = format(int(instr[2], 0), 'x')
                 except ValueError as e:
                     raise ParseMacroError("ESET parse error - not REG or hex value", instr)
                     return (0, [])
@@ -247,9 +280,9 @@ class Parser:
         else:
             # USING A HEX VALUE
             try:
-                immed = format(int(instr[1], 16), 'x')
+                immed = format(int(instr[1], 0), 'x')
             except ValueError as e:
-                raise ParseMacroError("EUVAL parse error - not label or hex value", instr)
+                raise ParseMacroError("EUVAL parse error - not label or immediate value", instr)
                 return (0, [])
 
             if len(immed) == 1:
@@ -265,31 +298,139 @@ class Parser:
         return(len(expanded_instrs), expanded_instrs)
                 
 
-def str2hex(string):
-    # Purpose 
-    #   take a string and return an ascii string of hex to go into instrs
-    string_d = bytes(string, "utf-8").decode("unicode_escape") 
-    out = []
-    for c in string_d[::-1]:
-        out.append(format(ord(c), 'x'))
-    return  ''.join(out)
-    
+    def expand_CJMP(self, instr):
+        op = instr[0].upper()
+        dst = ""
+        val1 = 0
+        val2 = 0
+        dst_rel = 0
+        val2_immed = False
 
-class ParseError(Exception):
-    def __init__(self, message, line):
-        super().__init__(message)
-    
-        self.line = line
+        if (len(instr) <= 3) and ( op not in ["CJZ", "CJNZ"]):
+            raise ParseMacroError("CJMP parse error - Not Enough Arguments", instr)
 
-    def print_summary(self):
-        print(self.line)
+        # ---- Parse Destination ----
+        # Must be LABEL or IMMED
+        if instr[1] in self.labels:
+            # USING A LABEL
+            dst = instr[1]
 
-class ParseMacroError(ParseError):
+        else:
+            # USING A RELATIVE ADDRESS
+            try:
+                dst_rel = int(instr[1], 0)
+            except ValueError as e:
+                raise ParseMacroError("CJMP parse error - not label or immediate value", instr)
+                return (0, [])
 
-    def __init__(self, message, line):
-        super().__init__(message, line)
-    
-    def print_summary(self):
-        print("Error with Macro Parseing - Macro does not exist")
-        super().print_summary()
+        # ---- Parse VAL 1 ----
+        # Must be a REG
+        if instr[2] not in REGISTERS:
+            raise ParseMacroError("CJMP parse error - Value 1 not a recognized register", instr)
+        else:
+            val1 = REGISTERS[instr[2]]
+            
+        # ---- Parse VAL 2 ----
+        # Must be REG or IMMED
+        if op not in ["CJZ", "CJNZ"]:
+            if instr[3] in REGISTERS:
+                # REG
+                val2 = REGISTERS[instr[3]]
 
+            else
+                # IMMED
+                try:
+                    val2 = int(instr[3], 0)
+                    val2_immed = True
+                except ValueError as e:
+                    raise ParseMacroError("CJMP parse error - not label or immediate value", instr)
+                    return (0, [])
+
+
+        # ---- Handle Ops ----
+        if   op == "CJE": 
+            return self.expand_CJE(dst, val1, val2, dst_rel, val2_immed)
+        elif op == "CJNE": 
+            return self.expand_CJE(dst, val1, val2, dst_rel, val2_immed)
+        elif op == "CJLE": 
+            return self.expand_CJLE(dst, val1, val2, dst_rel, val2_immed)
+        elif op == "CJL": 
+            return self.expand_CJL(dst, val1, val2, dst_rel, val2_immed)
+        elif op == "CJGE": 
+            return self.expand_CJL(dst, val2, val1, dst_rel, val2_immed)  ## swap val1 <-> val2
+        elif op == "CJG": 
+            return self.expand_CJLE(dst, val2, val1, dst_rel, val2_immed) ## swap val1 <-> val2
+        elif op == "CJZ": 
+            return self.expand_CJE(dst, val1, 0, dst_rel, True)
+        elif op == "CJNZ": 
+            return self.expand_CJNE(dst, val1, 0, dst_rel, True)
+        else:
+            raise ParseMacroError("Macro not yet implemented", instr)
+            return(0,[])
+
+
+    def expand_CJNE(self, dst, val1, val2, dst_rel, val2_immed):
+        expanded_instrs = [Instr(["CLR"])]
+        # GET DST1
+        # PUSH DST1
+        # GET DST1
+        # PUSH DST2
+        # GET VAL1
+        # GET VAL2
+        # 2's COMP      ## Alternatively add XOR instr
+        # ADD
+        # POP [DST2]
+        # SWAP
+        # JZ (VAL == 0) ? PTR: SRIP+1
+        # POP DST1
+        # SWAP 
+        # J
+        # POP DST1
+        # CLR
+        return (len(expanded_instrs), expanded_instrs)
+
+
+    def expand_CJE(self, dst, val1, val2, dst_rel, val2_immed):
+        expanded_instrs = [Instr(["CLR"])]
+        # GET DST
+        # PUSH DST
+        # GET VAL1
+        # GET VAL2
+        # 2's COMP      ## Alternatively add XOR instr
+        # ADD
+        # POP [DST]
+        # SWAP
+        # JZ (VAL == 0) ? PTR: SRIP+1
+        return (len(expanded_instrs), expanded_instrs)
+
+
+    def expand_CJL(self, dst, val1, val2, dst_rel, val2_immed):
+        expanded_instrs = [Instr(["CLR"])]
+        # PREP DST
+        # PUSH DST
+        # GET VAL1 (REG) 
+        # GET VAL2
+        # CMP - (VAL <= PTR) ? 1:0 
+        # SWAP
+        # POP [DST] 
+        # SWAP
+        # JZ (VAL == 0) ? PTR: SRIP+1
+        return (len(expanded_instrs), expanded_instrs)
+
+
+    def expand_CJLE(self, dst, val1, val2, dst_rel, val2_immed):
+        expanded_instrs = [Instr(["CLR"])]
+        # PREP DST
+        # PUSH DST
+        # GET VAL1 (REG)
+        # GET VAL2
+        # CMP - (VAL <= PTR) ? 1:0 
+        # SWAP
+        # CLR
+        # UVAL 0x1
+        # 2's comp      ## Alternatively add XOR instr
+        # ADD  -- PTR += VAL
+        # POP [DST] 
+        # SWAP
+        # JZ (VAL == 0) ? PTR: SRIP+1
+        return (len(expanded_instrs), expanded_instrs)

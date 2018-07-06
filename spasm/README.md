@@ -1,23 +1,19 @@
 # SPASM
 
-v1.3.0 -- 6/29/2018
+v1.3.1 -- 7/6/2018
 
 #### Latest Updates:
 
-Changed functionality of the SRSP pseudo-register. It now holds a
-pointer to the top of the stack instead of an index into the 
-structure that functions as register table. 
+Defining control flow macros. Outlined in parser -  not completed yet
 
-Underflow prevention is ensured by bounds check -> returns 0 if stack is empty.
-
-Updated `hello_world`, `hello_world32`, and `rev_shell` to accomodate this 
-new manner of functionality. 
 
 #### Upcoming:
-1. SRIP conversion to pointer.
-2. Relative addressing & label addressing.
-3. Control Flow Macros.
-4. Full example programs 32 and 64
+1. Control Flow Macros.
+2. Full example programs 32 and 64
+3. Relative addressing & label addressing.
+4. JMP dst with offsets relative to label in control flow macros
+5. JMP dst relative to current RIP in control flow macros
+
 
 ## Usage
 
@@ -120,24 +116,46 @@ Free Instructions: 20
 ---------------------------------------- 
 MACROS :
 ---------------------------------------- 
-EUVAL   [ label | hex ] 
-ECALL   [ label | hex | reg ]
-EPUSH   [ reg | hex | str ] 
+EUVAL   [ label | immed ] 
+ECALL   [ label | immed | reg ]
+EPUSH   [ reg | immed | str ] 
 EGET    [ reg ]
-ESET    [ reg ] [ reg | hex |   ] 
+ESET    [ reg ] [ reg | immed ] 
+*CJZ     [ label ] [ reg ]
+*CJNZ    [ label ] [ reg ]
+*CJE     [ label ] [ reg ] [ reg | immed ]
+*CJNE    [ label ] [ reg ] [ reg | immed ]
+*CJL     [ label ] [ reg ] [ reg | immed ]
+*CJLE    [ label ] [ reg ] [ reg | immed ]
+*CJG     [ label ] [ reg ] [ reg | immed ]
+*CJGE    [ label ] [ reg ] [ reg | immed ]
+*EJ      [ label ]
 ---------------------------------------- 
+
+* - not yet implemented
 ```
 
 ### Examples
+
 
 See the example programs in the `examples/` directory. All files that end `.spa` 
 are spasm assembly files (probably written by hand), and all .sp files are spasm
 binary files to be run through an emulator.
 
-
-
-
 ### Previous updates
+
+v1.3.1 -- 6/29/2018
+
+-Changed functionality of the SRSP pseudo-register. It now holds a
+-pointer to the top of the stack instead of an index into the 
+-structure that functions as register table. 
++Defining control flow macros. Outlined in parser -  not completed yet
+
+-Underflow prevention is ensured by bounds check -> returns 0 if stack is empty.
+-
+-Updated `hello_world`, `hello_world32`, and `rev_shell` to accomodate this 
+-new manner of functionality. 
+
 
 ---
 

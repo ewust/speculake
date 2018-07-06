@@ -1,17 +1,18 @@
 Init: 
+    # call main
     ECALL main
 
 exit:         
-    ESET    SRAX    0x3C
-    ESET    SRDI    0x0
-    SYSCALL
+    ESET    SRAX    0x1
+    ESET    SRBX    0x0
+    syscall
 
 print_nl:    
-    ESET    SRSI    SRSP
+    ESET    SRCX    SRSP
     EPUSH   0x0A
 
-    ESET    RAX     0x1
-    ESET    RDI     0x1
+    ESET    RAX     0x4
+    ESET    RBX     0x1
     ESET    RDX     0x1
     SYSCALL
 
@@ -21,11 +22,11 @@ print_nl:
     J   
 
 print_fizz:    
-    ESET    SRSI    SRSP
+    ESET    SRCX    SRSP
     EPUSH   "fizz" 
 
-    ESET    RAX     0x1
-    ESET    RDI     0x1
+    ESET    RAX     0x4
+    ESET    RBX     0x1
     ESET    RDX     0x4
     SYSCALL
 
@@ -34,12 +35,12 @@ print_fizz:
     SWAP
     J   
 
-print_buzz:
-    ESET    SRSI    SRSP
+print_buzz:     # print_buzz 
+    ESET    SRCX    SRSP
     EPUSH   "buzz" 
 
-    ESET    RAX     0x1
-    ESET    RDI     0x1
+    ESET    RAX     0x4
+    ESET    RBX     0x1
     ESET    RDX     0x4
     SYSCALL
 
