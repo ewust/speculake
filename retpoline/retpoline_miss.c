@@ -66,9 +66,10 @@ void check_probes() {
     uint64_t t0, t1;
     uint8_t *addr;
 
-    int i;
+    int i, mix_i;
     for (i=0; i<NUM_PROBES; i++) {
-        addr = &probe_buf[i*cur_probe_space];
+		mix_i = ((i* 167) +13) & NUM_PROBES-1;
+        addr = &probe_buf[mix_i*cur_probe_space];
         t0 = _rdtscp(&junk);
         asm volatile( "movb (%%rbx), %%al\n"
             :: "b"(addr) : "rax");
@@ -76,7 +77,7 @@ void check_probes() {
         if (t1-t0 < 140) {
             cache_hits++;
             tot_time += t1-t0;
-            results[i]++;
+            results[mix_i]++;
         }
     }
     tot_runs++;
@@ -236,9 +237,9 @@ void retpoline_r11_signal(){
         // "mov $0x18, %%rax\n"    // sys_sched_yield
         // "syscall\n"
 
-    "clear_rsb:\n"
-        "jmp go\n"
-    "get_rip:\n"
+    "s_clear_rsb:\n"
+        "jmp s_go\n"
+    "s_get_rip:\n"
         "pop  %%rax\n"
         "add $0x21, %%rax\n"    // Add offset to jump over signal
         "push %%rax\n"
@@ -247,8 +248,8 @@ void retpoline_r11_signal(){
         "push %%rax\n"
         ".endr\n"
         "ret\n"
-    "go:\n"
-         "call get_rip\n"
+    "s_go:\n"
+         "call s_get_rip\n"
 
         //Signal(0x22)
         "movq $0x22, %%rcx\n"
@@ -257,8 +258,8 @@ void retpoline_r11_signal(){
         "mov (probe_buf), %%rdx\n"
         "add %%rax, %%rdx\n"
         "mov (%%rdx), %%rax\n"
-        
         "ret\n"
+        
         "movq (fn_ptr), %%r11\n"
         "mov %%r11, (%%rsp)\n"
         "ret\n"
@@ -336,7 +337,7 @@ void measure() {
     int i, j;
 
     int misses = 0;
-    uint64_t k = 3;
+    uint64_t k = 2;
     uint64_t width = 8;
     uint64_t top_k_i[k]; 
     uint64_t top_k_res[k]; 
@@ -348,11 +349,11 @@ void measure() {
 
             fn_ptr = rt1;
                 
-            for (j=0; j<100; j++){
-                retpoline_r11();
-                _mm_clflush(&fn_ptr);
+            // for (j=0; j<100; j++){
+            //     retpoline_r11();
+            //     _mm_clflush(&fn_ptr);
 
-            }
+            // }
             fn_ptr = check_probes;
             _mm_clflush(&fn_ptr);
             // Clear probe_buf from cache
@@ -361,10 +362,10 @@ void measure() {
             // }
             // asm volatile ("lfence;pause\n");
             // asm volatile (".rept 1000; nop; .endr\n":::"rax");
-            asm volatile (".rept 1000; inc %%rax; .endr\n":::"rax");
-            clear_RSB(); 
+            // asm volatile (".rept 1000; inc %%rax; .endr\n":::"rax");
+            // clear_RSB(); 
             // headfake_rsb();
-            retpoline_r11();
+            retpoline_r11_signal();
 
             //((void(*)(void *))map)(&jmp_ptr);
             usleep(1);

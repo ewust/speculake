@@ -66,17 +66,17 @@ void check_probes() {
     uint64_t t0, t1;
     uint8_t *addr;
 
-    int i;
+    int i, mix_i;
     for (i=0; i<NUM_PROBES; i++) {
-        addr = &probe_buf[i*cur_probe_space];
+		mix_i = ((i* 167) +13) & NUM_PROBES-1;
+        addr = &probe_buf[mix_i*cur_probe_space];
         t0 = _rdtscp(&junk);
-        asm volatile( "movb (%%rbx), %%al\n"
-            :: "b"(addr) : "rax");
+        asm volatile( "movb (%%rbx), %%al\n" :: "b"(addr) : "rax");
         t1 = _rdtscp(&junk);
-        if (t1-t0 < 140) {
+        if (t1-t0 < 150) {
             cache_hits++;
             tot_time += t1-t0;
-            results[i]++;
+            results[mix_i]++;
         }
     }
     tot_runs++;
@@ -96,7 +96,7 @@ bool get_top_k(uint64_t k, uint64_t* output_i, uint64_t* output_res){
     uint64_t top_k[k];
     uint64_t top_k_res[k];
     uint64_t min_i=0;
-    uint64_t min_hits_allowed=10;
+    uint64_t min_hits_allowed=1;
     uint64_t hits=0;
 
     uint64_t i, j, x;
@@ -171,7 +171,8 @@ void measure() {
     int i;
 
     int misses = 0;
-    uint64_t k = 1;
+    uint64_t k = 3;
+    uint64_t width = 8;
     uint64_t top_k_i[k]; 
     uint64_t top_k_res[k]; 
     uint64_t final_i;
@@ -192,8 +193,8 @@ void measure() {
         hit_miss = get_top_k(k, top_k_i, top_k_res);
 
         if (hit_miss){
-            final_i = construct_result(k, 8, top_k_i); 
-            printf("[%08lX] - cache hits: %ld\n\n", final_i, cache_hits);
+            final_i = construct_result(k, width, top_k_i); 
+            printf("[%08lX]  - Cache Hits: %ld  -- avg:%ld\n\n", final_i, cache_hits, cache_hits/2000);
 
             signal_idx++;
             misses = 0;

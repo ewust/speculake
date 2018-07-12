@@ -66,17 +66,17 @@ void check_probes() {
     uint64_t t0, t1;
     uint8_t *addr;
 
-    int i;
+    int i, mix_i;
     for (i=0; i<NUM_PROBES; i++) {
-        addr = &probe_buf[i*cur_probe_space];
+		mix_i = ((i* 167) +13) & NUM_PROBES-1;
+        addr = &probe_buf[mix_i*cur_probe_space];
         t0 = _rdtscp(&junk);
-        asm volatile( "movb (%%rbx), %%al\n"
-            :: "b"(addr) : "rax");
+        asm volatile( "movb (%%rbx), %%al\n" :: "b"(addr) : "rax");
         t1 = _rdtscp(&junk);
         if (t1-t0 < 140) {
             cache_hits++;
             tot_time += t1-t0;
-            results[i]++;
+            results[mix_i]++;
         }
     }
     tot_runs++;
@@ -106,7 +106,6 @@ bool get_top_k(uint64_t k, uint64_t* output_i, uint64_t* output_res){
         top_k_res[i]=0;
     }
 
-    // printf("results[0x11] = %ld\n", results[0x11]);
     for (i=0; i<NUM_PROBES; i++) {
 
         if (results[i] < min_hits_allowed){
