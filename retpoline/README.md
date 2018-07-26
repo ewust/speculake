@@ -37,14 +37,14 @@ the target function pointer into the rsp register.
 ```
 ##### Alterations:
 1. `measure_retp.c`
-	a) Comment in/out usleep 
-	b) Comment in/out clflush fn_ptr 
-	c) Comment in/out retpoline
-	d) Retpoline with yield in/out
-	e) Comment in/out signal in capture_spec section of retpoline
+	* Comment in/out usleep 
+	* Comment in/out clflush fn_ptr 
+	* Comment in/out retpoline
+	* Retpoline with yield in/out
+	* Comment in/out signal in capture_spec section of retpoline
 
-2. Makefile
-	a) Swap gcc version
-	b) Swap in/out retpoline compile time options.
-	c) Thunk options -- thunk (by block), thunk-inline (everwhere)
+2. `Makefile`
+	* Swap gcc version
+	* Swap in/out retpoline compile time options.
+	* Thunk options -- thunk (by block), thunk-inline (everwhere)
 
