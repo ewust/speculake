@@ -6,32 +6,23 @@ ifeq ($(ver),Ubuntu 14)
 	NO_PIE=-fno-pie
 endif
 
+# CC=gcc-7
+# RETP_OPTS=-mindirect-branch=thunk-inline -mfunction-return=thunk-inline -mindirect-branch-register
 
 #============ Retpoline Experiments ==============
 
-all: exp1 exp2 exp3 exp4 
+all: exp4 
 
-exp1: exp1_measure exp1_inject
-
-exp1_inject: inject.c indirect_retpoline.S
+exp2:  target_fn.c measure_exp2.c
 	$(CC) -Wl,-Tlinker.ld $^ -o $@ ${NO_PIE}
 
-exp1_measure:  target_fn.c measure.c indirect_retpoline.S
-	$(CC) -Wl,-Tlinker.ld $^ -o $@ ${NO_PIE}
+exp4: inject measure 
 
-exp2:  target_fn.c measure_exp1.c indirect.S
-	$(CC) -Wl,-Tlinker.ld $^ -o $@ ${NO_PIE}
+inject: inject_retp.c 
+	$(CC) -Wl,-Tlinker.ld $^ -o $@ ${NO_PIE} ${RETP_OPTS}
 
-exp3:  target_fn.c retpoline_miss.c indirect_retpoline.S
-	$(CC) -Wl,-Tlinker.ld $^ -o $@ ${NO_PIE}
-
-exp4: exp4_inject exp4_measure 
-
-exp4_inject: inject_ret.c indirect.S
-	$(CC) -Wl,-Tlinker.ld $^ -o $@ ${NO_PIE}
-
-exp4_measure: target_fn.c retpoline_yield.c indirect.S
-	$(CC) -Wl,-Tlinker.ld $^ -o $@ ${NO_PIE}
+measure: target_fn.c measure_retp.c signal.c
+	$(CC) -Wl,-Tlinker.ld $^ -o $@ ${NO_PIE} ${RETP_OPTS}
 
 clean:
-	$(RM) *.o exp* 
+	$(RM) *.o exp2 measure inject 

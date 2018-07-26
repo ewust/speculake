@@ -1,7 +1,5 @@
 # Retpoline Write-up
 
-#### TLDR: 
-[//]: <> (TODO)
 
 The plain inline construction of the retpoline where a desired destination function
 is call is protected against speculation. Here we use the function pointer `fn_ptr` to
@@ -135,7 +133,7 @@ retpoline call. However, it never speculated the repoline return to a location
 containing a signal.  
 
 We also included a test where we cleared the RSB inline in the retpoline construction
-at `(3)` between the direct call and the return and it still speculated to `capture_spec`.
+between the direct call and the return and it still speculated to `capture_spec`.
 
 It is of note that the program can be induced into speculating the return in `clear_rsb`
 with high consistency. The table below shows all of the different scanarios tested. 
@@ -144,21 +142,12 @@ It seems that
 [//]: <> (TODO)
 
 
-|    |`(1)`|`(2)`|`(rt1)`|`(clear_rsb 2)`|`(dilute_rsb 1)`|`(dilute_rsb 2)`|
-|----|:---:|:---:|:-----:|:-------------:|:--------------:|:--------------:|
-|inc 1000<br> head_fake|N/A|N/A|0|N/A|N/A|N/A|
-|inc 1000<br>flush_cache<br>clear_rsb|Low|N/A|N/A|N/A|N/A|N/A|
-|inc 1000<br>flush_cache<br>flush_rsb|N/A|N/A|N/A|N/A|N/A|N/A|
-|flush_cache<br>lfence<br>nop 1000<br>clear_rsb<br>|N/A|N/A|N/A|Low|N/A|N/A|
-|flush_cache<br>lfence<br>inc 1000<br>clear_rsb<br>|N/A|N/A|N/A|High|N/A|N/A|
-|flush_cache<br>lfence<br>clear_rsb<br>|N/A|N/A|N/A|Low|N/A|N/A|
-|flush_cache<br>inc 1000<br>clear_rsb|N/A|N/A|N/A|High|N/A|N/A|
-|flush_cache<br>clear_rsb|N/A|N/A|N/A|Low|N/A|N/A|
-|i|High|N/A|N/A|N/A|N/A|N/A|
-|i|High|N/A|N/A|N/A|N/A|N/A|
-|i|High|N/A|N/A|N/A|N/A|N/A|
-|i|High|N/A|N/A|N/A|N/A|N/A|
-
+|    |`(1)`|`(2)`|`(clear_rsb 2)`|`(dilute_rsb 1)`|`(dilute_rsb 2)`|
+|----|:---:|:---:|:-------------:|:--------------:|:--------------:|
+|Test<br> under test<br>more under test|test |test|test|test|test|
+|mov r11, (rsb)<br>sys_sched_yield<br>ret|high|test|test|test|test|
+|inc 1000<br>flush_cache<br>clear_rsb|low|test|test|test|test|
+|inc 1000<br>flush_cache<br>flush_rsb|N/A|test|test|test|test|
 
 [//]: <> ( intel Xeon E3-1270 v6   -- Kaby Lake   (w/ microcode update)
     intel Xeon E3-1270 v6   -- Kaby Lake

@@ -6,7 +6,8 @@
 #include <unistd.h>
 #include <sys/mman.h>
 #include <string.h>
-#include "common.h"
+
+void __attribute__((section(".fnptr"))) (*fn_ptr)(void);
 
 /*
  * This is the target of the indirect call
@@ -48,22 +49,6 @@ int main(int argc, char *argv[])
     printf("target_fn = %p\n", target_fn);
 
     printf("training...\n");
-
-    uint64_t base = TARGET_FN_ADDR;
-    if (argc > 1) {
-        base = strtoll(argv[1], NULL, 16);
-    }
-    printf("using base address %p\n", (void*)base);
-    map = mmap((void*)base, 0x1000, PROT_READ|PROT_WRITE|PROT_EXEC, MAP_PRIVATE|MAP_ANONYMOUS|MAP_FIXED, -1, 0);
-    if (map == MAP_FAILED) {
-        perror("mmap");
-        return -1;
-    }
-    memcpy(map, indirect, ((uint64_t)end_indirect)-((uint64_t)indirect));
-
-    // Set it to just immediately return (retq = 0xc3)...
-    memset(map+600, '\xc3', 1);
-
 
     target_fn();
 
