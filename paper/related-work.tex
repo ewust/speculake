@@ -1,35 +1,37 @@
-
 \section{Related Work}
 \label{sec:related-work}
 
 % Many resourcess have been useful in developing the \speculake exploit 
 % model.  
 
-\subsection{Weird Machines \& Red-Pills}
+\subsection{Weird Machines}
 
-%Hardware side effects often leave behind unexpected state transitions 
-%that are not, or cannot be, accounted for in modeling environments. Malware
-%has historically made use of these bugs to create "weird" models of 
-%computation~\cite{weird_machines}. These state transitions can also leak 
-%information about the environment in which a program is running, which 
-%malware has used to detect honey-pots and emulated 
-%environments~\cite{balzarotti2010efficient}.
+\speculake is a \textit{weird machine}---a machine which executes arbitrary
+computation using unintended executions paths, often the result of bugs or
+attacker exploits~\cite{weird_machines,bratus2011exploit,weird_exploits}. In
+particular \speculake takes advantage of speculative execution and a separate
+trigger program to execute otherwise dead code.
 
-\textit{Weird machines} are machines composing bugs and features of a system to
-create arbitrary computation with interesting
-properties~\cite{weird_machines,bratus2011exploit,weird_exploits}. This
-encompasses many traditional computer vulnerabilities~\cite{buffer_overflow,
-format_string_exploit, shacham2007geometry}. These exploits demonstrate
-performing arbitrary computation in places that were not originally intended to
-act as computational entities.
+Previous weird machines have demonstrated many traditional computer
+vulnerabilities such as buffer overflows, format string exploits and
+return-to-libc attacks without function calls~\cite{buffer_overflow,
+format_string_exploit, shacham2007geometry}. 
 
-Unexpected functionality such as~\cite{bangert2013page} is abundant in modern
-processors~\cite{d2015exploiting} as multiple threads share system resources
-cooperatively and optimizations are often done across the process
-isolation boundary. \speculake takes advantage of cooperative hardware
-resources, and constructs a hardware weird machine
-using speculative branching and \texttt{Flush+Reload}.
+Additionally, unexpected functionality such as instruction-less
+computing~\cite{bangert2013page} enables the demonstration of a Turing complete
+weird machine by taking advantage of memory translation tables, page-faults, and
+hardware exception handling to effectively compute arithmetic and logical
+operations without the processor executing any instructions.
 
+These types of machines are abundant in modern processors~\cite{d2015exploiting}
+as multiple threads share system resources cooperatively and optimizations are
+often done across the process isolation boundary. 
+
+Whereas previous weird machines have demonstrated the capability to execute
+potentially malicious code in an unexpected manner, \speculake showcases the
+ability to execute dead code within the speculative world.
+
+\subsection{Red-Pills}
 Hardware minutia have also been used to identify and fingerprint execution
 environments---in malware this is know as a red-pill~\cite{red-pill} and is
 typically used by malware to detect when it is under emulation or a debugging
