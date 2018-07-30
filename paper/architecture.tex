@@ -205,7 +205,7 @@ Most notably instructions that use the extended x86 registers are still valid
 within the speculative context. Specifically, Intel's hardware accelerated
 AES-NI encryption and decryption instructions, which each use 128-bit registers.
 As shown in Figure~\ref{fig:spec-capacity}, speculative environments can
-complete a significant number of AES rounds -- more than enough to decrypt a
+complete a significant number of AES rounds---more than enough to decrypt a
 full block using AES-CBC. We investigate the use of AES instructions in the
 spculative environment further in Sections~\ref{subsec:decryption}.
 
