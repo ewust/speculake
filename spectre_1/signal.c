@@ -54,7 +54,6 @@ inline void signal40(uint64_t state){
          : "rax", "rbx", "rcx", "rdx");
 }
 
-
 /*
  * Find the K items in results that have been hit the most often
  */
@@ -63,7 +62,7 @@ bool get_top_k(uint64_t k, uint64_t* results, uint64_t* output_i, uint64_t* outp
     uint64_t top_k[k];
     uint64_t top_k_res[k];
     uint64_t min_i=0;
-    uint64_t min_hits_allowed=0;
+    uint64_t min_hits_allowed=1;
     uint64_t hits=0;
 
     uint64_t i, j, x;

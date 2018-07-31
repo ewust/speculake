@@ -6,13 +6,13 @@
 #define __SIGNAL(val, reg1, reg2, reg3)     \
         movq $(val), reg2;                     \
         mov (cur_probe_space), reg1;        \
-        imul reg2;                          \
+        imul reg1, reg2;                          \
         mov (probe_buf), reg3;              \
-        add reg1, reg3;                     \
+        add reg2, reg3;                     \
         mov (reg3), reg1;
 
 #define __signal(value) \
-        __stringify(__SIGNAL(value, %%r10, %%r11, %%r12))
+        __stringify(__SIGNAL(value, %%rax, %%rcx, %%rdx))
 
 extern uint8_t* probe_buf;
 extern uint64_t cur_probe_space;
