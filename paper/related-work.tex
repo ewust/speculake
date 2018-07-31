@@ -59,50 +59,52 @@ speculative execution. Symbolic execution will also fail to find the speculative
 gadgets as it is never on the execution pathway. This allows \speculake to
 effectively act as a red-pill while avoiding detection as such.
 
-\subsection{Cache Side Channels}
+\subsection{Covert Channels}
 
-Cache side-channels have been used against a number of processors at essentially
-all different caching levels---L1 data
-cache~\cite{percival2005cache,zhang2012cross,osvik2006cache}, L1 instruction
-cache~\cite{aciiccmez2010new}, L2
-cache~\cite{ristenpart2009hey,percival2005cache},
-LLC~\cite{ristenpart2009hey,liu2015last}, and branch prediction
-cache~\cite{aciiccmez2007power}. These attacks have also been performed in the
-cloud~\cite{ristenpart2009hey,zhang2012cross},
-browser~\cite{oren2015spy,google_cache_browser}, and security critical
-encryption~\cite{yarom2014recovering,tromer2010efficient} environments,
-demonstrating how ubiquitous hardware side-channel exploits can be. 
+There is a plethora of previous research into cache side-channels, examining how
+information is leaked between
+processes~\cite{percival2005cache,zhang2012cross,osvik2006cache}. This is a key
+feature of Spectre~\cite{spectre} and Meltdown~\cite{meltdown}. In \speculake we
+use the branch predictor side-channel as a \emph{covert
+channel}~\cite{lampson1973note} between an innocent victim program and malware.
+This allows \speculake to use the leaked information from cache as a message to
+a colluding malware to make decisions. 
 
-Cache side channels come in many
-variants~\cite{neve2006refined,tromer2010efficient,yarom2014flush+,gruss2016flush+flush}.
-In \speculake, we utilize the \texttt{Flush+Reload} method, where we first flush
-all items from cache, wait for the speculative world to reload a value, and then
-time accesses to reloading each potential value. However, we acknowledge that
-the recent \texttt{Flush+Flush} variant may offer a faster
-alternative~\cite{gruss2016flush+flush}.
+Previous work has examined various ways of sharing information over covert
+channels, such as across virtualized environments on cloud
+systems~\cite{wu2012whispers}, using L1 and L2 cache to share
+information~\cite{percival2005cache}, measuring temperature to create a thermal
+covert channel~\cite{masti2015thermal, bartolini2016capacity} and taking
+advantage of processor architecture to leak information~\cite{wang2006covert}.
 
-%\begin{itemize}
-%\item \texttt{Evict+Time} - An attacker with a synchronized clock evicts a series of items 
-%from cache. The victim then proceeds with computation, at which point the attacker can 
-%time accesses to each evicted item to identify which items a victim loaded~\cite{neve2006refined}. 
-%\item \texttt{Prime+Probe} - An attaker performs a computation, then evicts specific 
-%items from the cache before performing the same action again. Information about the cache
-%access patterns can be gained by comparing the timimg of the two 
-%computations~\cite{tromer2010efficient}.
-%\item \texttt{Flush+Reload} - Two cooperating processes  make use of the \texttt{Evict+Time} 
-%model to form a communication channel~\cite{yarom2014flush+}.
-%\item \texttt{Flush+Flush} - Follows the same model as \texttt{Prime+Probe},
-%however clflush is used instead of a load as it resolves much quicker in cases 
-%where the item is not in cache~\cite{gruss2016flush+flush}.
-%\end{itemize}
+The branch predictor has been used as a covert
+channel~\cite{evtyushkin2016understanding}. Previous work has examined the
+capability of two colluding programs to share sensitive information between each
+other using the branch predictor by timing how long a spy process executes taken
+(not-taken) branches~\cite{evtyushkin2015covert}.
 
+\speculake takes advantage of a cache side-channel in \texttt{OpenSSL} and uses
+it as a covert channel. \texttt{OpenSSL} is not a malicious colluding program in
+this case but rather a program leaking information on which cipher suite has
+been selected by attackers, allowing us to use the branch predictor as an
+attacker controlled covert channel of an innocent victim program.
 
-%While other works have demonstrated higher throughput from similar 
-%covert cache side channels~\cite{liu2015last}, \speculake incurrs slightly higher performance 
-%penalties in our implementation as we perform redundancy checks to 
-%ensure the signal strength.  This redundancy combined with the intentional cache misseses
-%which enable speculative execution cost hundreds to thousands of clock cycles
-%per round. 
+% cache~\cite{aciiccmez2010new}, L2
+% cache~\cite{ristenpart2009hey,percival2005cache},
+% LLC~\cite{ristenpart2009hey,liu2015last}, and branch prediction
+% cache~\cite{aciiccmez2007power}. These attacks have also been performed in the
+% cloud~\cite{ristenpart2009hey,zhang2012cross},
+% browser~\cite{oren2015spy,google_cache_browser}, and security critical
+% encryption~\cite{yarom2014recovering,tromer2010efficient} environments,
+% demonstrating how ubiquitous hardware side-channel exploits can be. 
+
+% Cache side channels come in many
+% variants~\cite{neve2006refined,tromer2010efficient,yarom2014flush+,gruss2016flush+flush}.
+% In \speculake, we utilize the \texttt{Flush+Reload} method, where we first flush
+% all items from cache, wait for the speculative world to reload a value, and then
+% time accesses to reloading each potential value. However, we acknowledge that
+% the recent \texttt{Flush+Flush} variant may offer a faster
+% alternative~\cite{gruss2016flush+flush}.
 
 
 \subsection{Speculative Execution}
