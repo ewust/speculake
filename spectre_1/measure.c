@@ -126,6 +126,12 @@ void train_branch(){
     }
 }
 
+/*
+ * The Address of target_fn is set in linker.ld to be 0x0000000000434040
+ * since these buffers will be aligned on the stack, just overwrite the 
+ * same thing everwhere, as this should happen speculatively and never 
+ * actually write onto stack.
+ */
 void trick_branch(){
     char overflow[136];
     memset(overflow, 0x44, sizeof(overflow));
