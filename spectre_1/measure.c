@@ -81,8 +81,8 @@ void check_probes() {
 
     int i, mix_i;
     for (i=0; i<NUM_PROBES; i++) {
-        //mix_i = ((i* 167) +13) & NUM_PROBES-1;
-        mix_i = i;
+        mix_i = ((i* 167) +13) & NUM_PROBES-1;
+        //mix_i = i;
         addr = &probe_buf[mix_i*cur_probe_space];
         t0 = _rdtscp(&junk);
         asm volatile( "movb (%%rbx), %%al\n"
