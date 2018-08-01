@@ -118,75 +118,13 @@ channel between an unsuspecting trigger program and \speculake malware.
 
 \subsection{Speculative Execution}
 
-% Lead in 
-Leading up to the discovery and release of the Spectre and Meltdown
-vulnerabilities multiple teams were working to reverse engineer the mechanisms
-that implemented in the microcode of various processors and document their
-behavior~\cite{intel-instruction-tables,project_zero,measuring-cache,measuring-rob}.
-Research into branch predictors~\cite{godbolt2016branch}, cache replacement
-policies, and reorder buffer construction~\cite{measuring-rob} paved the way for
-the branch prediction side-channels employed by Spectre (and subsequently
-\speculake).
-%Efforts to examine cache and memory security also preempted the Spectre work, 
-%including Sophia D'Antoine's thesis work developing a side channel based on 
-%instruction interleaving in the CPU~\cite{d2015exploiting}. Similar research into branch 
-%predictors, cache replacement policies, and reorder buffer construction including work by Matt 
-%Godbolt~\cite{godbolt2016branch}, and Henry Wong~\cite{measuring-rob} paved the runway for 
-%dedicated branch prodiction side-channels.
-
-% Discovery & Followup
-Given the numerous directions that were being investigated in reverse
-engineering Intel processors, multiple teams discovered the Spectre
-vulnerabilities concurrently~\cite{spectre, project_zero, evtyushkin2018branchscope, maisuradze2018speculose}.
-%These works propose multiple variants making use of branch prediction.
-Follow 
-up work on speculative execution side channels has also demonstrated
-web-based vulnerabilites~\cite{genkin2018drive} as well as hardware isolation  
-leaks in Intel's SGX~\cite{spectre_sgx}. At the time of writing multiple sources
-have claimed new speculative execution related exploits termed \textit{Spectre-NG}
-have been reported to Intel and assigned CVE numbers, though details are
-not yet available~\cite{spectre_ng_gossip}.
-%We have no details
-%on content, though Intel has labeled four as critical and another four 
-%as intermediate security flaws~\cite{spectre_ng_gossip}.  
-
-
-% defenses
-
-%Much like cache side channel vulnerabilities speculative execution is relatively
-%critical to processor performance and requires significant software and hardware 
-%updates to fully address. 
-% Multiple measures have been proposed to combat the 
-% individual variants of Spectre.
-
-% One popular approach uses compiler level software patches to wrap sensitive 
-% function calls. Retpoline replaces indirect jumps with \texttt{retq}
-% instructions that read from the cached stack (and are thus less likely to be
-% mis-speculated)~\cite{retpoline}.
-% Gruss~\textit{et al.} propose the KAISER software patch to enforce address space
-% isolation for kernel and user space proceses~\cite{gruss2017kaslr}. 
-% Other proposals have considered hypervisor enforced time domain separation at varying 
-% granularity~\cite{renau2018securing}, and fuzzy clocks that would reduce the accuracy 
-% of any time based exfiltration pathway~\cite{hu1992reducing}. However, none of these defenses
-% fundamentally defeat the use of a branch predictor as a cooperative mechanism
-% spanning multiple processes. Intel has released microarchitecture updates for
-% its most recent CPUs, but older architectures do not support these updates and
-% will remain vulnerable~\cite{intel-micro-patch}.
-
-
-% Trippel~\textit{et al.} proposes a method of faithfully simulating hardware
-% bugs, given a formal model specifying the
-% microarchitecture~\cite{trippel2018meltdownprime}. However, such models are
-% unlikely to be released by CPU manufacturers, as they generally involve
-% closely-guarded trade secrets, making this a less accessible solution for the
-% research community.
-
-%\smallskip
-%
-%We can certainly look forward to more vulnerabilities relating to speculative 
-%branching and related hardware side channels. Our work represents an exploit 
-%model for these vulnerabilities reliant upon shared hardware resources. 
-
-
-
-%%%%%%%%%%%%%%
+\speculake builds on Spectre~\cite{spectre} and Meltdown~\cite{meltdown} which
+leverage speculative execution to leak sensitive information to unprivileged
+processes.  Others have built on Spectre and Meltdown to demonstrate web-based
+vulnerabilities~\cite{genkin2018drive, schwarz2018netspectre} as well as
+hardware isolation leaks in Intel's SGX~\cite{spectre_sgx,chen2018sgxpectre}.
+The branch predictor has also been examined~\cite{evtyushkin2018branchscope} in
+the light of Spectre but only as side-channel which is leaking information.
+\speculake likewise takes advantage of speculative execution however it does so
+to attain hidden arbitrary computation. We believe that \speculake can leverage
+these advances in speculative execution malware as well.
