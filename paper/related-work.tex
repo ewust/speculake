@@ -12,24 +12,24 @@ perform arbitrary
 computation~\cite{weird_machines,bratus2011exploit}. In
 particular \speculake showcases the ability to execute dead code.
 
-Previous examples of weird machines include traditional vulnerabilities such as
-buffer overflows, format string exploits and return-to-libc attacks without
+Previous examples of ``weird machines'' include traditional vulnerabilities such
+as buffer overflows, format string exploits and return-to-libc attacks without
 function calls~\cite{buffer_overflow, format_string_exploit,
 shacham2007geometry}. 
 
-Unexpected functionality such as instruction-less
-computing~\cite{bangert2013page} enables the demonstration of a Turing complete
-weird machine by taking advantage of memory translation tables, page-faults, and
-hardware exception handling to effectively compute arithmetic and logical
-operations without the processor executing any instructions.
+Unexpected functionality such as instruction-less computing enables the
+demonstration of a Turing complete weird machine by taking advantage of memory
+translation tables, page-faults, and hardware exception handling to effectively
+compute arithmetic and logical operations without the processor executing any
+instructions~\cite{bangert2013page}.
 
 Features in modern processors such as multiple threads sharing system resources
 and optimizations done across the process isolation boundary leads to
 opportunities for ``weird machines''~\cite{d2015exploiting}.
 
-Whereas previous weird machines have demonstrated the capability to execute
-potentially malicious code in an unexpected manner, \speculake is a new type of
-``weird machine'' that takes advantage of speculative execution and uses a
+Previous ``weird machines'' have demonstrated the capability to execute
+potentially malicious code in an unexpected manner, and \speculake is a new type
+of ``weird machine'' that takes advantage of speculative execution and uses a
 non-complicit trigger program to execute otherwise dead code.
 
 \subsection{Red-Pills}
