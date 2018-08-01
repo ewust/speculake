@@ -6,30 +6,31 @@
 
 \subsection{Weird Machines}
 
-\speculake is a \textit{weird machine}---a machine which executes arbitrary
-computation using unintended executions paths, often the result of bugs or
-attacker exploits~\cite{weird_machines,bratus2011exploit,weird_exploits}. In
-particular \speculake takes advantage of speculative execution and a separate
-trigger program to execute otherwise dead code.
+\speculake shares many properties with \textit{weird machines}---a machine which
+take advantage of bugs or unexpected idiosyncracies in existing systems to
+perform arbitrary
+computation~\cite{weird_machines,bratus2011exploit}. In
+particular \speculake showcases the ability to execute dead code.
 
-Previous weird machines have demonstrated many traditional computer
-vulnerabilities such as buffer overflows, format string exploits and
-return-to-libc attacks without function calls~\cite{buffer_overflow,
-format_string_exploit, shacham2007geometry}. 
+Previous examples of weird machines include traditional vulnerabilities such as
+buffer overflows, format string exploits and return-to-libc attacks without
+function calls~\cite{buffer_overflow, format_string_exploit,
+shacham2007geometry}. 
 
-Additionally, unexpected functionality such as instruction-less
+Unexpected functionality such as instruction-less
 computing~\cite{bangert2013page} enables the demonstration of a Turing complete
 weird machine by taking advantage of memory translation tables, page-faults, and
 hardware exception handling to effectively compute arithmetic and logical
 operations without the processor executing any instructions.
 
-These types of machines are abundant in modern processors~\cite{d2015exploiting}
-as multiple threads share system resources cooperatively and optimizations are
-often done across the process isolation boundary. 
+Features in modern processors such as multiple threads sharing system resources
+and optimizations done across the process isolation boundary leads to
+opportunities for ``weird machines''~\cite{d2015exploiting}.
 
 Whereas previous weird machines have demonstrated the capability to execute
-potentially malicious code in an unexpected manner, \speculake showcases the
-ability to execute dead code within the speculative world.
+potentially malicious code in an unexpected manner, \speculake is a new type of
+``weird machine'' that takes advantage of speculative execution and uses a
+non-complicit trigger program to execute otherwise dead code.
 
 \subsection{Red-Pills}
 Hardware minutia have also been used to identify and fingerprint execution
