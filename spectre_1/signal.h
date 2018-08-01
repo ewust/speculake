@@ -16,7 +16,7 @@
 
 extern uint8_t* probe_buf;
 extern uint64_t cur_probe_space;
-#define NUM_PROBES 1024
+#define NUM_PROBES 256
 
 /*
  * Find the K items in results that have been hit the most often

@@ -12,7 +12,7 @@ endif
 all: exploit
 
 exploit: target_fn.c measure.c signal.c
-	$(CC) -Wl,-Tlinker.ld $^ -o $@ ${NO_PIE} -fno-stack-protector
+	$(CC) -Wl,-Tlinker.ld $^ -o $@ ${NO_PIE} -fno-stack-protector -fomit-frame-pointer
 
 clean:
 	$(RM) *.o exploit
