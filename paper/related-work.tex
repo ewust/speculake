@@ -12,20 +12,18 @@ perform arbitrary
 computation~\cite{weird_machines,bratus2011exploit}. In
 particular \speculake showcases the ability to execute dead code.
 
-Previous examples of ``weird machines'' include traditional vulnerabilities such
-as buffer overflows, format string exploits and return-to-libc attacks without
-function calls~\cite{buffer_overflow, format_string_exploit,
-shacham2007geometry}. 
-
-Unexpected functionality such as instruction-less computing enables the
-demonstration of a Turing complete ``weird machine'' by taking advantage of
-memory translation tables, page-faults, and hardware exception handling to
-effectively compute arithmetic and logical operations without the processor
-executing any instructions~\cite{bangert2013page}.
-
-Features in modern processors such as multiple threads sharing system resources
-and optimizations done across the process isolation boundary leads to
-opportunities for ``weird machines''~\cite{d2015exploiting}.
+Recently there has been a trend of features in modern processors such as
+multiple threads sharing system resources and optimizations done across the
+process isolation boundary which lead to opportunities for ``weird
+machines''~\cite{d2015exploiting}. In particular, previous examples of ``weird
+machines'' include traditional vulnerabilities such as buffer overflows, format
+string exploits and return-to-libc attacks without function
+calls~\cite{buffer_overflow, format_string_exploit, shacham2007geometry}.
+Additionally, unexpected functionality such as instruction-less computing
+enables the demonstration of a Turing complete ``weird machine'' by taking
+advantage of memory translation tables, page-faults, and hardware exception
+handling to effectively compute arithmetic and logical operations without the
+processor executing any instructions~\cite{bangert2013page}.
 
 \speculake is a new type of ``weird machine'' that takes advantage of
 speculative execution and uses a non-complicit trigger program to execute
@@ -39,31 +37,31 @@ Hardware minutia have also been used to identify and fingerprint execution
 environments---in malware this is known as a red-pill~\cite{red-pill} and is
 typically used by malware to detect when it is under emulation or a debugging
 environment~\cite{lindorfer2011detecting, balzarotti2010efficient,
-paleari2009fistful} attempting to circumvent malware detectors.
-
-To address red-pills, systems often employ measures to detect them.
-``Bare-metal'' emulation of malware~\cite{kirat2011barebox}, methods to
-determine if malware is performing red-pill checks to avoid emulation
+paleari2009fistful} attempting to circumvent malware detectors. To address
+red-pills, systems often employ measures to detect them. ``Bare-metal''
+emulation of malware~\cite{kirat2011barebox}, methods to determine if malware is
+performing red-pill checks to avoid emulation
 environments~\cite{kirat2014barecloud}, and symbolic execution can be used to
 combat red-pills by finding environmental triggers in malicious
 binaries~\cite{schwartz2010all}. 
 
-\speculake undertakes to avoid detection, and is a new class of red-pill. Unlike
-previous red-pills, \speculake complicates analysis and impedes red-pill
-detectors with the use a trigger program and speculative execution. The use of a
-separate and seemingly benign trigger program influenced by the adversary
-enables the \speculake malware to limit detection by acting benign until
-triggered to influence the branch predictor. Additionally, as an \speculake
-attack is carried out via speculative execution, the instructions executed and
-speculative state are not committed to by the processor and are thus obscured
-from analysts.
+Analogously, \speculake undertakes to avoid detection. Unlike previous
+red-pills, \speculake complicates analysis and impedes malware detectors with
+the use a trigger program and speculative execution. The use of a separate and
+seemingly benign trigger program influenced by the adversary enables the
+\speculake malware to limit detection by acting benign until triggered to
+influence the branch predictor (while still appearing innocuous). 
 
-Similarly, break-points (and other debugging techniques) will not aid in
-unravelling \speculake malware as break-points interrupt the control flow of a
-program and prevent speculative execution. Symbolic execution will also fail to
-find the speculative gadgets as they are never on the (committed) execution
-pathway. This allows \speculake to effectively act as a red-pill while avoiding
-detection as such.
+Additionally, as an \speculake attack is carried out via speculative execution,
+the instructions executed and speculative state are not committed to by the
+processor and are thus obscured from analysts. Similarly, symbolic execution
+will fail to find the speculative gadgets as they are never on the (committed)
+execution pathway. More direct analysis such as with break-points (and other
+debugging techniques) will not aid in unravelling \speculake malware as
+break-points interrupt the control flow of a program and prevent speculative
+execution. This allows \speculake to effectively act as a red-pill while
+avoiding detection as such.
+
 
 \subsection{Covert Channels}
 
@@ -83,20 +81,22 @@ information~\cite{percival2005cache}, measuring temperature to create a thermal
 covert channel~\cite{masti2015thermal, bartolini2016capacity} and taking
 advantage of processor architecture to leak information~\cite{wang2006covert}.
 
-The branch predictor has also been used as a covert
-channel~\cite{evtyushkin2016understanding}. Previous work has examined the
-capability of two colluding programs to share sensitive information between each
-other using the branch predictor by timing how long a spy process executes taken
-(not-taken) branches~\cite{evtyushkin2015covert}.
+\speculake uses the branch predictor as a covert channel. The branch predictor
+has been considered as a covert channel
+before~\cite{evtyushkin2016understanding}. For example, the branch predictor can
+be used by two colluding programs to share sensitive information between each
+other by timing how long a spy process executes taken (not-taken)
+branches~\cite{evtyushkin2015covert}.
 
-\speculake exemplifies a new covert channel using the branch predictor in which
-only one side of the channel is nefarious and the other is innocent. \speculake
-takes advantage of a branch predictor side-channel in \texttt{OpenSSL} and uses
-it as a covert channel. \texttt{OpenSSL} is not a malicious colluding program in
-this case but rather a program whose execution pathway can be influenced by
-attackers based on selected cipher suites. This allows malware to use the branch
-predictor as an attacker controlled covert channel between an unsuspecting
-trigger program and \speculake malware.
+While the branch predictor has been used as a covert channel between two
+colluding malicious programs, \speculake exemplifies a new covert channel using
+the branch predictor in which only one side of the channel is nefarious and the
+other is innocent. \speculake takes advantage of a branch predictor side-channel
+in \texttt{OpenSSL} and uses it as a covert channel. \texttt{OpenSSL} is not a
+malicious colluding program in this case but rather a program whose execution
+pathway can be influenced by attackers based on selected cipher suites. This
+allows malware to use the branch predictor as an attacker controlled covert
+channel between an unsuspecting trigger program and \speculake malware.
 
 % cache~\cite{aciiccmez2010new}, L2
 % cache~\cite{ristenpart2009hey,percival2005cache},
