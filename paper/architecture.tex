@@ -4,15 +4,15 @@
 
 \speculake malware is comprised of two independent programs: a payload program,
 and a trigger program. Both are installed on the victim's computer (e.g. via
-trojan, remote exploit, or phishing), and must run simultaenously on the same
+trojan, remote exploit, or phishing), and must run simultaneously on the same
 physical CPU. We note that the constraint of running programs on the same CPU is
-not a signifcant burden: \texttt{taskset} can be used to limit a process to a
+not a significant burden: \texttt{taskset} can be used to limit a process to a
 core, or if not available, the attacker can simply run multiple copies of the
 trigger or payload program to coerce the OS scheduler to assign a
-payload/trigger pair to the same core. We note that this is not a strict requirement
-for the attacker as most OS schedulers will use round robin algrithms to assign 
-tasks to processors -- eventually the trigger and payload will execute co-resident
-on a single core. 
+payload/trigger pair to the same core. We note that this is not a strict
+requirement for the attacker as most OS schedulers will use round robin
+algorithms to assign tasks to processors---eventually the trigger and payload
+will execute co-resident on a single core. 
 
 At a high level, the trigger program performs a series of indirect jumps in a
 loop, training the branch predictor to this pattern. Meanwhile, the
