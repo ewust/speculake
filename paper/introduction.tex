@@ -20,7 +20,12 @@ information from purposefully mis-speculated branches in a victim
 process~\cite{spectre}. The Meltdown vulnerability uses speculative results of an
 unauthorized memory read to sidestep page faults and leak protected memory from
 the kernel~\cite{meltdown}. Both of these vulnerabilities focus on extracting
-secret data from a process or operating system.
+secret data from a process or operating system. Recent follow-up work has
+revealed other Spectre ``variants'',  including speculative buffer
+overflows, speculative store bypass, and using alternative side channels besides
+the cache~\cite{spectre1-1,spectre3}. In addition, several attacks have
+leveraged Spectre to attack Intel's SGX~\cite{sgx-spectre,foreshadow}, and
+perform remote leakage attacks~\cite{netspectre}.
 
 \medskip
 
@@ -55,17 +60,20 @@ behavior~\cite{moser2007exploring,schwartz2010all,wang2017angr,egele2012survey}.
 
 
 \speculake provides a new technique to malware authors, allowing them to hide
-program functionality in code that does not execute at runtime.
+program functionality in code that appears to not execute at runtime. This technique
+defeats existing static and dynamic analysis, making it especially difficult for
+malware analysts to determine what a binary will do.
 
 
 At a high level, \speculake consists of two parts: a payload program, and a
 trigger program. When run by itself, the payload program executes a pattern of
-indirect jumps and measures a cache side channel. While the trigger program is
-not running, the payload program is effectively inactive (and may optionally do
-some decoy operation). When the trigger program runs, it executes a similar
+indirect jumps and measures a cache-based side channel\footnote{We note that other
+side channels could be used in place of a cache}. While the trigger program is
+not running, the payload program is effectively inactive (potentially performing
+a decoy operation). When the trigger program runs, it executes a similar
 pattern of indirect jumps (with similar source and destination addresses as the
 payload program), effectively training the CPU's branch predictor to the jump
-pattern specified by the trigger program.
+pattern performed by the trigger program.
 
 Importantly, the trigger program and payload program's indirect jump patterns
 diverge on the destination of their final jumps. However, because the trigger
@@ -80,7 +88,7 @@ mis-speculation in the payload program, it will discard the results from the
 speculative gadget and continue executing from the correct destination. However,
 the payload program has a limited speculative window where it can perform
 computation, and can communicate results back to the ``real world'' payload 
-program via a cache side channel.
+program via a side channel.
 
 %Figure~\ref{fig:high-level}
 
@@ -110,20 +118,21 @@ Simulating or modelling the speculative execution path is a difficult task for a
 program analyst hoping to reverse engineer an \speculake binary. First, the
 analyst must reverse engineer and accurately model the closed-source proprietary
 components of the target CPU, including the branch predictor, cache hierarchy,
-out-of-order execution, and hyperthreading. In contrast, the \speculake
+out-of-order execution, and hyperthreading, as well as taking into account the
+operating system's process scheduling algorithm. In contrast, the \speculake
 author only has to use a partial model of these components and produce binaries
 that take advantage of them, while the analyst's model must be complete to
-capture all potential \speculake uses. Second, the analyst must run all
+capture all potential \speculake variants. Second, the analyst must run all
 potential trigger programs through the simulator, including benign programs with
-realistic inputs. Both of these contribute to a time-consuming and expensive
-endeavor for would-be analysts.
+real-world inputs. Both of these contribute to a time-consuming and expensive
+endeavor for would-be analysts, giving the attacker a significant advantage.
 
 % Results summary
 In order to study the potential of \speculake, we implement several example
 payload programs and evaluate their performance. We find that the speculative
 window is limited by the reorder buffer and physical register file sizes, which
 allows us to execute between 100 and 200 instructions speculatively on modern
-Intel CPUs. While brief, we are able to perform execution in short steps,
+Intel CPUs. While brief, we show how to perform execution in short steps,
 communicating intermediate results back to the ``real world'' part of the
 payload program. Using this technique, we demonstrate implementing a universal
 Turing machine (demonstrating arbitrary computation), a custom instruction set
@@ -132,7 +141,8 @@ the ability to perform AES decryption of a text block via AES encrypt/decrypt
 instructions.
 
 Using these building blocks, we demonstrate the practicality of hiding arbitrary
-computation by implementing a reverse shell in our speculative instruction set.
+computation by implementing a reverse shell in our speculative instruction set,
+with instructions decrypted in the speculative world.
 We show that this simple payload is able to perform several system calls in a
 reasonable time, ultimately launching a dial-back TCP shell in just over
 2~milliseconds after the trigger program starts.

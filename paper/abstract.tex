@@ -20,13 +20,15 @@ communicating its results back to the rest of the payload program, changing its
 behavior.
 
 We study the extent and types of execution that can be performed
-speculatively, and build tools that enable several computations to be
+speculatively, and demonstrate several computations that can be
 performed covertly. In particular, within speculative execution we are able to
-decrypt memory using AES-NI instructions, and are able to interpret a custom
-virtual machine language to perform arbitrary computation.
-We also show how the trigger program
+decrypt memory using AES-NI instructions at over 5~kbps. Building on this, we
+are additionally able to decrypt and interpret
+a custom virtual machine language to perform arbitrary computation,
+allowing us to create a covert dial-back shell that executes in a few
+milliseconds. We also show how our corresponding trigger program
 can be a pre-existing benign application already running on the system, and
-demonstrate this concept with OpenSSL driven remotely by the attacker as our
+demonstrate this concept with OpenSSL driven remotely by the attacker as a
 trigger program.
 
 %Finally, we describe defenses, but in all honesty, you're probably not going to like
