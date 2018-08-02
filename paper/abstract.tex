@@ -16,7 +16,7 @@ We introduce \emph{\speculake}\footnote{Executable Spectre}, which compiles
 arbitrary malicious code into a seemingly-benign payload binary. When a separate
 trigger program runs on the same machine, it mistrains the CPU's branch
 predictor, causing the payload program to \emph{speculatively} execute code, and
-communicating its results back to the rest of the payload program, changing its
+communicating its results back to the rest of the payload program, changes its
 behavior.
 
 We study the extent and types of execution that can be performed
