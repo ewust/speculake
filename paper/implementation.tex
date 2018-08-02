@@ -24,8 +24,6 @@ cache but otherwise need not be accessed directly.
 \subsection{Turing Machine}
 \label{subsec:impl-turing}
 
-\FigTuringSuccess
-
 We implemented a 2-symbol 5-state Busy Beaver Turing machine logic in a  
 payload application. The gadget implementation reads a global state,
 tape, and position, and determines how the state, tape, and position should be
@@ -36,16 +34,16 @@ this array to avoid the CPU's stride prediction from preemptively loading values
 in the buffer.
 
 
-Our implementation is able to examine the state and current symbol
-on the Turing tape and make decisions based on these values as long as they are
-in cache. If one of these becomes uncached, one of two things will happen.
-First, the speculative gadget may simply fail to report any result back to the
-real world, as the uncached read takes too long to return before the speculative
-world is squashed by the resolution of the function pointer. Second, the CPU may
-\emph{speculate} on the value of the uncached item, which may be incorrect. Of
-course, this does not affect the correctness of normal programs, but it does
-impact the correctness of our speculative code. In particular, the speculative
-gadget will compute using an incorrect value of state or current
+Our implementation is able to examine the state and current symbol on the Turing
+tape and make decisions (in the speculative world) based on these values as long
+as they are in cache. If one of these becomes uncached, one of two things will
+happen. First, the speculative gadget may simply fail to report any result back
+to the real world, as the uncached read takes too long to return before the
+speculative world is squashed by the resolution of the function pointer. Second,
+the CPU may \emph{speculate} on the value of the uncached item, which may be
+incorrect. Of course, this does not affect the correctness of normal programs,
+but it does impact the correctness of our speculative code. In particular, the
+speculative gadget will compute using an incorrect value of state or current
 symbol, and ultimately report the wrong update.
 
 
@@ -55,21 +53,18 @@ speculative gadget will read from memory. Thus, error correcting codes on
 the reported result do not improve the situation.
 
 
-
-In order to have confidence the speculative gadget executed with the
-correct inputs and reported the computed result correctly, 
-we repeat the execution a number of times and look for the value that was
-detected as present in the cache most often over all the iterations.
-
-Our Turing implementation discovered that 10 repetitions is sufficient for the
-real world to determine the correct value, as the ``hit rate'' for any one
-iteration observing the correct value loaded in cache was over 80\%.
-
 We implemented the 5 state Busy Beaver configuration which requires over 47
-million steps to complete. Figure~\ref{fig:turing_success} shows the
-capabilities of our Turing implementation. We were able to verify that the
-speculative world could correctly compute a million instructions with no errors
-at a rate of 324 instructions per second.
+million steps to complete. In order to have confidence the speculative gadget
+executed with the correct inputs and reported the computed result correctly, we
+repeat the execution a number of times and look for the value that was detected
+as present in the cache most often over all the iterations. We measured the
+error rate of our implementation as a function of how many redundant iterations
+of the same step. Our Turing implementation discovered that 10 repetitions is
+sufficient for the real world to determine the correct value, as the ``hit
+rate'' for any one iteration observing the correct value loaded in cache was
+over 80\%. Additionally we found that the speculative world could correctly
+compute a million instructions with no errors at a rate of 324 instructions per
+second.
 
 % Target_fn returning next step given access to current state in global vars
 %   - busy beaver
