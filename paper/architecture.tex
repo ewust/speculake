@@ -51,11 +51,11 @@ remotely), the analyst will not be able to observe or force this trigger to
 happen at will. We emphasize that while this may also be true for existing
 trigger-based malware, analysts can often reverse engineer the trigger out of
 the malware, for example by observing control flow within the malware and using
-adaptive fuzzers~\cite{afl} to generate inputs that explore other execution
+adaptive fuzzers~\cite{afl,stephens2016driller} to generate inputs that explore other execution
 paths of the binary. In contrast, \speculake malware's trigger depends on
 behavior in seemingly unrelated binaries, influencing malware behavior through
-channels invisible to the analyst. As with typical malware, the analyst may
-attempt to reverse engineer the trigger to revela the malware's behavior, but we
+channels that are effectively invisible to the analyst. As with typical malware, the analyst may
+attempt to reverse engineer the trigger to reveal the malware's behavior, but we
 will show (in Section~\ref{subsec:nested-spec}) how to defeat this type of
 analysis.
 
@@ -64,7 +64,7 @@ analysis.
 
 In \speculake, we cause the CPU to mis-speculate the destination of an indirect
 branch in the payload program, causing it to speculatively execute 
-instructions that are never truly executed. We term this speculative destination
+instructions that are never truly executed. We term the destination where speculation begins
 the \emph{speculative entry point}. \speculake uses indirect jumps to allow
 speculative execution from \emph{any} instruction in the payload process'
 address space. Because it can jump to any instruction, the malware analyst has a
@@ -89,18 +89,21 @@ We observe that Intel CPUs consider three types of x86\_64 indirect branches:
 general purpose registers besides \texttt{\%rax} can be used as well}.
 We created a simple trigger program that performs a series of 28 indirect
 branches
-using \texttt{jmpq *\%rax} instructions. Between each jump, we increment
-\texttt{\%rax} to account for the number of bytes between jumps. For the last
-jump, we load a function pointer into \texttt{\%rax} and do a final indirect
-branch using \texttt{callq *\%rax}.
+using \texttt{jmpq *\%rax} instructions, as we found that 28 jumps was the minimum
+needed to reliably train the indirect branch predictor. 
+Between each jump, we incremented
+\texttt{\%rax} accordingly to continue on to the next jump. After these 28
+jumps, we load a function pointer into \texttt{\%rax} and do a final indirect
+branch using \texttt{callq *\%rax}. In our trigger, we perform these jumps
+        repeatedly in a loop.
 
 In our payload program, we first perform the same 28 indirect jumps. We ensure
-the source address of these jumps is the same as in the trigger program by
+the source and destination addresses of these jumps is the same as in the trigger program by
 manually defining their containing function at a fixed address inside a linker
 script. We also do the final indirect call to a function pointer, but with two
-differences. First, the destination of the function pointer is a different
-address, and second, the location of the function pointer in memory is uncached.
-This forces the CPU to predict the destination of the indirect call while it
+differences. First, the destination in the function pointer is a different
+address, and second, the memory location of the function pointer itself is uncached.
+This forces the CPU to predict the destination of the final indirect call while it
 waits for the function pointer to load from memory. Due to the similar
 history of branches with the trigger program,
 the CPU will (incorrectly) predict the destination to be the same as the one in
@@ -109,13 +112,13 @@ payload. Even though the in-order execution of
 payload program never executes or even reads from this address, the CPU will
 briefly execute instructions there speculatively.
 
-Eventually, the dereference of the uncached function pointer in payload program
+Eventually, the dereference of the uncached function pointer in the payload program
 will be resolved, and the CPU will recognize it has incorrectly predicted the
-destination of its \texttt{callq}/\texttt{jmpq}/\texttt{retq} instruction. The
+destination of its \texttt{callq} instruction. The
 results from the speculative entry point instructions will be discarded, and the
-CPU will continue executing from the correct destination. However, as the
-speculative code changes what is loaded into the cache based on its results, it
-can covertly communicate its results to the ``real world'' program.
+CPU will continue executing from the correct destination. However, the
+speculative code can change what is loaded into the cache based on its
+computation, allowing it to covertly communicate its results to the ``real world'' program.
 
 
 
@@ -128,11 +131,12 @@ can covertly communicate its results to the ``real world'' program.
 We performed several experiments to determine how much computation can be
 performed
 speculatively, as well as what components are responsible for the limit.
-We report results from our experiments on an Intel~Xeon-1270,
+We report results from our experiments on an Intel~Xeon-1270 (Sandy Bridge),
 though we note we found similar results across other Intel processor generations,
-including an i5-7200U, % jack
-an i5-4300U, % ewust laptop
-and an i5-4590. % ewust desktop
+including an i5-7200U (Kaby Lake), % jack
+an i5-4300U (mobile Haswell), % ewust laptop
+an i5-4590 (desktop Haswell), % ewust desktop
+as well as an AMD EPYC 7251. % envy
 % For simplicity, we report results from only the Xeon-1270.
 
 
@@ -182,12 +186,13 @@ branch was resolved.
 We also tested whether instruction complexity or data dependencies impact the
 number of instructions that can be completed. We find that data dependencies and
 instruction complexity both have an impact on the number of instructions that
-can be executed. Instruction complexity is determined by the number of $\mu$ ops
+can be executed. Instruction complexity is determined by the number of $\mu$~ops
 that the instruction uses, which appears to be what is tracked in the ROB. For
-instance, on our architecture, the 64-bit \texttt{idiv} instruction takes 59
-$\mu$ ops, and we can execute up to 3 of them in the speculative world.
+instance, on our architecture, the 64-bit \texttt{idiv} instruction takes 59~$\mu$~ops,
+and we can execute up to 3 of them in the speculative world.
 Meanwhile, we can execute up to 18 32-bit \texttt{idiv} instructions, which each
-take 9 $\mu$ ops~\cite{intel-instruction-tables}.
+take 9~$\mu$~ops~\cite{intel-instruction-tables}. These suggest we can execute
+on the order of 175~$\mu$~ops before the speculative world expires.
 
 We found that the processor can identify some operations that have no effect on
 output registers and allows them to use the entire size provided by the ROB, as
@@ -205,9 +210,11 @@ Most notably instructions that use the extended x86 registers are still valid
 within the speculative context. Specifically, Intel's hardware accelerated
 AES-NI encryption and decryption instructions, which each use 128-bit registers.
 As shown in Figure~\ref{fig:spec-capacity}, speculative environments can
-complete a significant number of AES rounds---more than enough to decrypt a
-full block using AES-CBC. We investigate the use of AES instructions in the
-spculative environment further in Sections~\ref{subsec:decryption}.
+complete a significant number of AES rounds---over 100 rounds in our
+experiments, more than enough to decrypt a
+full block using simple AES modes (e.g. AES-CTR). We investigate the use of AES
+instructions in the spculative environment further in
+Sections~\ref{subsec:decryption}.
 
 \medskip
 
@@ -216,7 +223,7 @@ is rarely limited by cache miss duration. Instead
 ROB size and processor mechanisms for resolving
 data dependencies define an upper boundary of approximately 150
 instructions\footnote{While \texttt{nop} is able to execute up to the full 220
-ROB capacity, instructions that do useful work cannot reach this limit}.
+ROB capacity, instructions that do useful work (and/or use multiple $\mu$ ops) cannot reach this limit}.
 
 % TODO: 
 % - Highlist instruction signal variablity (add v mul v aesdec v nop)?
@@ -256,7 +263,7 @@ target A, but the CPU is mistrained by a trigger program that jumps to B, thus
 causing the payload program to speculatively execute at B. At B, suppose there
 is a second indirect jump, perhaps using the same register as the first jump
 (which has still not resolved). If the trigger program jumps to C, the payload
-program will speculate a second time and continue speculative execution at C.
+program may speculate a second time and continue speculative execution at C.
 
 We find that not all Intel CPUs support nested speculation. For
 example, it appears Haswell chips do not speculate while already speculating,
@@ -265,28 +272,31 @@ preceeded Haswell) and Kaby Lake (which followed Haswell) support nested
 speculation. We find that when a CPU does support nested speculation, there
 appears to be no limit to nested depth besides the speculative instruction
 limit. We use a 16-deep nested speculation in Section~\ref{subsec:impl-aes}
-to thoroughly protect speculative decryption keys from reverse
+to protect speculative decryption keys from reverse
 engineering.
 
 \subsection{Speculative Primitive}
 
-We summarize our findings into a \emph{speculative primitive}, which allows us to
+We summarize our findings into a \emph{speculative primitive}, which allows our payload program to
 speculatively (and covertly) perform on the order of 100 arbitrary
 instructions while an accompanying trigger program is running, and communicate
 a short (e.g. single byte) result to the real
 world via a cache side channel. These speculative instructions are able to read
 from any real-world memory or registers, but they cannot perform updates or
 writes directly. To update memory, the speculative instructions must communicate
-to the real world through a cache side channel.
+to the real world. We use a cache side channel to do so, but other side channels
+compatible with Spectre could also be used~\cite{spectre1-1}.
 
 We note a performance tradeoff between the size of communication (e.g. 4 bits vs 8
 bits) and the time it takes the real world to recover the result from the side
 channel. Using Flush+Reload~\cite{yarom2014flush+} as our cache side channel,
 recovering the result requires accessing all elements in an array exponential in
-the size of the result (e.g. $2^8$ array reads to recover an 8-bit result). 
+the size of the result (e.g. $2^8$ array reads to recover an 8-bit result).
 Therefore, there is a
 performance advantage for keeping the size of the result small, and communicating
 out small pieces of information that are aggregated by the real world.
-
+Meanwhile, smaller channels introduce more overhead in recovering information. We
+investigate this tradeoff in Section~\ref{subsec:impl-aes}, and find that 8~bits
+is near optimal.
 
 %%%%%%%%%%%%%%
