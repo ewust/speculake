@@ -20,7 +20,6 @@ implementation of \speculake used the \texttt{Flush+Reload} cache side channel
 method, but other methods (such as \texttt{Prime+Probe}) could be used in its
 place.
 
-
 In addition, the malware can also employ more subtle and less direct methods
 of measuring what is in the cache. For example, creating race conditions between
 multiple threads that results in different behaviors depending on which threads
@@ -32,6 +31,36 @@ to exfiltrate information from the speculative gadgets, such as the branch
 predictor itself~\cite{evtyushkin2018branchscope}, memory bandwidth, or power
 utilization of the system.
 
+\paragraph{Red-Pills}
+Hardware minutia have also been used to identify and fingerprint execution
+environments---in malware this is known as a red-pill~\cite{red-pill} and is
+typically used by malware to detect when it is under emulation or a debugging
+environment~\cite{lindorfer2011detecting, balzarotti2010efficient,
+paleari2009fistful} attempting to circumvent malware detectors. To address
+red-pills, systems often employ measures to detect them. ``Bare-metal''
+emulation of malware~\cite{kirat2011barebox}, methods to determine if malware is
+performing red-pill checks to avoid emulation
+environments~\cite{kirat2014barecloud}, and symbolic execution can be used to
+combat red-pills by finding environmental triggers in malicious
+binaries~\cite{schwartz2010all}. 
+
+Analogously, \speculake undertakes to avoid detection. Unlike previous
+red-pills, \speculake complicates analysis and impedes malware detectors with
+the use a trigger program and speculative execution. The use of a separate and
+seemingly benign trigger program influenced by the adversary enables the
+\speculake malware to limit detection by acting benign until triggered to
+influence the branch predictor (while still appearing innocuous). 
+
+Additionally, as an \speculake attack is carried out via speculative execution,
+the instructions executed and speculative state are not committed to by the
+processor and are thus obscured from analysts. Similarly, symbolic execution
+will fail to find the speculative gadgets as they are never on the (committed)
+execution pathway. More direct analysis such as with break-points (and other
+debugging techniques) will not aid in unravelling \speculake malware as
+break-points interrupt the control flow of a program and prevent speculative
+execution. This allows \speculake to effectively act as a red-pill while
+avoiding detection as such. Suggesting that significant work would be required
+to adapt current red-pill detectors to detect \speculake malware.
 
 %While the notion of simply adapting current defenses to recognize this new
 %strain of malware may be simplest, we caution that the methods introduced by
