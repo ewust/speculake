@@ -305,9 +305,9 @@ recovering the result requires accessing all elements in an array exponential in
 the size of the result (e.g. $2^8$ array reads to recover an 8-bit result).
 Therefore, there is a
 performance advantage for keeping the size of the result small, and communicating
-out small pieces of information that are aggregated by the real world.
+out small pieces of information that are aggregated by the real world over multiple speculative executions.
 Meanwhile, smaller channels introduce more overhead in recovering information. We
 investigate this tradeoff in Section~\ref{subsec:impl-aes}, and find that 8~bits
-is near optimal.
+is near optimal in practice.
 
 %%%%%%%%%%%%%%
