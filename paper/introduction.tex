@@ -10,22 +10,23 @@ benefit is faster execution performance. When its guess is wrong, the CPU
 simply discards the speculated results and continues executing along the true path.
 
 
-Previously, it was assumed that speculative execution results
-remain invisible if discarded, as careful CPU design maintains strict separation
-between speculative results and updates to architectual state.
-However, recent research has revealed side channels that violate this
-separation, and researchers have demonstrated ways to exfiltrate results from speculative
-computation. Most notably, the Spectre vulnerability allows attackers to leak
-information from purposefully mis-speculated branches in a victim
-process~\cite{spectre}. The Meltdown vulnerability uses speculative results of an
-unauthorized memory read to sidestep page faults and leak protected memory from
-the kernel~\cite{meltdown}. Both of these vulnerabilities focus on extracting
-secret data from a process or operating system. Recent follow-up work has
-revealed other Spectre ``variants'',  including speculative buffer
-overflows, speculative store bypass, and using alternative side channels besides
-the cache~\cite{spectre1-1,spectre3}. In addition, several attacks have
-leveraged Spectre to attack Intel's SGX~\cite{sgx-spectre,foreshadow}, and
-perform remote leakage attacks~\cite{netspectre}.
+Previously, it was assumed that speculative execution results remain invisible
+if discarded, as careful CPU design maintains strict separation between
+speculative results and updates to architectual state. However, recent research
+has revealed side channels that violate this separation, and researchers have
+demonstrated ways to exfiltrate results from speculative computation. Most
+notably, the Spectre vulnerability allows attackers to leak information from
+purposefully mis-speculated branches in a victim process~\cite{spectre}. The
+Meltdown vulnerability uses speculative results of an unauthorized memory read
+to sidestep page faults and leak protected memory from the
+kernel~\cite{meltdown}. Both of these vulnerabilities focus on extracting secret
+data from a process or operating system. Recent follow-up work has revealed
+other Spectre ``variants'',  including speculative buffer overflows, speculative
+store bypass, and using alternative side channels besides the
+cache~\cite{kiriansky2018speculative,spectre3}. In addition, several attacks
+have leveraged Spectre to attack Intel's SGX~\cite{chen2018sgxpectre,
+spectre_sgx, foreshadow}, and perform remote leakage
+attacks~\cite{schwarz2018netspectre}.
 
 \medskip
 
