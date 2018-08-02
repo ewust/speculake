@@ -1,9 +1,105 @@
 
 \section{Discussion}
 
+\subsection{Resilience of \speculake}
+%Spectre works to use a cache side-channel to leak information from a process. As
+%such defenses to Spectre work to limit the information available to a
+%speculatively executing program. 
+%
+\subsubsection{Spectre Versions}
+In this work we have implemented applications making use of the speculative
+primitive in Spectre version 2, however the speculative primitive is not 
+unique to this varaint. The \speculake model can be applied more broadly
+across the spectrum of speculative functionality to hide malicious computation.
+
+For example an attacker could construct a series of direct branches with 
+contradictory conditions such that the resulting code section can never 
+be on a real world execution path.
+This, however does not prevent the section from being speculated. An 
+attacker may be able to hide a jump to a speculative entry point in 
+this section and train the branch predictor to take this path. 
+
+Alternatively, recent variants of Spectre version 1 could be used to
+redirect control flow in speculative overflow style attacks~\cite{}. 
+Using this technique speculative gadgets could be executed
+based on attacker controlled input. 
+
+Similarly we theorize that speculative-store-bypass could be used to
+redirect control flow when the mis-speculated load is that of an indirect
+branch target or function pointer. Again the speculative primitive could 
+be employed to execute speculative gadgets. 
+
+These alternatives create an even larger attack area for a potential 
+reverse engineer as the attacker can pivot between them with minimal alterations. 
+
+\subsubsection{Gadget Location}
+The benefits of \speculake rely on the computation performed in the
+speculative world being well hidden. To this end we have verified 
+certain requirements about the locations that a speculative gadget can 
+be placed within a binary. 
+
+First and foremost the gadget must be in the instruction cache. 
+This does not require that the actual instructions ever run,
+ only that they are in cache. We have 
+found that this is not a large barrier to overcome as Intel 
+processors aggressively prefetch cache pages~\cite{measuring-cache}
+and simple access patterns could be established to ensure
+that the required block(s) are accessible. 
+
+We have also confirmed that all speculative code in the payload must be
+stored in executable pages, and that it cannot be stored in non-executable data
+sections. This is somewhat surprising, given the nature of the Meltdown
+vulnerability that enabled speculative execution past page faults. However, in
+the case of Meltdown, the speculative computation still occurs in pages marked
+as executable.
+
+%We suspect that this is again due to caching. The processor has no
+%reason to cache instructions stored in the data section in the instruction
+%cache. If a trigger trains the branch predictor to jump to an address in the
+%payload's data section, the payload will not be able to fetch the instructions
+%into the execution pipeline. 
+
+
+\subsubsection{Hypervisors}
+For virtual environments that provide guests significant periods of access to
+hardware resources, \speculake is viable in certain configurations. 
+This result is specific to Spectre version 2 as it relies on 
+the indirect branch predictor effecting the branches in either the host 
+or guest environment. We have found that the hypercall context switch from 
+guest to host is light enough that a trigger program running in a guest
+can effect the branch predictor in a host on the same CPU core. This is not
+true in the alternate configuration where the trigger runs on the host as the 
+hypercall transition seems to be more substantial. This implies, and we have verified,
+that guest-to-guest indirect branch predictor interference, and the current
+\speculake implementation, will not work across disparate virtual environments.
+
 \subsection{Defenses}
 We now address possible defenses to detecting and reverse engineering malware that uses
 \speculake. 
+\subsubsection{Implemented Mitigations}
+Multiple mitigation have been implemented in production and consumer environments
+already, stretching from compiler patches to micro-code updates.
+
+IBPB - IBPB is used when transitioning to a new secure address space allowing a
+program to ensure that earlier code's behavior does not effect its branch prediction.
+However, this does not prevent a willing payload program from intentionally omitting
+IBPB protections.
+
+STIBP - As discussed in section~\ref{sssec:hyperthread} Single Thread Indirect Branch Predictors
+prevent sibling threads from interacting via the Indirect Branch Predictor~\cite{}.
+However, this does not prevent coresident processes from cooperating, which is
+guaranteed to eventually occur in most modern operating systems.
+
+IBRS - Prevents code from less privileged prediction modes from effecting predicted
+addresses, specifically used for portecting the kernel. This does not
+prevent speculative execution in a willing payload program in a less privileged
+speculation mode.
+
+Retpoline - Using speculation to prevent speculation, retpoline is a construction
+used to prevent arbitrary indirect jumps that can be included inline by a compiler
+or patched into a binary~\cite{}. While this successfully thwarts indirect branch prediction
+tampering it incurs a siginificant performance penalty when applied globally to all
+indirect branches~\cite{}.
 
 \subsubsection{Malware Detection}
 \label{subsubsec:malware}
@@ -28,8 +124,10 @@ values are cached.
 Finally, \speculake could also use another side channel method that
 avoids the cache
 to exfiltrate information from the speculative gadgets, such as the branch
-predictor itself~\cite{evtyushkin2018branchscope}, memory bandwidth, or power
-utilization of the system.
+predictor itself~\cite{evtyushkin2018branchscope}, memory bandwidth, power
+utilization, or contention over other shared resources. While cache 
+channels tend to have the highest throughput, they are not the only 
+resource that must be monitored to detect or prevent these types of attacks. 
 
 \paragraph{Red-Pills}
 Hardware minutia have also been used to identify and fingerprint execution
@@ -137,76 +235,6 @@ Spectre vulnerability.
 %necessary, increasing this value to higher levels can lead to a significantly
 %higher confidence with very little performance detriment (especially in the
 %case of AES decryption).
-
-\subsection{Resilience of \speculake}
-%Spectre works to use a cache side-channel to leak information from a process. As
-%such defenses to Spectre work to limit the information available to a
-%speculatively executing program. 
-%
-
-\subsubsection{Gadget Location}
-The benefits of \speculake rely on the computation performed in the
-speculative function being well hidden. To this end we have verified 
-certain requirements about the locations that a speculative gadget can 
-be placed within a binary. 
-
-First and foremost the gadget must be in the instruction cache. 
-This does not require that the actual instructions ever run,
- only that they are in cache. We have 
-found that this is not a large barrier to overcome as Intel 
-processors aggressively prefetch cache pages~\cite{measuring-cache}
-and simple access patterns could be established to ensure
-that the required block(s) are accessible. 
-
-We have also confirmed that all speculative code in the payload must be
-stored in executable pages, and that it cannot be stored in non-executable data
-sections. This is somewhat surprising, given the nature of the Meltdown
-vulnerability that enabled speculative execution past page faults. However, in
-the case of Meltdown, the speculative computation still occurs in pages marked
-as executable.
-
-%We suspect that this is again due to caching. The processor has no
-%reason to cache instructions stored in the data section in the instruction
-%cache. If a trigger trains the branch predictor to jump to an address in the
-%payload's data section, the payload will not be able to fetch the instructions
-%into the execution pipeline. 
-
-
-\subsubsection{Hypervisors}
-For virtual environments that provide guests significant periods of access to 
-hardware resources, we have found that \speculake is viable in certain configurations. 
-
-\texttt{Guest1 -> Guest1}---When both the trigger and payload are run internal to a
-single virtual machine the branch prediction is successfully trained in the
-payload program, though at a notably reduced hit rate. This can be overcome by
-using an increased number of iterations to establish confidence. 
-
-\texttt{Guest -> Host}---In a configuration where the trigger runs on the guest
-while the payload runs on the host we have found that \speculake also
-successfully trains the branch predictor well enough retrieve a signal. Again,
-this signal is significantly reduced, implying the hypercall context switch from
-guest to host requires some overhead. We note that processor affinity in a guest
-is not mapped to processor affinity in the host, as the host assigns the VM to
-any available CPU, though eventually the hypervisor will assign the VM back to
-the same core as the payload program allowing progress to continue.
-
-\texttt{Host -> Guest}---When the trigger program executes on the host
-attempting to train the
-branch predictor to influence a payload process in a guest we have found that
-the payload receives no signal. This implies that the hypercall context switch
-from the host to the guest is heavier and has a larger impact on branch history.
-This is also supported by the fact that hypervisors can be fingerprinted from 
-within a VM using the branch predictor as demonstrated by the Project Zero 
-team at Google~\cite{}.
-~\cite{project_zero}.
-
-\texttt{Guest1 -> Guest2}---Configurations where the trigger and payload run on
-co-resident virtual machines similarly show no signal for the same reasons that
-host to guest \speculake fails. However, this has the added difficulty that
-virtual machines must be run on the same core or on a pair of hyperthreaded
-cores.
-
-
 
 
 \subsection{Future Work}
