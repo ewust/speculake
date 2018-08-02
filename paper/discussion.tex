@@ -42,12 +42,12 @@ emulation of malware~\cite{kirat2011barebox}, methods to determine if malware is
 performing red-pill checks to avoid emulation
 environments~\cite{kirat2014barecloud}, and symbolic execution can be used to
 combat red-pills by finding environmental triggers in malicious
-binaries~\cite{schwartz2010all}. 
+binaries~\cite{schwartz2010all}. Similar sand-boxing techniques may be applied
+to detect \speculake malware.
 
-Analogously, \speculake undertakes to avoid detection. Unlike previous
-red-pills, \speculake complicates analysis and impedes malware detectors with
-the use a trigger program and speculative execution. The use of a separate and
-seemingly benign trigger program influenced by the adversary enables the
+Unlike red-pills, \speculake complicates analysis and impedes malware detectors
+with the use a trigger program and speculative execution. The use of a separate
+and seemingly benign trigger program influenced by the adversary enables the
 \speculake malware to limit detection by acting benign until triggered to
 influence the branch predictor (while still appearing innocuous). 
 
@@ -55,7 +55,9 @@ Additionally, as an \speculake attack is carried out via speculative execution,
 the instructions executed and speculative state are not committed to by the
 processor and are thus obscured from analysts. Similarly, symbolic execution
 will fail to find the speculative gadgets as they are never on the (committed)
-execution pathway. More direct analysis such as with break-points (and other
+execution pathway. 
+
+Furthermore, direct analysis such as with break-points (and other
 debugging techniques) will not aid in unravelling \speculake malware as
 break-points interrupt the control flow of a program and prevent speculative
 execution. This allows \speculake to effectively act as a red-pill while
