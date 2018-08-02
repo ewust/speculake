@@ -43,7 +43,7 @@ this to inform the CPU's guess for speculative execution.
 There are two kinds of branches a CPU handles: \emph{direct} and
 \emph{indirect}. A \emph{direct} branch may either jump to a provided address or
 continue executing straight through depending on the state of the CPU (e.g. condition
-registers). While there are only two potential statically-known targets for a direct
+registers). While there are only two statically-known targets for a direct
 branch, the CPU may not know if the branch is taken or not until preceding
 instructions retire. An \emph{indirect} branch is always taken, but its address
 is determined by the value of a register or memory address. Direct branches are
