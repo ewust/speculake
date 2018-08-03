@@ -1,29 +1,93 @@
 
 
-\section{Trigger Programs}
-Easy answer: custom program that mistrains branch predictor
+\section{Triggers}
+%Easy answer: custom program that mistrains branch predictor
 
-\subsection{Benign Triggers}
-Could also be any program on the system, and potentially remote!
+So far, we have described using a custom program as a trigger, which performs a
+pattern of indirect jumps to mistrain the indirect branch predictor. In this
+section, we describe alternative triggers, including using benign programs
+already on the system, and recent Spectre variants.
+
+\subsection{Benign Program Triggers}
+\label{subsec:openssl}
+
+Custom trigger programs that are installed with malicious payload programs may
+be easy for an analyst to pair up and analyze. As an alternative to trying to
+hide the trigger program from the analyst, ExSpectre can use \emph{benign}
+programs already installed on the system as a trigger.
+
+For example, if a benign application makes a series of indirect jumps---thus training
+the indirect branch predictor---an ExSpectre payload can make similar indirect
+jumps leading up to its speculative entry point. The payload's speculative entry
+point will be determined by the benign application, but may be even more
+difficult for an analyst to discover, as now the ExSpectre trigger could be
+\emph{any} application running concurrently on the system.
+
+\paragraph{OpenSSL}
+We experimented using the OpenSSL library as a potential benign trigger
+application, as its source code has a gratuitous use of function pointers which
+compile to indirect jumps. In addition, it has many complicated code paths that
+can be easily selected by remote clients through their choice of cipher suite.
+This allows a remote attacker to trigger ExSpectre malware on a server running a
+(benign) TLS stack supported by OpenSSL, simply by making a large number of TLS
+connections with a specific cipher suite. We describe our implementation using
+OpenSSL as a trigger in Section~\ref{subsec:openssl-impl}.
+
+\medskip
+
+In addition, an adversary could use a benign application (like OpenSSL) to
+\emph{communicate} information covertly to the malicious payload program. For
+example, with OpenSSL, the attacker could have a pair of cipher uncommon cipher
+suites, and using one results in communicating a 1-bit, while the other
+communicates a 0-bit to the payload. To receive this, the payload would have to
+do indirect jump patterns corresponding to both cipher suites, with the
+corresponding speculative entry points shifting in the appropriate bit. Thus, an
+adversary can communicate remotely (over a network) to the payload program
+indirectly via a benign application.
+
+We observe that communication could also go in the other direction: from
+the payload program back to the remote adversary, also via a benign application
+intermediary. The payload program could influence the performance of the benign
+application, and the adversary could time responses from the benign application
+to receive covert information from the malicious payload.
+
+%Could also be any program on the system, and potentially remote!
 
 
-\subsection{Complex Triggers}
-When considering packers and crypters used in modern malware it is not uncommon to see 
-a malicious sample packed using multiple stages with different unpacking conditions. 
-Whether that be red pills, or environent checks, or network triggers, the reliance is on
-complexity to fool any reverse engineer out of finding the correct conditions to 
-release the full payload.
 
-Similarly \speculake can be instrumented to use more than one trigger. Multiple stages 
-can be designed used any combination of crafted or benign trigger programs. Only when all
-stages have been run to completion in order will the malicious payload be revealed.  
-In conjunction with this each stage cna use a randomized ISA to a common emulator, or 
-they can use differnt emulators all together. 
 
-Alternatively each stage could be used to decrypt the next AES key-schedule to decrypt 
-a subsequent layer. Using this model we can instrument \speculake malware as a crypter 
-with the keys hidden in data or dead code which static and dynamic reverse engineering 
-methods will overlook. 
+\subsection{Speculative Buffer Overflow}
 
+In addition to using separate trigger programs, ExSpectre can also use
+\emph{trigger inputs} to a payload program to initiate its malicious behavior.
+While existing fuzzers and symbolic execution tools can discover traditional
+input triggers, we can leverage other Spectre variants...
+
+TODO: Jack
+
+
+\subsection{Speculative Store Bypass}
+
+TODO: Jack
+
+
+%\subsection{Complex Triggers}
+%When considering packers and crypters used in modern malware it is not uncommon to see 
+%a malicious sample packed using multiple stages with different unpacking conditions. 
+%Whether that be red pills, or environent checks, or network triggers, the reliance is on
+%complexity to fool any reverse engineer out of finding the correct conditions to 
+%release the full payload.
+%
+%Similarly \speculake can be instrumented to use more than one trigger. Multiple stages 
+%can be designed used any combination of crafted or benign trigger programs. Only when all
+%stages have been run to completion in order will the malicious payload be revealed.  
+%In conjunction with this each stage cna use a randomized ISA to a common emulator, or 
+%they can use differnt emulators all together. 
+%
+%Alternatively each stage could be used to decrypt the next AES key-schedule to decrypt 
+%a subsequent layer. Using this model we can instrument \speculake malware as a crypter 
+%with the keys hidden in data or dead code which static and dynamic reverse engineering 
+%methods will overlook. 
+%
 
 %%%%%%%%%%%%%%

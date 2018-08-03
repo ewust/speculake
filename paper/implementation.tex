@@ -244,28 +244,31 @@ once triggered.
 \FigSpasmModel
 
 \subsection{OpenSSL Trigger}
-\label{subsec:openssl}
+\label{subsec:openssl-impl}
 
-Benign programs can also act as a trigger program, provided they perform sufficient
-indirect jumps to train the branch predictor. We experiment using the OpenSSL
-library as a potential benign trigger, as its source code has gratuitous use of
-function pointers which compile to indirect jumps. In addition, it has many
-complicated code paths that can be easily selected by remote clients by their
-choice of cipher suite.
+%Benign programs can also act as a trigger program, provided they perform sufficient
+%indirect jumps to train the branch predictor. We experiment using the OpenSSL
+%library as a potential benign trigger, as its source code has gratuitous use of
+%function pointers which compile to indirect jumps. In addition, it has many
+%complicated code paths that can be easily selected by remote clients by their
+%choice of cipher suit
 
-For these experiments, we disable ASLR for simplification, but note that
-branch predictors can also be used to determine ASLR offsets and our attack adjusted
-accordingly~\cite{evtyushkin2016jump}.
+To demonstrate a benign trigger application, we implemented an ExSpectre payload that
+would trigger when running concurrently with OpenSSL.
+% Could cut?
+For these experiments, we disable
+ASLR for simplification, but note that
+branch predictors can also be used to determine ASLR offsets of co-resident applications,
+and our attack adjusted accordingly~\cite{evtyushkin2016jump}.
 
 We used \texttt{gdb} to run an instance of an OpenSSL server (version 1.0.1f),
 and printed out every instruction executed and its address after a breakpoint on
 the \texttt{SSL\_new} function. We then made a TLS connection to the
-server\footnote{Which took well over 2~hours, potentially making it the slowest
-TLS handshake to have ever completed},
+server,
 which produced over 13~million instructions, including over 359,000 direct jumps
-and 28,000 indirect jumps. We then searched for the longest repeated set of over
-28-32 indirect jumps that end with a unique jump (i.e. source and destination do
-not occur in the previous 28-32 indirect jumps).
+and 28,000 indirect jumps. We then searched for the longest repeated set of more than
+28 indirect jumps that end with a unique jump (i.e. source and destination do
+not occur in the previous 28+ indirect jumps).
 
 We discovered a candidate that corresponds to code in OpenSSL's
 \texttt{nistp256.c} that contained 31 indirect jumps repeated 254 times in our
@@ -273,36 +276,43 @@ handshake. This code is used during the TLS key exchange as the server computes
 the ECDHE shared secret. We made a list of 31 source-destination address pairs
 for these indirect jumps, and constructed a jump/ret chain to mimic the same
 jump pattern in
-our payload program. Our program jumps to the source address of a pair,
-which has a single \texttt{retq} instruction that pops the next
-destination off the stack, performing the indirect jump. At each destination
-address, we place another static (direct) \texttt{jmpq} to bring execution to the
-next source address in our list. The last jump source/destination pair is not
-performed (and its destination is not pushed to the stack). However, we place
-our gadget code at the destination address, which, when executed speculatively,
-loads a specific value into the cache.
-The ``true'' destination of the last indirect jump returns to our
-payload program, which immediately times probing the cache to see if any value was
-loaded.
+our payload program. Our payload program mimicks the first 30 indirect jump
+source/destination pairs, with a final jump going to a cache timing function
+in our payload program. However, due to the prior pattern, this last jump is
+frequently mis-speculated (about 3.5\% of the time), and instead goes to the
+destination corresponding to the 31st jump in OpenSSL, which serves as our
+speculative entry point.
 
-We ran these experiments on an Intel Haswell
+%Our program jumps to the source address of a pair,
+%which has a single \texttt{retq} instruction that pops the next
+%destination off the stack, performing the indirect jump. At each destination
+%address, we place another static (direct) \texttt{jmpq} to bring execution to the
+%next source address in our list. The last jump source/destination pair is not
+%performed (and its destination is not pushed to the stack). However, we place
+%our gadget code at the destination address, which, when executed speculatively,
+%loads a specific value into the cache.
+%The ``true'' destination of the last indirect jump returns to our
+%payload program, which immediately times probing the cache to see if any value was
+%loaded.
+
+We ran experiments on an Intel Haswell
 i5-4590 CPU, with OpenSSL and our payload program pinned to the same core using
 \texttt{taskset}.
 We induced the jump pattern in OpenSSL by running Apache benchmark against it to
 generate thousands of TLS connections using the ECDHE key exchange with the
 secp256r1 curve (ECDHE-RSA-AES256-GCM-SHA384). When running Apache benchmark locally, our payload program
-reliably achieves a 3.5\% hit rate. When apache benchmark runs on a remote
-machine, the hit rate drops to approximately 2.0\%. Nonetheless, these are both
-sufficient to perform computation, though we must perform a greater number of
-speculative iterations
-to extract results from the speculative world before updating any real world state.
+reliably executes (speculatively) at the intended speculative entry point
+about 3.5\% of the time. When apache benchmark runs on a remote
+machine, this rate drops to approximately 2.0\%. Nonetheless, these are both
+sufficient to perform computation, as our payload can simply increase the amount
+of iterations needed to extract meaningful results from the speculative world.
 
-We verified that our payload program did not observe any cache loads (0\% hit
-rate) when we ran
-other programs that consumed CPU on the same core. In addition, when we used
+We verified that our payload program did not execute at the speculative entry
+point when we ran
+other programs that simply consumed CPU on the same core. In addition, when we used
 Apache benchmark to create thousands of connections with a different cipher
-suite (DHE-RSA-AES128-GCM-SHA256), we similarly received no hit rate. This
-could potentially allow an adversary to use an obscure or uncommon (but still
-supported) cipher suite to trigger a malicious payload program on a remote server.
+suite (DHE-RSA-AES128-GCM-SHA256), we similarly received no speculation. This
+could allow an adversary to use an obscure or uncommon (but still
+supported) cipher suite to trigger a malicious \speculake payload program on a remote server.
 
 %%%%%%%%%%%%%%
