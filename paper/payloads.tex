@@ -96,23 +96,24 @@ Section~\ref{subsec:impl-aes}.
 \label{subsec:nested-spec}
 
 
-%TODO: ewust needs a pass to tie into previous section
-An analyst could locate the speculative entry point for our
-decryption gadget by
-searching for AES-NI instructions in the payload program's dead code, ultimately
-discovering the keys that it uses. However, we find it is possible to overcome
-this by having the trigger program communicate the decryption key to the payload
-program via the branch predictor.
+As mentioned, even with encryption, an analyst that can locate the
+speculative entry point and discover the decryption key. For instance, the
+analyst could locate the speculative entry point by searching for AES-NI
+instructions in the payload program, ultimately discovering the keys it derives
+and uses.
 
-To accomplish this, we use multiple speculative entry points, each that derives a
+We can overcome
+this by having the trigger program communicate the decryption key to the payload
+program via the branch predictor. To accomplish this, we use multiple speculative
+entry points, each that derives a
 different decryption key before calling a common decryption routine. Since
 the exact speculative entry point is determined by the trigger program, an
 analyst cannot discover the decryption key directly from the payload program.
 
-An analyst could still enumerate all potential entry points, testing each one
+Still, an analyst could enumerate all potential entry points, testing each one
 until they find one that correctly decrypts the ciphertext. In a 1~MB binary,
 there are (at most) only 1~million entry points, providing just 20~bits of
-security.
+security, trivial for an analyst to brute force.
 
 To increase security, we instead use nested speculation to \emph{chain} entry points
 together. Rather than derive
@@ -125,7 +126,8 @@ the payload program performs the same 30 training jumps before a stall, the CPU
 will predict the payload program will also perform the next 10 jumps. If each
 jump has the potential to land in up to 1024 possible locations, this would
 provide in total $1024^{10} = 2^{100}$ possible keys, or 100~bits of security.
-%We describe our implementation of this nested speculative execution concept in
+We describe our implementation of nested speculative execution in
+Section~\ref{subsec:impl-aes}, where we achieve 128~bits of security.
 %Section~\ref{subsec:nested-spec}.
 
 
@@ -157,24 +159,23 @@ provide in total $1024^{10} = 2^{100}$ possible keys, or 100~bits of security.
 %   - Find the obfuscated key schedule
 %   - Find the correct trigger program
 
-\subsection{Virtual Machines}
-We demonstrate in Section~\ref{subsec:turing} that general purpose computation 
-is possible in the speculative environment in spite of the constraints 
-imposed. However, a Turing Machine
-is not an efficient or usable model for computation when
-attempting to accomplish tasks on modern processors. 
+\subsection{Emulation}
 
-Using emulators in the ``real world'' allows for binary programs to be
-placed encrypted and hidden in dead code and, as demonstrated in
-Section~\ref{subsec:decryption}.
+To combine our encryption and arbitrary computation in an efficient way, we
+implemented an emulator that gets its instructions from the speculative
+decryption described previously. In the payload program, the emulated
+instructions are initially encrypted under a key that will be delivered by the
+trigger, as described previously. Once the trigger executes, it will cause
+instructions to be decrypted and run by the emulator.
+
 Traditional reverse engineering methods will reveal only that
 emulation is being done, while the program being emulated remains encrypted.
 Even when the trigger is running, only the parts of the code that execute would
-be revealed to a careful analyst observing the CPU's committed state, and the
+be revealed to a careful analyst observing the CPU's committed state, while the
 remainder of the emulated program would remain hidden.
 
 We design a custom emulator and instruction set---SPASM (Speculative
-Assembly)---that accommodates the constraints of the speculative primitive.
+Assembly)---that accommodates the constraints of our speculative primitive.
 SPASM is a 6-bit Instruction set, where all instructions (including operand,
 registers, and arguments) fit within 6-bits. This allows each step of the
 speculative world to emit a single SPASM instruction to the real world for
@@ -193,7 +194,7 @@ an author, it still requires programs to be written in a custom assembly languag
 We note that the \speculake model is not intrinsically linked to the SPASM emulator. 
 A wrapper could be implemented around other existing emulators to construct
 instructions incrementally through the fixed-width channel (e.g. using 4 8-bit
-reads to reveal a single 32-bit ARM instruction).
-This would allow for encrypted payloads to be written in higher level languages
-like C or C++, and compiled to any target architecture the real-world emulator
-can execute.
+reads to reveal a single 32-bit ARM instruction), allowing for encrypted
+payloads to be written in higher-level languages. We also note that this
+provides flexibility to the authors, allowing them to completely redefine
+instructions or use a different instruction set altogether to hamper detection.
