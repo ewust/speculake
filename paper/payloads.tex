@@ -91,6 +91,44 @@ we find only takes a handful of $\mu$-ops to perform the instructions needed in
 AES decryption. We discuss details of our speculative AES decryption in
 Section~\ref{subsec:impl-aes}.
 
+
+\subsubsection{Obfuscating keys with nested speculation}
+\label{subsec:nested-spec}
+
+
+%TODO: ewust needs a pass to tie into previous section
+An analyst could locate the speculative entry point for our
+decryption gadget by
+searching for AES-NI instructions in the payload program's dead code, ultimately
+discovering the keys that it uses. However, we find it is possible to overcome
+this by having the trigger program communicate the decryption key to the payload
+program via the branch predictor.
+
+To accomplish this, we use multiple speculative entry points, each that derives a
+different decryption key before calling a common decryption routine. Since
+the exact speculative entry point is determined by the trigger program, an
+analyst cannot discover the decryption key directly from the payload program.
+
+An analyst could still enumerate all potential entry points, testing each one
+until they find one that correctly decrypts the ciphertext. In a 1~MB binary,
+there are (at most) only 1~million entry points, providing just 20~bits of
+security.
+
+To increase security, we instead use nested speculation to \emph{chain} entry points
+together. Rather than derive
+the key from a single entry point, we have each potential entry point perform
+another indirect jump that the CPU cannot immediately resolve, forcing it to
+speculate while already executing speculatively. The predicted target of that jump
+will also be determined by the trigger program. For example, if the trigger
+program makes 30 training jumps, followed by 10 additional indirect jumps, and
+the payload program performs the same 30 training jumps before a stall, the CPU
+will predict the payload program will also perform the next 10 jumps. If each
+jump has the potential to land in up to 1024 possible locations, this would
+provide in total $1024^{10} = 2^{100}$ possible keys, or 100~bits of security.
+%We describe our implementation of this nested speculative execution concept in
+%Section~\ref{subsec:nested-spec}.
+
+
 \medskip
 
 

@@ -1,51 +1,51 @@
 
 \section{Implementation and Evaluation}
-We now discuss the details of our implementations and the information learned
-about speculative execution gained by these experiments. We discuss how we gain
-confidence in information passed back, and how a low number of iterations is
-sufficient to gain a strong confidence in results.
+%We now discuss the details of our implementations and the information learned
+%about speculative execution gained by these experiments. We discuss how we gain
+%confidence in information passed back, and how a low number of iterations is
+%sufficient to gain a strong confidence in results.
 
-For each of these payloads, we used our custom trigger program that performs 28
-indirect jumps, followed by a final indirect jump to a function pointer that
-pointed to a gadget at address 0x430000. In each of our payload programs,
-we performed the same 28 indirect jumps and the final indirect jump with the
-function pointer with two differences: first, the function pointer was cleared
-from the cache (using the \texttt{clflush} instruction), and second, the
-function pointer pointed to a different destination (specifically, to a
-function
-that measured the cache side channel, recording the indexes in the probe array
-that appeared to be in the cache and then flushing all indexes).
-At address 0x430000, we placed the code for our speculative gadget within the 
-payload program, which is never directly called
-(but executes speculatively). We note that this code must be loaded into the
-cache but otherwise need not be accessed directly.
+In this section, we discuss implementation details for our payload and trigger
+programs.
 
+%In each of our payload programs,
+%we performed the same 28 indirect jumps and the final indirect jump with the
+%function pointer with two differences: first, the function pointer was cleared
+%from the cache (using the \texttt{clflush} instruction), and second, the
+%function pointer pointed to a different destination (specifically, to a
+%function
+%that measured the cache side channel, recording the indexes in the probe array
+%that appeared to be in the cache and then flushing all indexes).
+%At address 0x430000, we placed the code for our speculative gadget within the 
+%payload program, which is never directly called
+%(but executes speculatively). We note that this code must be loaded into the
+%cache but otherwise need not be accessed directly.
+%
+
+
+% Could move to an errata appendix?
+%We randomized the stride length between indexes in
+%this array to avoid the CPU's stride prediction from preemptively loading values
+%in the buffer.
 
 \subsection{Turing Machine}
 \label{subsec:impl-turing}
 
-We implemented a 2-symbol 5-state Busy Beaver Turing machine logic in a  
-payload application. The gadget implementation reads a global state,
-tape, and position, and determines how the state, tape, and position should be
-updated. It encodes this update into a single byte, and loads from a global
-buffer indexed by that byte, loading it into cache.
-We randomized the stride length between indexes in
-this array to avoid the CPU's stride prediction from preemptively loading values
-in the buffer.
+We designed our Turing machine implementation to work with our custom trigger
+program, with 28 indirect jumps mimicked by the Turing payload program.
+We implemented a 2-symbol 5-state Busy Beaver Turing machine logic at the
+speculative entry point (in 42 x86-64 instructions), returning the state update,
+symbol to write, and tape move direction in a single byte via a cache side
+channel.
 
-
-Our implementation is able to examine the state and current symbol on the Turing
-tape and make decisions (in the speculative world) based on these values as long
-as they are in cache. If one of these becomes uncached, one of two things will
-happen. First, the speculative gadget may simply fail to report any result back
-to the real world, as the uncached read takes too long to return before the
-speculative world is squashed by the resolution of the function pointer. Second,
-the CPU may \emph{speculate} on the value of the uncached item, which may be
-incorrect. Of course, this does not affect the correctness of normal programs,
-but it does impact the correctness of our speculative code. In particular, the
-speculative gadget will compute using an incorrect value of state or current
-symbol, and ultimately report the wrong update.
-
+We observed in our implementation that it is important that all values used in
+the speculative world---as well as the code itself---be cached. If these are
+evicted, the speculative code may fail to run, or the CPU may \emph{speculate}
+on the value of the uncached item, which may be incorrect. While this does not
+impact the correctness of normal programs whose incorrect speculations will be
+resolved, our speculative code reports results back to the real world before
+this resolution. In our Turing example, we observed this as incorrect state
+transitions.
 
 This error is particularly devious, as it is not an
 error of bit flips or noise, but rather the processor speculating what the
@@ -53,18 +53,22 @@ speculative gadget will read from memory. Thus, error correcting codes on
 the reported result do not improve the situation.
 
 
-We implemented the 5 state Busy Beaver configuration which requires over 47
-million steps to complete. In order to have confidence the speculative gadget
-executed with the correct inputs and reported the computed result correctly, we
-repeat the execution a number of times and look for the value that was detected
-as present in the cache most often over all the iterations. We measured the
+%TODO: Ian please fill in these numbers
+Instead, we
+repeat the execution several times and look for the modal value over all
+iterations. We measured the
 error rate of our implementation as a function of how many redundant iterations
-of the same step. Our Turing implementation discovered that 10 repetitions is
-sufficient for the real world to determine the correct value, as the ``hit
-rate'' for any one iteration observing the correct value loaded in cache was
-over 80\%. Additionally we found that the speculative world could correctly
-compute a million instructions with no errors at a rate of 324 instructions per
-second.
+of the same step, and found that 10 redundant iterations resulted in 1 error every
+million Turing steps, with the error rate dropping exponentially as iterations
+increase. We choose TODO(Ian) iterations as a conservative bound (error rate measured
+to be 0), and computed 1 million Turing steps at a rate of TODO(Ian)
+steps per second.
+
+% Was 324 steps per second, but was that at 10 iterations? But we just said
+% 10 wasn't perfect (1 error in a million steps), so it seems confusing to say
+% we computed a million steps without error at 10 iterations.
+
+
 
 % Target_fn returning next step given access to current state in global vars
 %   - busy beaver
@@ -77,20 +81,22 @@ second.
 \subsection{AES Decryption}
 \label{subsec:impl-aes}
 The speculative world is able to take advantage of the AES-NI instructions to
-decrypt messages. However, the speculative upper-limit of 220 instructions is not
+decrypt messages. However, the speculative upper-limit of about 175 $\mu$~ops is not
 enough to allow us to compute the key expansion, even using the
-\texttt{aeskeygenassist} instructions. To avoid this, we preload the expanded
-key schedule into the program, rather than the key. We note that an analyst
+\texttt{aeskeygenassist} instructions. To avoid this, we can either preload the
+expanded key schedule into the program (instead of the key), or use a cheaper
+(non-standard) key expansion algorithm.
+For the former, we note that an analyst
 could observe the structure of a normal key schedule,
 but we can avoid this by simply selecting 11 random round keys.
-While this alternative key schedule variant is not ``true'' AES, we can easily
-make the same change in our respective encryption function to make it compatible.
 We note that
 this should not weaken the security of AES, as we can ensure the round keys are
 not linearly related.
-We discuss further methods for obfuscating
-the key in Section~\ref{subsec:nested-spec}.
 
+
+%We discuss further methods for obfuscating
+%the key in Section~\ref{subsec:nested-spec}.
+%
 
 We wrote our AES decryption payload in 35 x86\_64 instructions and 2 lines of C
 (which compiles to an additional 31 x86\_64 instructions). The payload
@@ -99,6 +105,8 @@ decrypted byte at that location in the ciphertext via the cache side channel.
 In this model, the speculative function decrypts a full 16-byte AES block each
 iteration, but only returns the bits specified by the index.
 
+
+% TODO: this could move elsewhere?
 We demonstrate the speed that information can be decrypted via the speculative
 world, and we vary the channel width of the side channel from 1 to 12 bits to
 measure its performance. At low channel width, reading from the cache side
@@ -111,52 +119,21 @@ Bytes/sec).
 % Iterations: 20
 
 
-\subsubsection{Obfuscating keys with nested speculation}
-\label{subsec:nested-spec}
-
-An analyst could locate the speculative entry point for our
-decryption gadget by
-searching for AES-NI instructions in the payload program's dead code, ultimately
-discovering the keys that it uses. However, we find it is possible to overcome
-this by having the trigger program communicate the decryption key to the payload
-program via the branch predictor.
-
-To accomplish this, we use multiple speculative entry points, each that derives a
-different decryption key before calling a common decryption routine. Since
-the exact speculative entry point is determined by the trigger program, an
-analyst cannot discover the decryption key directly from the payload program.
-
-An analyst could still enumerate all potential entry points, testing each one
-until they find one that correctly decrypts the ciphertext. In a 1~MB binary,
-there are (at most) only 1~million entry points, providing just 20~bits of
-security.
-
-To increase security, we instead use nested speculation to \emph{chain} entry points
-together. Rather than derive
-the key from a single entry point, we have each potential entry point perform
-another indirect jump that the CPU cannot immediately resolve, forcing it to
-speculate while already executing speculatively. The predicted target of that jump
-will also be determined by the trigger program. For example, if the trigger
-program makes 30 training jumps, followed by 10 additional indirect jumps, and
-the payload program performs the same 30 training jumps before a stall, the CPU
-will predict the payload program will also perform the next 10 jumps. If each
-jump has the potential to land in up to 1024 possible locations, this would
-provide in total $1024^{10} = 2^{100}$ possible keys, or 100~bits of security.
-%We describe our implementation of this nested speculative execution concept in
-%Section~\ref{subsec:nested-spec}.
-
 \smallskip
 
-We implemented this technique, making 256 speculative landing spots, that each
-shifted 8 unique bits into the 128-bit register \texttt{\%xmm0}, and then
-performed an indirect jump. We then had the trigger program perform 16
-indirect jumps that corresponded with 16 randomly-chosen landing spots in the
+We also implemented our nested speculation technique for obfuscating keys,
+making 256 speculative landing spots that each
+shift 8 unique bits into the 128-bit register \texttt{\%xmm0}, and then
+performing an indirect jump. We then had a custom trigger program perform 16
+indirect jumps (after the initial 28) that corresponded with 16 randomly-chosen landing spots in the
 payload program, training the branch predictor. When the payload program reaches the
 first speculative jump, it follows the same pattern speculatively, 
 eventually filling
 \texttt{\%xmm0} with the corresponding $16*8$ bits. We then used
 the \texttt{aesenc} instruction to expand these 128-bits to a full
-key schedule, and performed decryption as described previously.
+key schedule, and performed decryption as described previously. Thus, without
+the trigger program, an analyst has no information about what key is used to
+decrypt the ciphertext in the payload.
 
 
 
@@ -173,6 +150,7 @@ key schedule, and performed decryption as described previously.
 % \subsubsection{SPASM}
 % \label{subsubsec:spasm}
 
+% TODO: needs a pass
 %Constructing an emulator making use of the speculative primitive requires  
 %a trade off in expresive capability versus speed. 
 We have implemented our custom instruction set architecture---SPASM---as a model
