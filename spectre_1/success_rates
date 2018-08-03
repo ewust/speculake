@@ -1,0 +1,7 @@
+// "Company"    "Code Name"      "processor"      return_addr-hitrate    fn_ptr-hitrate
+"Intel"     "Haswell" "Xeon E3-1276 v3"  1985       750
+"Intel"     "Sandy Bridge" "i3-2105"  0       0
+"Intel"     "Kaby Lake"   "i5-7200U"  0     1970
+"Intel"     "Kaby Lake"   "Xeon E3-1270 v6"  0     1995
+"AMD"       "Epyc"     "Epyc 7251"      1999    25
+"AMD"       "Opteron 6300" "Opteron 6328"   0   5
