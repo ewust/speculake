@@ -60,7 +60,7 @@ error rate of our implementation as a function of how many redundant iterations
 of the same step, and found that 10 redundant iterations resulted in 1 error every
 million Turing steps, with the error rate dropping exponentially as iterations
 increase. We choose 11 iterations as a conservative bound (error rate measured
-to be 0), and computed 1 million Turing steps at a rate of 1351.75
+to be 0), and computed 1 million Turing steps at a rate of 1351
 steps per second.
 
 % Was 324 steps per second, but was that at 10 iterations? But we just said
@@ -149,7 +149,6 @@ decrypt the ciphertext in the payload.
 % \subsubsection{SPASM}
 % \label{subsubsec:spasm}
 
-% TODO: needs a pass
 %Constructing an emulator making use of the speculative primitive requires  
 %a trade off in expresive capability versus speed. 
 We have implemented our custom instruction set architecture---SPASM---as a model
@@ -190,11 +189,13 @@ the SPASM instruction set can be found in Appendix~\ref{appendix:spasm}.
 In SPASM we have implemented multiple example programs that we encrypted and
 loaded into a \speculake payload, which decrypts and emulates SPASM instructions
 only when the corresponding trigger program is running.
-We first implemented a \textit{HelloWorld}
-program that prints to \texttt{stdout}. Next, a \texttt{FizzBuzz} program that
+We have implemented a \textit{HelloWorld}
+program that prints to \texttt{stdout}, and a \texttt{FizzBuzz} program that
 demonstrates control flow and arithmetic operations while printing to stdout.
-Finally, we implemented a \textit{ReverseShell} program that opens and connects to a socket
-before duplicating I/O file descriptors and executing a local shell.
+Finally, we implemented a \textit{ReverseShell} program that opens and connects a TCP socket
+to an attacker-chosen location
+before executing a local shell and allowing the remote adversary
+to issue shell commands on the victim machine.
 Figure~\ref{fig:spasm_model} details the high-level flow of a SPASM payload.
 
 %Expected performance for a given SPASM binary will vary given multiple factors,
@@ -233,7 +234,7 @@ once triggered.
 To demonstrate a benign trigger application, we implemented an ExSpectre payload that
 would trigger when running concurrently with OpenSSL.
 % Could cut?
-For these experiments, we disable
+We disable
 ASLR for simplification, but note that
 branch predictors can also be used to determine ASLR offsets of co-resident applications,
 and our attack adjusted accordingly~\cite{evtyushkin2016jump}.
@@ -244,11 +245,11 @@ the \texttt{SSL\_new} function. We then made a TLS connection to the
 server,
 which produced over 13~million instructions, including over 359,000 direct jumps
 and 28,000 indirect jumps. We then searched for the longest repeated set of more than
-28 indirect jumps that end with a unique jump (i.e. source and destination do
+28 indirect jumps that ends with a unique jump (i.e. source and destination do
 not occur in the previous 28+ indirect jumps).
 
 We discovered a candidate that corresponds to code in OpenSSL's
-\texttt{nistp256.c} that contained 31 indirect jumps repeated 254 times in our
+\texttt{nistp256.c} that contained 31 indirect jumps repeated 254 times each
 handshake. This code is used during the TLS key exchange as the server computes
 the ECDHE shared secret. We made a list of 31 source-destination address pairs
 for these indirect jumps, and constructed a jump/ret chain to mimic the same
@@ -288,8 +289,8 @@ We verified that our payload program did not execute at the speculative entry
 point when we ran
 other programs that simply consumed CPU on the same core. In addition, when we used
 Apache benchmark to create thousands of connections with a different cipher
-suite (DHE-RSA-AES128-GCM-SHA256), we similarly received no speculation. This
-could allow an adversary to use an obscure or uncommon (but still
-supported) cipher suite to trigger a malicious \speculake payload program on a remote server.
+suite (DHE-RSA-AES128-GCM-SHA256), we similarly saw no speculation at the entry point. This
+could allow an adversary to use an obscure or uncommon cipher suite to trigger a
+malicious \speculake payload program on a remote server.
 
 %%%%%%%%%%%%%%
