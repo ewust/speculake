@@ -53,15 +53,14 @@ speculative gadget will read from memory. Thus, error correcting codes on
 the reported result do not improve the situation.
 
 
-%TODO: Ian please fill in these numbers
 Instead, we
 repeat the execution several times and look for the modal value over all
 iterations. We measured the
 error rate of our implementation as a function of how many redundant iterations
 of the same step, and found that 10 redundant iterations resulted in 1 error every
 million Turing steps, with the error rate dropping exponentially as iterations
-increase. We choose TODO(Ian) iterations as a conservative bound (error rate measured
-to be 0), and computed 1 million Turing steps at a rate of TODO(Ian)
+increase. We choose 11 iterations as a conservative bound (error rate measured
+to be 0), and computed 1 million Turing steps at a rate of 1351.75
 steps per second.
 
 % Was 324 steps per second, but was that at 10 iterations? But we just said
