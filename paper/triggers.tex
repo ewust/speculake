@@ -64,16 +64,54 @@ to receive covert information from the malicious payload.
 In addition to using separate trigger programs, ExSpectre can also use
 \emph{trigger inputs} to a payload program to initiate its malicious behavior.
 While existing fuzzers and symbolic execution tools can discover traditional
-input triggers, we can leverage other Spectre variants...
+input triggers, we can leverage other Spectre variants to obfuscate speculative
+gadget access. 
 
+We make use of Specualtive Buffer Overflows (SBO) to redirect control flow
+to a speculative entry point specified by user input. Using Spectre variant 1.1 
+we can design a program that takes seemingly arbitrary user input and performs complete 
+bounds checks such that evaluated code is safe, however a direct branch can
+be bypassed speculatively given significant lead up with consistent input 
+to train the branch predictor (see Figure~\ref{fig:spectre-one}). This allows the input
+to become the trigger. 
 
-TODO: Jack Figure~\ref{fig:spectre-one}
+A direct branch followed by a store operation with user controlled index and
+value can be coerced into overflowing a local array. 
+As seen in code snippet from Kiriansky and Waldspurger~\cite{kiriansky2018speculative}:
+\begin{lstlisting}
+    if (y < lenc)
+        c[y] = z;
+\end{lstlisting}
+with user controlled 
+\texttt{y} and \texttt{z} and sporadically uncached \texttt{lenc}, an attacker 
+can \textit{speculatively} overflow array \texttt{c}
+to overwrite a return address, function pointer, etc. and redirect control flow.
+
+ 
+
+We make use of this in a willing payload such that user input can intentionally 
+mistrain the branch predictor. The speculative entry point is also chosen by the 
+trigger in this scenario as \texttt{z} contains the address of the 
+speculative entry point, allowing the attacker to create a ROP style speculative 
+execution path through the payload.
 
 
 \subsection{Speculative Store Bypass}
 
-TODO: Jack
+Speculative Store Bypass (SSB) can similarly be used to construct an internal trigger
+using race conditions on a store and a subsequent load that the cpu believes 
+will not alias but in reality do~\cite{spec-store-bypass}.
 
+To redirect control flow a store to a function pointer or indirect branch 
+target pointer could be speculated to a stale value. While the program never 
+executes at this stale address in reality, the speculative gadgets have a 
+real effect on shared resources. This attack again allows ROP style 
+chains to execute speculative gadgets.
+
+The speculative primitive is shared by all versions of Spectre as an upper
+bound on what can be done speculatively. What is required to adapt a spectre 
+vulnerability into the \speculake technique is an attacker controlled method of 
+triggering control flow redirection in a willing payload to a speculative entry point. 
 
 %\subsection{Complex Triggers}
 %When considering packers and crypters used in modern malware it is not uncommon to see 
