@@ -10,64 +10,60 @@
 takes advantage of bugs or unexpected idiosyncracies in existing systems to
 perform arbitrary
 computation~\cite{weird_machines,bratus2011exploit}. In
-particular \speculake showcases the ability to execute dead code.
+particular \speculake showcases the ability to use CPU speculation to compute.
 
 Recently there has been a trend of features in modern processors such as
 multiple threads sharing system resources and optimizations done across the
 process isolation boundary which lead to opportunities for ``weird
 machines''~\cite{d2015exploiting}. In particular, previous examples of ``weird
 machines'' include traditional vulnerabilities such as buffer overflows, format
-string exploits and return-to-libc attacks without function
-calls~\cite{buffer_overflow, format_string_exploit, shacham2007geometry}.
-Additionally, unexpected functionality such as instruction-less computing
-enables the demonstration of a Turing complete ``weird machine'' by taking
-advantage of memory translation tables, page-faults, and hardware exception
-handling to effectively compute arithmetic and logical operations without the
-processor executing any instructions~\cite{bangert2013page}.
+string exploits and return oriented
+programming~\cite{buffer_overflow, format_string_exploit, shacham2007geometry}.
+Weird machines have also been built using operating system page faults, enabling
+the computation of arithmetic and logic operations without the use of
+traditional instructions~\cite{bangert2013page}.
+%Additionally, unexpected functionality such as instruction-less computing
+%enables the demonstration of a Turing complete ``weird machine'' by taking
+%advantage of memory translation tables, page-faults, and hardware exception
+%handling to effectively compute arithmetic and logical operations without the
+%processor executing any instructions~\cite{bangert2013page}.
+\speculake extends research in ``weird machines'', and takes advantage of
+speculative execution to execute instructions that otherwise appear to be dead
+code.
 
-\speculake is a new type of ``weird machine'' that takes advantage of
-speculative execution and uses a non-complicit trigger program to execute
-otherwise dead code. While previous ``weird machines'' have demonstrated the
-capability to execute potentially malicious code in an unexpected manner, we are
-the first to exploit speculative execution in order to execute arbitrary
-instructions.
+
+% Not sure this is true. It could be argued that Spectre is the first to do
+% this, though we certainly leverage that for our purposes. It's a fuzzy
+% distinction, but maybe best to leave this out.
+%While previous weird machines have demonstrated the
+%capability to execute potentially malicious code in an unexpected manner, we are
+%the first to exploit speculative execution in order to execute arbitrary
+%instructions.
 
 
 
 \subsection{Covert Channels}
 
-There is a plethora of previous research into cache side-channels, examining how
-information is leaked between
-processes~\cite{percival2005cache,zhang2012cross,osvik2006cache}. This is a key
-feature of Spectre~\cite{spectre} and Meltdown~\cite{meltdown}. In \speculake we
-use the branch predictor side-channel as a \emph{covert
-channel}~\cite{lampson1973note} between an innocent trigger program and malware.
-This allows \speculake to use the leaked information from cache as a message to
-the malware in order to influence speculative execution pathways.
+Spectre builds upon prior work on cache side channels, and similarly uses to to
+leak information from
+processes~\cite{percival2005cache,zhang2012cross,osvik2006cache}. In \speculake,
+we use the branch predictor as a \emph{covert channel}~\cite{lampson1973note}
+between the trigger program and malware payload, allowing the malware's
+(speculative) execution path to be influenced by the trigger.
 
-Previous work has examined various ways of sharing information over covert
+Previous work has examined how to share information over covert
 channels, such as across virtualized environments on cloud
 systems~\cite{wu2012whispers}, using L1 and L2 cache to share
 information~\cite{percival2005cache}, measuring temperature to create a thermal
-covert channel~\cite{masti2015thermal, bartolini2016capacity} and taking
+covert channel~\cite{masti2015thermal, bartolini2016capacity}, and taking
 advantage of processor architecture to leak information~\cite{wang2006covert}.
+This includes using the branch predictor itself as a covert
+channel~\cite{evtyushkin2016understanding,evtyushkin2015covert}, which
+\speculake similarly uses.
 
-\speculake uses the branch predictor as a covert channel. The branch predictor
-has been considered as a covert channel
-before~\cite{evtyushkin2016understanding}. For example, the branch predictor can
-be used by two colluding programs to share sensitive information between each
-other by timing how long a spy process executes taken (not-taken)
-branches~\cite{evtyushkin2015covert}.
-
-While the branch predictor has been used as a covert channel between two
-colluding malicious programs, \speculake exemplifies a new covert channel using
-the branch predictor in which only one side of the channel is nefarious and the
-other is innocent. \speculake takes advantage of a branch predictor side-channel
-in \texttt{OpenSSL} and uses it as a covert channel. \texttt{OpenSSL} is not a
-malicious colluding program in this case but rather a program whose execution
-pathway can be influenced by attackers based on selected cipher suites. This
-allows malware to use the branch predictor as an attacker controlled covert
-channel between an unsuspecting trigger program and \speculake malware.
+However, we note that the covert channel used in \speculake need not involve two
+cooperative programs, and we demonstrate using the benign OpenSSL as a
+non-colluding program involved in utilizing this covert channel.
 
 % cache~\cite{aciiccmez2010new}, L2
 % cache~\cite{ristenpart2009hey,percival2005cache},
@@ -89,13 +85,20 @@ channel between an unsuspecting trigger program and \speculake malware.
 
 \subsection{Speculative Execution}
 
+
 \speculake builds on Spectre~\cite{spectre} and Meltdown~\cite{meltdown} which
-leverage speculative execution to leak sensitive information to unprivileged
-processes.  Others have built on Spectre and Meltdown to demonstrate web-based
-vulnerabilities~\cite{genkin2018drive, schwarz2018netspectre} as well as
-hardware isolation leaks in Intel's SGX~\cite{spectre_sgx,chen2018sgxpectre}.
-The branch predictor has also been examined~\cite{evtyushkin2018branchscope} in
-the light of Spectre but only as side-channel which is leaking information.
-\speculake likewise takes advantage of speculative execution however it does so
-to attain hidden arbitrary computation. We believe that \speculake can leverage
-these advances in speculative execution malware as well.
+leverage speculative execution to leak sensitive information from vulnerable
+processes.  Follow up work has identified several new Spectre variants,
+including speculative buffer overflows and speculative store
+bypass~\cite{kiriansky2018speculative,spec-store-bypass}, and has investigated
+additional ways to leak information using branch
+predictors as a side channel~\cite{evtyushkin2018branchscope}.
+Researchers have also leveraged Spectre to demonstrate web-based
+vulnerabilities~\cite{genkin2018drive,schwarz2018netspectre} as well as to leak
+keys and other information from the hardware isolation provided by Intel
+SGX~\cite{spectre_sgx,chen2018sgxpectre,foreshadow}.
+\speculake likewise takes advantage of speculative execution, but with the goal
+of hiding arbitrary computation from reverse engineering, rather than extracting
+secrets from vulnerable programs. \speculake additionally benefits from
+new Spectre variants: as we showed, speculative buffer overflows (``Spectre~1.1'')
+can be used as an alternative trigger for malware.
