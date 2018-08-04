@@ -62,7 +62,7 @@ bool get_top_k(uint64_t k, uint64_t* results, uint64_t* output_i, uint64_t* outp
     uint64_t top_k[k];
     uint64_t top_k_res[k];
     uint64_t min_i=0;
-    uint64_t min_hits_allowed=1;
+    uint64_t min_hits_allowed=3;
     uint64_t hits=0;
 
     uint64_t i, j, x;
@@ -97,7 +97,7 @@ bool get_top_k(uint64_t k, uint64_t* results, uint64_t* output_i, uint64_t* outp
         for (i=0; i<k; i++){
             output_i[i] = top_k[i];
             output_res[i] = top_k_res[i];
-            printf("\t[%04lX]  %ld -- %ld / %d\n",  output_i[i], i, output_res[i],MAX_ITERATIONS); 
+            // printf("\t[%04lX]  %ld -- %ld / %d\n",  output_i[i], i, output_res[i],MAX_ITERATIONS); 
         }
         return true;
     } else {

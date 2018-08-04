@@ -10,7 +10,7 @@
 #include "../../spasm/emulator/spasm.h"
 
 
-#define MAX_ITERATIONS 2000
+#define MAX_ITERATIONS 20
 
 /*
  * Target gadget  never called directly (essentially dead code)
@@ -177,7 +177,7 @@ void measure() {
 
             misses = 0;
         } else {
-            printf("--[]: %lu avg cycles ps %ld\n", avg, cur_probe_space);
+            // printf("--[]: %lu avg cycles ps %ld\n", avg, cur_probe_space);
             misses++;
             cur_probe_space += 63;
             cur_probe_space %= MAX_PROBE_SPACE;
