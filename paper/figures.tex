@@ -27,10 +27,55 @@
 \end{figure}
 }
 
+\newcommand{\FigSpectreOne}{
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=0.9\linewidth]{figures/spectre_1_training.png}
+    \caption{When using speculative buffer overflow the direct branch predictor
+    must be trained on input data before it can mis-speculate a branch. 
+    Over an independent number of training 
+    rounds we measure the resulting hit rate fraction of trials where the 
+    speculative gadget is able to perform the intended cache load. We find 
+    that around 200 benign training branches are required before a branch 
+    can be mis-speculated with discernable hit rate fraction. Note that a 
+    1\% signal is generally significant enough to discern as background cache noise 
+    is minimal in an ideal scenario.}
+    \label{fig:spectre-one}
+\end{figure}   
+}
+
+
+\newcommand{\FigSpecMeasureNP}{
+\begin{figure*}[t]
+     \centering
+        \includegraphics[width=0.9\textwidth]{figures/Speculative_measurements_no-parity.png}
+    \caption{The speculative primitive allows for a limited number of instructions
+    to be completed speculatively, dependent on multiple factors. The ROB 
+    capacity aligns directly with the upper bound of nop instructions 
+    that can be completed speculatively, while other constraints bound more 
+    complex instructions.}
+    \label{fig:spec-capacity-np}
+\end{figure*}
+}
+
+
+\newcommand{\FigSpecMeasureParity}{
+\begin{figure}[b]
+     \centering
+        \includegraphics[width=1.05\linewidth]{figures/Speculative_measurements_parity.png}
+    \caption{Trigger and payload processes must share CPU resources as they 
+        must be performed on the same hyperthread or associated parity hyperthreads. 
+        Processes on the parity hyperthreads (cool colors) denoted by (P) accomplish a 
+        significantly lower number of instructions as compared with processes 
+        on the same hyperthread (warm colors).}
+    \label{fig:spec-capacity-parity}
+\end{figure}
+}
+
 
 \newcommand{\FigSpecMeasure}{
 \begin{figure*}[t]
-    \centering
+     \centering
         \includegraphics[width=0.9\textwidth]{figures/Speculative_measurements.png}
     \caption{The speculative primitive allows for a limited number of instructions
         to be completed speculatively, dependent on multiple factors. Trigger and 
