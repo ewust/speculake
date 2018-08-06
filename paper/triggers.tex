@@ -38,19 +38,19 @@ OpenSSL as a trigger in Section~\ref{subsec:openssl-impl}.
 
 In addition, an adversary could use a benign application (like OpenSSL) to
 \emph{communicate} information covertly to the malicious payload program. For
-example, with OpenSSL, the attacker could have a pair of cipher uncommon cipher
-suites, and using one results in communicating a 1-bit, while the other
-communicates a 0-bit to the payload. To receive this, the payload would have to
-do indirect jump patterns corresponding to both cipher suites, with the
+example, with OpenSSL, the attacker could have a pair of uncommon cipher
+suites, where using one results in communicating a 1-bit, while use of the other
+communicates a 0-bit to the payload. To receive data, the payload would have to
+do indirect jump patterns corresponding to OpenSSL code for processing both cipher suites, with the
 corresponding speculative entry points shifting in the appropriate bit. Thus, an
 adversary can communicate remotely (over a network) to the payload program
 indirectly via a benign application.
 
 We observe that communication could also go in the other direction: from
-the payload program back to the remote adversary, also via a benign application
+the payload program back to the remote adversary, also via the benign application
 intermediary. The payload program could influence the performance of the benign
 application, and the adversary could time responses from the benign application
-to receive covert information from the malicious payload. This would allow the
+to receive covert information from the malicious payload~\cite{netspectre}. This would allow the
 malicious payload to operate \emph{entirely speculatively}, without assistance
 from the real world for keeping state.
 
@@ -66,54 +66,77 @@ from the real world for keeping state.
 In addition to using separate trigger programs, ExSpectre can also use
 \emph{trigger inputs} to a payload program to initiate its malicious behavior.
 While existing fuzzers and symbolic execution tools can discover traditional
-input triggers, we can leverage other Spectre variants to obfuscate speculative
-gadget access. 
+input triggers, we can leverage other Spectre variants to obfuscate our triggers.
 
-We make use of Specualtive Buffer Overflows (SBO) to redirect control flow
-to a speculative entry point specified by user input. Using Spectre variant 1.1 
-we can design a program that takes seemingly arbitrary user input and performs complete 
-bounds checks such that evaluated code is safe, however a direct branch can
-be bypassed speculatively given significant lead up with consistent input 
-to train the branch predictor (see Figure~\ref{fig:spectre-one}). This allows the input
-to become the trigger. 
+To do this, we use Specualtive Buffer Overflows (SBO)~\cite{kiriansky2018speculative}
+to redirect control flow
+to a speculative entry point specified by user input.
+We design a payload program that takes arbitrary user input and performs appropriate
+bounds checks to ensure no traditional control flow violations could be exploited.
+However, using the Spectre~1.1 variant, control flow can still be violated speculatively,
+allowing the adversary to force a speculative entry point based entirely off the
+input provided. This allows the trigger to be an input, potentially even
+provided over a network if the payload program accepts network data. Traditional
+symbolic execution and code coverage fuzzers will be unable to discover this trigger input, as
+they do not model the speculative state of the CPU.
 
-A direct branch followed by a store operation with user controlled index and
-value can be coerced into overflowing a local array. 
-As seen in code snippet from Kiriansky and Waldspurger~\cite{kiriansky2018speculative}:
+%such that evaluated code is safe, however a direct branch can
+%be bypassed speculatively given significant lead up with consistent input 
+%to train the branch predictor (see Figure~\ref{fig:spectre-one}). This allows the input
+%to become the trigger. 
+
+To create an SBO-triggered payload program, we make the following code pattern,
+as seen from Kiriansky and Waldspurger's Spectre~1.1
+description~\cite{kiransky2018speculative}:
 \begin{lstlisting}
     if (y < lenc)
         c[y] = z;
 \end{lstlisting}
-with user controlled 
+With user controlled 
 \texttt{y} and \texttt{z} and sporadically uncached \texttt{lenc}, an attacker 
 can \textit{speculatively} overflow array \texttt{c}
-to overwrite a return address, function pointer, etc. and redirect control flow.
+to overwrite a return address (or function pointer, etc) and redirect control
+flow. Note that the bounds check on \texttt{y} will ensure that this program
+will not actually allow a buffer overflow to occur, but the attacker can
+nonetheless use this to influence a speculative entry point based on their
+choice of \texttt{y} and \texttt{z}.
 
- 
 
-We make use of this in a willing payload such that user input can intentionally 
-mistrain the branch predictor. The speculative entry point is also chosen by the 
+We make use of this pattern in a willing payload such that user input can intentionally
+mistrain the branch predictor by repeatedly sending valid (in-bounds) values of
+\texttt{y} before sending a value that would overflow the bounds of \texttt{c}.
+The speculative entry point is also chosen by the 
 trigger in this scenario as \texttt{z} contains the address of the 
-speculative entry point, allowing the attacker to create a ROP style speculative 
-execution path through the payload.
+speculative entry point, allowing the attacker to create a ROP-style speculative 
+execution path through the payload. We describe our implementation of this in
+Section~\ref{tk}.
 
 
 \subsection{Speculative Store Bypass}
 
-Speculative Store Bypass (SSB) can similarly be used to construct an internal trigger
-using race conditions on a store and a subsequent load that the cpu believes 
-will not alias but in reality do~\cite{spec-store-bypass}.
+Speculative Store Bypass (SSB) (Spectre variant 4) can similarly be used to
+construct an internal (input-based) trigger using the CPU's speculative
+load-store forwarding~\cite{spec-store-bypass}. In a speculative store bypass,
+the CPU incorrectly speculates that a store will not alias with a future load,
+and uses a stale (wrong) value for the result of the speculative load.
 
-To redirect control flow a store to a function pointer or indirect branch 
-target pointer could be speculated to a stale value. While the program never 
-executes at this stale address in reality, the speculative gadgets have a 
-real effect on shared resources. This attack again allows ROP style 
-chains to execute speculative gadgets.
 
-The speculative primitive is shared by all versions of Spectre as an upper
-bound on what can be done speculatively. What is required to adapt a spectre 
-vulnerability into the \speculake technique is an attacker controlled method of 
-triggering control flow redirection in a willing payload to a speculative entry point. 
+To redirect control flow, a payload program could use a function pointer or
+indirect branch target register as the destination for a speculative store
+bypass, causing the CPU to use a stale value to speculatively determine where it
+would go. The stale value could be controlled by a previous unrelated input,
+allowing an adversary to specify the speculative entry point in a carefully
+crafted data input. While the program never
+executes at this stale address in reality, the CPU will briefly speculatively
+execute there, enabling \speculake payloads. Like the speculative buffer
+overflow, this trigger also allows ROP style chains to execute a series of
+speculative gadgets.
+
+
+%The speculative primitive is shared by all versions of Spectre as an upper
+%bound on what can be done speculatively. What is required to adapt a spectre 
+%vulnerability into the \speculake technique is an attacker controlled method of 
+%triggering control flow redirection in a willing payload to a speculative entry point. 
 
 %\subsection{Complex Triggers}
 %When considering packers and crypters used in modern malware it is not uncommon to see 
