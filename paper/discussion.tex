@@ -82,13 +82,15 @@ that guest-to-guest indirect branch predictor interference, and the current
 \speculake implementation, will not work across disparate virtual environments.
 
 \subsection{Defenses}
-We now address possible defenses to detecting and reverse engineering malware that uses
-\speculake. 
+We now address possible defenses to detecting and reverse engineering malware
+that uses \speculake. 
+
+
 \subsubsection{Implemented Mitigations}
 Multiple patches and micro-code updates have been developed to mitigate Spectre
 vulnerabilities, however, none of these entirely prevent \speculake malware from
-working, as they are generally not designed to protect programs that willingly use
-Spectre against themselves.
+working, as they are generally not designed to protect programs that willingly
+use Spectre against themselves.
 
 \paragraph{Indirect Branch Predictor Barrier} - IBPB is used when transitioning to a new
 address space, allowing a
@@ -150,6 +152,16 @@ resource that must be monitored to detect or prevent these types of attacks.
 %environment~\cite{lindorfer2011detecting, balzarotti2010efficient,
 %paleari2009fistful} attempting to circumvent malware detectors. To address
 %red-pills, systems often employ measures to detect them.
+\paragraph{Anti-Virus Detectors}
+We verified that numerous modern Anti-Virus technologies were unable to detect
+and flag \speculake malware. We examined ClamAV, BitDefender and rkhunter and
+found that they focus on signature and string detection, examining if potential
+malware make library calls, though BitDefender does use their own proprietary
+adaptable unpacker to support detection of ``generic
+unpacking''~\cite{BitDefender}. Modern anti-virus detectors but do not flag
+programs that directly make syscalls or have the capability of making arbitrary
+syscalls. We note that this is the state of modern commercial anti-virus
+technology but does not mean that \speculake is undetectable.
 
 \paragraph{Bare Metal}
 Modern malware often uses hardware minutia to identify and fingerprint execution
@@ -234,40 +246,16 @@ not include such an instruction in either their payload or trigger programs.
 %capabilities.
 \fi
 
-%\paragraph{Operating System Defense}
-%Hardware could also provide the operating system with a privileged instruction
-%that gives it more control over the interaction between programs. For example,
-%the OS could use a privileged instruction to copy out the Branch History Buffer
-%(BHB) state when it context switches between processes, restoring it when the
-%process is restored. This would prevent cross-process interactions with the
-%branch predictor, and prevent multi-process \speculake malware. However, it does
-%not prevent a single-process \speculake, and it does not fully address the
-%Spectre vulnerability.
-%
-
-%\subsubsection{Cache Poisoning}
-%As mentioned in Section~\ref{subsubsec:malware} a vital component of \speculake
-%is the ability to perform cache timings. Any mechanism that modifies the cache
-%can affect the success of \speculake-like attacks.
-%
-%Drastic methods such as completely poisoning the cache will hinder this attack
-%while also forcing almost all loads to result in a cache miss, effectively
-%nullifying the point of cache.
-%
-%However, more conservative methods such as randomly loading values into cache
-%can have a negative affect on \speculake-like attacks (causing the cache timing
-%to predict incorrect values) while not having too detrimental of an affect on
-%programs as a whole.
-%
-%In response to this method of defense \speculake-like attacks can modify the
-%number of iterations and confidence thresholds necessary to determine a value.
-%As mentioned in Section~\ref{subsec:impl-turing} our experiments found that it
-%was only necessary to perform 50 iterations of our \texttt{target\_fn} in order
-%to gain 80\% confidence in the value returned. While only 50 iterations are
-%necessary, increasing this value to higher levels can lead to a significantly
-%higher confidence with very little performance detriment (especially in the
-%case of AES decryption).
-
+\subsubsection{Reverse-engineering triggers}
+Once \speculake malware has been detected analysts attempting to
+reverse-engineer the effect of the malware can take a similar path as to its
+authors. Specifically the task of examining the real-world execution path of the
+malware and comparing this with the indirect and direct jumps conducted by
+potential trigger programs to find a match. We note that while there may be a
+large number of potential trigger programs the real world execution pathway must
+match the malware's very closely in order to influence the malware successfully.
+However this method will not be useful against the speculative store bypass
+version of \speculake, as a secondary trigger program is unnecessary there.
 
 \subsection{Future Work}
 \label{subsec:future-work}
