@@ -65,62 +65,91 @@ program functionality in code that appears to not execute at runtime. This techn
 defeats existing static and dynamic analysis, making it especially difficult for
 malware analysts to determine what a binary will do.
 
+\FigHighLevel
 
 At a high level, \speculake consists of two parts: a payload program, and a
-trigger program. When run by itself, the payload program executes a pattern of
-indirect jumps and measures a cache-based side channel\footnote{We note that other
-side channels could be used in place of a cache}. While the trigger program is
-not running, the payload program is effectively inactive (potentially performing
-a decoy operation). When the trigger program runs, it executes a similar
-pattern of indirect jumps (with similar source and destination addresses as the
-payload program), effectively training the CPU's branch predictor to the jump
-pattern performed by the trigger program.
+trigger. The trigger can take the form of a special input (as in typical
+malware), or an unrelated program running on the same system. When run without
+the trigger, the payload program executes a series of benign operations, and
+measures a cache-based side channel\footnote{We note that other side channels
+could be used in place of a cache}. Once the trigger activates---either
+by the attacker providing specially crafted input, or the trigger program running---it causes
+the CPU to briefly \emph{speculatively} execute from a new target location inside the
+payload program.
 
-Importantly, the trigger program and payload program's indirect jump patterns
-diverge on the destination of their final jumps. However, because the trigger
-program has trained the CPU's branch predictor, the CPU speculates that the
-payload program will continue following the pattern of the trigger program,
-causing it to execute a \emph{speculative gadget} in the payload
-program. This execution path is shown in Figure~\ref{fig:high-level}.
+This target location can be in a region that is neither read
+nor executed normally by the payload program, making this logic effectively dead code to
+any static or dynamic reachability analysis. After the CPU discovers the
+mis-speculation at the target location, it will discard the results and continue
+executing from the correct destination. However, this still gives the payload program a
+limited speculative window where it can perform arbitrary computation, and can
+communicate results back to the ``real world'' via a side
+channel. Figure~\ref{fig:high-level} shows the variant of \speculake that uses a
+trigger program to mis-train the CPU's indirect branch predictor, causing the
+payload program to briefly speculatively execute a hidden target function.
 
-We emphasize that this gadget is in a region that is neither
-read nor executed by the payload program, and after the CPU discovers the
-mis-speculation in the payload program, it will discard the results from the
-speculative gadget and continue executing from the correct destination. However,
-the payload program has a limited speculative window where it can perform
-computation, and can communicate results back to the ``real world'' payload 
-program via a side channel.
+
+%At a high level, \speculake consists of two parts: a payload program, and a
+%trigger program. When run by itself, the payload program executes a pattern of
+%indirect jumps and measures a cache-based side channel\footnote{We note that other
+%side channels could be used in place of a cache}. While the trigger program is
+%not running, the payload program is effectively inactive (potentially performing
+%a decoy operation). When the trigger program runs, it executes a similar
+%pattern of indirect jumps (with similar source and destination addresses as the
+%payload program), effectively training the CPU's branch predictor to the jump
+%pattern performed by the trigger program.
+%
+%Importantly, the trigger program and payload program's indirect jump patterns
+%diverge on the destination of their final jumps. However, because the trigger
+%program has trained the CPU's branch predictor, the CPU speculates that the
+%payload program will continue following the pattern of the trigger program,
+%causing it to execute a \emph{speculative gadget} in the payload
+%program. This execution path is shown in Figure~\ref{fig:high-level}.
+%
+%We emphasize that this gadget is in a region that is neither
+%read nor executed by the payload program, and after the CPU discovers the
+%mis-speculation in the payload program, it will discard the results from the
+%speculative gadget and continue executing from the correct destination. However,
+%the payload program has a limited speculative window where it can perform
+%computation, and can communicate results back to the ``real world'' payload 
+%program via a side channel.
 
 %Figure~\ref{fig:high-level}
 
 
-\FigHighLevel
 
 
 
-While it's possible for the trigger and payload programs to be bundled in a
-single program, an analyst aware of \speculake could easily find the speculative
-gadget in the payload program based on the jump pattern in the trigger program.
-However, if the trigger and payload are kept separate, the analyst has a much
-harder job and must identify both.
+%While it's possible for the trigger and payload programs to be bundled in a
+%single program, an analyst aware of \speculake could easily find the speculative
+%gadget in the payload program based on the jump pattern in the trigger program.
+%However, if the trigger and payload are kept separate, the analyst has a much
+%harder job and must identify both.
 
-Moreover, it is possible that the trigger program be a
-seemingly-unrelated benign program already on the victim's computer. We
+
+It is also possible that a trigger program be a
+\emph{benign} program already on the victim's computer. We
 show this using the OpenSSL library as a benign trigger
-program in Section~\ref{subsec:openssl}. If the trigger program is another benign
-program on the system, the analyst has the difficult task of identifying which
-program, library, or even operating system component is responsible for training
-the CPU's branch predictor, and finding the specific set of jumps that occur at
-runtime. To make matters worse, the payload program can include dummy jump
-patterns that are effectively dead ends for the analyst, as they do not
-ultimately call the hidden speculative gadget.
+program in Section~\ref{subsec:openssl}, activating a malicious payload program
+when an adversary connects to the infected OpenSSL server using a
+TLS connection with a specific cipher suite.
+
+
+%If the trigger program is another benign
+%program on the system, the analyst has the difficult task of identifying which
+%program, library, or even operating system component is responsible for training
+%the CPU's branch predictor, and finding the specific set of jumps that occur at
+%runtime. To make matters worse, the payload program can include dummy jump
+%patterns that are effectively dead ends for the analyst, as they do not
+%ultimately call the hidden speculative gadget.
 
 We also show it is possible to obviate the trigger program entirely, and
-instead use \emph{trigger inputs}, which are attacker-provided data inputs to
-the payload that cause the CPU to speculatively execute
+instead use \emph{trigger inputs}, which are data inputs the attacker provides
+directly to
+the payload, causing the CPU to speculatively execute
 at the attacker's chosen address. Unlike traditional malware input triggers, these inputs
 cannot be inferred from the payload binary using static analysis or symbolic
-execution, as the logic these triggers activate happens speculatively in the
+execution, as the logic these triggers activate happen speculatively in the
 CPU, which existing analysis tools do not model. We describe this technique in
 more detail in Section~\ref{subsec:spec-buffer-overflow}.
 
@@ -133,29 +162,29 @@ operating system's process scheduling algorithm. In contrast, the \speculake
 author only has to use a partial model of these components and produce binaries
 that take advantage of them, while the analyst's model must be complete to
 capture all potential \speculake variants. Second, the analyst must run all
-potential trigger programs through the simulator, including benign programs with
-real-world inputs. Both of these contribute to a time-consuming and expensive
+potential trigger programs or inputs through the simulator, including benign
+programs with real-world inputs. Both of these contribute to a time-consuming and expensive
 endeavor for would-be analysts, giving the attacker a significant advantage.
 
 % Results summary
 In order to study the potential of \speculake, we implement several example
-payload programs and evaluate their performance. We find that the speculative
-window is limited by the reorder buffer and physical register file sizes, which
+payload programs and triggers variants, and evaluate their performance. We find
+that the payload program's speculative
+window is mainly limited by the CPU's reorder buffer, which
 allows us to execute between 100 and 200 instructions speculatively on modern
 Intel CPUs. While brief, we show how to perform execution in short steps,
 communicating intermediate results back to the ``real world'' part of the
 payload program. Using this technique, we demonstrate implementing a universal
 Turing machine (demonstrating arbitrary computation), a custom instruction set
 architecture that fits within the constraints of speculative execution, and show
-the ability to perform AES decryption of a text block via AES encrypt/decrypt
-instructions.
+the ability to perform AES decryption using AES-NI instructions.
 
 Using these building blocks, we demonstrate the practicality of hiding arbitrary
 computation by implementing a reverse shell in our speculative instruction set,
 with instructions decrypted in the speculative world.
 We show that this simple payload is able to perform several system calls in a
 reasonable time, ultimately launching a dial-back TCP shell in just over
-2~milliseconds after the trigger program starts.
+2~milliseconds after the trigger is present.
 
 %Using these building blocks, we demonstrate the practicality of hiding arbitrary
 %computation by decrypting an AES-encrypted ARM binary in the speculative world
