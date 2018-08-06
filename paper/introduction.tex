@@ -103,9 +103,10 @@ single program, an analyst aware of \speculake could easily find the speculative
 gadget in the payload program based on the jump pattern in the trigger program.
 However, if the trigger and payload are kept separate, the analyst has a much
 harder job and must identify both.
+
 Moreover, it is possible that the trigger program be a
 seemingly-unrelated benign program already on the victim's computer. We
-investigate using the OpenSSL library as a benign trigger
+show this using the OpenSSL library as a benign trigger
 program in Section~\ref{subsec:openssl}. If the trigger program is another benign
 program on the system, the analyst has the difficult task of identifying which
 program, library, or even operating system component is responsible for training
@@ -114,6 +115,14 @@ runtime. To make matters worse, the payload program can include dummy jump
 patterns that are effectively dead ends for the analyst, as they do not
 ultimately call the hidden speculative gadget.
 
+We also show it is possible to obviate the trigger program entirely, and
+instead use \emph{trigger inputs}, which are attacker-provided data inputs to
+the payload that cause the CPU to speculatively execute
+at the attacker's chosen address. Unlike traditional malware input triggers, these inputs
+cannot be inferred from the payload binary using static analysis or symbolic
+execution, as the logic these triggers activate happens speculatively in the
+CPU, which existing analysis tools do not model. We describe this technique in
+more detail in Section~\ref{subsec:spec-buffer-overflow}.
 
 Simulating or modelling the speculative execution path is a difficult task for a
 program analyst hoping to reverse engineer an \speculake binary. First, the
