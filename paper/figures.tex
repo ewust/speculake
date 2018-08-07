@@ -41,6 +41,25 @@
 }
 
 
+\newcommand{\FigSpectreOneModel}{
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.9\linewidth]{figures/spectre_1_model.png}
+    \caption{\textbf{Speculative Buffer Overflow}\,---\, %
+    Safe input values are stored into a local array (Step 1),
+    training the branch predictor to bypass the bounds check when given
+    unsafe input (Step 2). This results in a speculative array store which
+    overflows the bounds and overwrite a return address (Step 3). The CPU's 
+    store-to-load forwarding will forward the speculative overflow to the 
+    return (Step 4), where it will steer speculative execution to the 
+    attacker-specified speculative entry point (Step 5). Eventually, the 
+    original bounds check is resolved and control flow is redirected to the 
+    cache timing function (Step 6). }
+    \label{fig:spectre-one-model}
+\end{figure}
+}
+
+
 \newcommand{\FigSpecMeasureNP}{
 \begin{figure*}[t]
      \centering
