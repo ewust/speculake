@@ -296,18 +296,17 @@ and data value. When a line is read the payload program makes a bounds
 check on the length of padding then stores the data at that offset in a
 local array. 
 
-The local array store is now the vulnerability it can be exploited even 
-with complete bounds checks. After a series of honest inputs we include 
-an entry with a padding length beyond the maximum. On the runs with this
-cafted input we flush from cache the maximum padding length constant in 
-the payload program, preventing the bounds check from being resolved 
-and allowing the data value to be speculatively stored. We 
-then speculatively overwrite the return address and use store-to-load forwarding
-to cause a following return to divert to the address specified by the data entry. 
-From here we make use of the decryption gadget to dcecrypt SPASM instructions
-from an encrypted data blob to be transmitted to the real world via cache 
-side-channel. Using this method we have been able to run all SPASM payloads 
-including the reverse-shell. 
+The local array store is now the vulnerability it can be exploited even with
+complete bounds checks. After a series of honest inputs we include an entry with
+a padding length beyond the maximum. On the runs with this crafted input we
+flush from cache the maximum padding length constant in the payload program,
+preventing the bounds check from being resolved and allowing the data value to
+be speculatively stored. We then speculatively overwrite the return address and
+use store-to-load forwarding to cause a following return to divert to the
+address specified by the data entry. From here we make use of the decryption
+gadget to decrypt SPASM instructions from an encrypted data blob to be
+transmitted to the real world via cache side-channel. Using this method we have
+been able to run all SPASM payloads including the reverse-shell. 
 
 We note significant unpredictability in the branch predictor, though we
 show in Figure~\ref{fig:spectre-one} that a minimum around 200 safe input entries

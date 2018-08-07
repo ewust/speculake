@@ -83,15 +83,16 @@
 \begin{figure}[b]
      \centering
         \includegraphics[width=1.05\linewidth]{figures/Speculative_measurements_parity.png}
-        \caption{\textbf{Hyperthreading}\,---\,%
-        The trigger program influences the payload program via the indirect branch predictor
-        when running on the same logical CPU core. Hyperthreads also share an indirect branch
-        predictor despite running on different logical cores. We measured the impact of
-        same logical core (warm colors) vs paritiy hyperthreads (cool colors, denoted by (P))
-        on the size of the speculative execution window. As hyperthreads run concurrently, they do not
-        need to wait for an OS context switch between processes, but the two processes directly
-        contend for ROB entries. As a result, we find that hyperthreads generally have a smaller
-        speculative execution window.}
+        \caption{\textbf{Hyperthreading}\,---\,% The trigger program influences
+        the payload program via the indirect branch predictor when running on
+        the same logical CPU core. Hyperthreads also share an indirect branch
+        predictor despite running on different logical cores. We measured the
+        impact of same logical core (warm colors) vs parity hyperthreads (cool
+        colors, denoted by (P)) on the size of the speculative execution window.
+        As hyperthreads run concurrently, they do not need to wait for an OS
+        context switch between processes, but the two processes directly contend
+        for ROB entries. As a result, we find that hyperthreads generally have a
+        smaller speculative execution window.}
     \label{fig:spec-capacity-parity}
 \end{figure}
 }
@@ -167,7 +168,7 @@
     \centering
         \includegraphics[width=0.46\textwidth]{figures/spasm_model.pdf}
         \caption{\textbf{SPASM model}\,---\,%
-        Our SPASM emulator speculatively decrypts intructions, and emulates
+        Our SPASM emulator speculatively decrypts instructions, and emulates
         them in the real world. The \textit{Speculative Computation} decrypts
         the encrypted SPASM binary, returning the result through the side channel
         to allow the \textit{Resultant Computation} to update the emulated state

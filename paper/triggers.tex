@@ -69,7 +69,7 @@ While existing fuzzers and symbolic execution tools can discover traditional
 input triggers, we can leverage other Spectre variants to obfuscate our
 triggers.
 
-To do this, we use Specualtive Buffer Overflows
+To do this, we use Speculative Buffer Overflows
 (SBO)~\cite{kiriansky2018speculative} to redirect control flow to a speculative
 entry point specified by user input. We design a payload program that takes
 arbitrary user input and performs appropriate bounds checks to ensure no

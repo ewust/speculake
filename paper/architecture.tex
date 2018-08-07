@@ -116,13 +116,13 @@ payload. Even though the in-order execution of
 payload program never executes or even reads from this address, the CPU will
 briefly execute instructions there speculatively.
 
-Eventually, the dereference of the uncached function pointer in the payload program
-will be resolved, and the CPU will recognize it has incorrectly predicted the
-destination of its \texttt{callq} instruction. The
-results from the speculative entry point instructions will be discarded, and the
-CPU will continue executing from the correct destination. However, the
-speculative code can change what is loaded into the cache based on its
-computation, allowing it to covertly communicate its results to the ``real world'' program.
+Eventually, the de-reference of the uncached function pointer in the payload
+program will be resolved, and the CPU will recognize it has incorrectly
+predicted the destination of its \texttt{callq} instruction. The results from
+the speculative entry point instructions will be discarded, and the CPU will
+continue executing from the correct destination. However, the speculative code
+can change what is loaded into the cache based on its computation, allowing it
+to covertly communicate its results to the ``real world'' program.
 
 
 
@@ -200,7 +200,7 @@ on the order of 175~$\mu$~ops before the speculative world expires.
 
 We found that the processor can identify some operations that have no effect on
 output registers and allows them to use the entire size provided by the ROB, as
-determined in Section~\ref{sssec:ROB}. This includes idomatic no-ops and zero
+determined in Section~\ref{sssec:ROB}. This includes idiomatic no-ops and zero
 idioms, which have no reliance on register values, for example the instruction
 \texttt{xchg \%rax, \%rax} and \texttt{xor \%rax, \%rax}. However, if an
 instruction is a potential data hazard, it must use an entry in the Physical 
@@ -217,12 +217,12 @@ As shown in Figure~\ref{fig:spec-capacity-np}, speculative environments can
 complete a significant number of AES rounds---over 100 rounds in our
 experiments, more than enough to decrypt a
 full block using simple AES modes (e.g. AES-CTR). We investigate the use of AES
-instructions in the spculative environment further in
+instructions in the speculative environment further in
 Sections~\ref{subsec:decryption}.
 
 \medskip
 
-We find that when executing speculatively, the number of instrutions completed
+We find that when executing speculatively, the number of instructions completed
 is rarely limited by cache miss duration. Instead
 ROB size and processor mechanisms for resolving
 data dependencies define an upper boundary of approximately 150
@@ -284,7 +284,7 @@ program may speculate a second time and continue speculative execution at~C.
 We find that not all Intel CPUs support nested speculation. For
 example, it appears Haswell chips do not speculate while already speculating,
 but nonetheless support non-nested \speculake. Both Sandy Bridge (which
-preceeded Haswell) and Kaby Lake (which followed Haswell) support nested
+preceded Haswell) and Kaby Lake (which followed Haswell) support nested
 speculation. We find that when a CPU does support nested speculation, there
 appears to be no limit to nested depth besides the speculative instruction
 limit. We use a 16-deep nested speculation in Section~\ref{subsec:impl-aes}
