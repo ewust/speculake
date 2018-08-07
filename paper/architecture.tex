@@ -28,7 +28,7 @@ payload program.
 We assume a scenario where an adversary wishes to hide or obscure the behavior
 of a malicious program (malware) from an analyst attempting to reverse engineer
 it. We note this is distinct from the goals of evading malware detection, where
-maleware escapes classification by an anti-virus or other automated tool. While
+malware escapes classification by an anti-virus or other automated tool. While
 we believe \speculake could also be used to make automated detection more
 difficult, our main focus is on reverse engineer resistance, useful for evading
 manual classification concerned with malware behavior. For anti-virus evasion,
@@ -37,30 +37,31 @@ existing anti-virus
 systems~\cite{jana2012abusing,oberheide2009polypack,ropinjector,swinnen2014one,ugarte2015sok}.
 
 
-We assume the adversary is able to install binaries on the target machine
-(e.g. via a trojan or remote exploitation), and the analyst is attempting to
-determine what the malware will do using traditional debugging tools. We assume
-the analyst may be aware that speculative execution is used to obfuscate
-behavior, but does not have special-purpose hardware that allows introspection of
-the CPU's speculative state. This assumption is realistic, as modern processors
-do not allow developers or other users to directly interact with proprietary CPU
+We assume the adversary is able to install binaries on the target machine (e.g.
+via a trojan or remote exploitation), and the analyst is attempting to determine
+what the malware will do using traditional debugging tools. We assume the
+analyst may be aware that speculative execution is used to obfuscate behavior,
+but does not have special-purpose hardware that allows introspection of the
+CPU's speculative state. This assumption is realistic, as modern processors do
+not allow developers or other users to directly interact with proprietary CPU
 optimizations and features.
 
 We further assume that the malware has a specific trigger that the analyst is
-not privy to. In our examples, this trigger is often behavior exhibited by some
-other (potentially benign) process running on the same system as the malware.
-As the adversary is able to control when such a trigger is deployed (potentially
-remotely), the analyst will not be able to observe or force this trigger to
-happen at will. We emphasize that while this may also be true for existing
-trigger-based malware, analysts can often reverse engineer the trigger out of
-the malware, for example by observing control flow within the malware and using
-adaptive fuzzers~\cite{afl,stephens2016driller} to generate inputs that explore other execution
-paths of the binary. In contrast, \speculake malware's trigger depends on
-behavior in seemingly unrelated binaries, influencing malware behavior through
-channels that are effectively invisible to the analyst. As with typical malware, the analyst may
-attempt to reverse engineer the trigger to reveal the malware's behavior, but we
-will show (in Section~\ref{subsec:nested-spec}) how to defeat this type of
-analysis.
+not privy to, and the adversary can influence. In our examples, this
+trigger is often behavior exhibited by some other (potentially benign) process
+running on the same system as the malware. As the adversary is able to control
+when such a trigger is deployed (potentially remotely), the analyst will not be
+able to observe or force this trigger to happen at will. We emphasize that while
+this may also be true for existing trigger-based malware, analysts can often
+reverse engineer the trigger out of the malware, for example by observing
+control flow within the malware and using adaptive
+fuzzers~\cite{afl,stephens2016driller} to generate inputs that explore other
+execution paths of the binary. In contrast, \speculake malware's trigger depends
+on behavior in seemingly unrelated binaries, influencing malware behavior
+through channels that are effectively invisible to the analyst. As with typical
+malware, the analyst may attempt to reverse engineer the trigger to reveal the
+malware's behavior, but we will show (in Section~\ref{subsec:nested-spec}) how
+to defeat this type of analysis.
 
 \subsection{Indirect jumps}
 
