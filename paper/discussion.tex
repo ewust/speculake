@@ -230,6 +230,24 @@ at inspecting the speculative buffer overflow variant described in
 Section~\ref{subsec:spec-buffer-overflow}, as it does not use a separate trigger
 program.
 
+Alternatively an analyst may attempt to identify sections of the program or dead 
+code that will be used to access the probe array and thereby find the speculative 
+gadgets. However, identifying sections of memory that will access the probe 
+array is equivalent to the "Must Alias" or "Points-To Problem" which has been 
+proven undecidable without significant 
+restrictions~\cite{ramalingam1994undecidability,landi1992undecidability}.
+
+%
+% Theorem 1. ([7, 10]) Single procedural flow-sensitive points-
+% to analysis with dynamic memory and non-scalar variables
+% is undecidable.
+% Our first result improves the above undecidability result
+% to
+% Theorem 2. Single procedural flow-sensitive points-to
+% analysis with dynamic memory is undecidable, even when
+% only scalar variables are allowed.
+%
+
 \subsection{Future Work}
 \label{subsec:future-work}
 
@@ -238,8 +256,7 @@ the speculative world and examines the implications and limitations on
 modern processors. Given the wide-spread nature of the Spectre vulnerability 
 and the ubiquity of side-channels, we believe that this work can 
 be directly extended to other architectures, such as ARM, and other processors
-making use of
-speculative branch prediction.
+making use of speculative branch prediction.
 
 \subsubsection{Multiple Triggers}
 To create further difficulties for an analyst, or to further target the
