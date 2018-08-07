@@ -1,43 +1,14 @@
 
 \section{Discussion}
 
+\if0
+%Cutting this for now. We sort of cover it in the Turing section(s)
+
 \subsection{Resilience of \speculake}
 %Spectre works to use a cache side-channel to leak information from a process. As
 %such defenses to Spectre work to limit the information available to a
 %speculatively executing program. 
-%
-\subsubsection{Spectre Versions}
-In this work we have implemented applications making use of the speculative
-primitive in Spectre version 2, however the speculative primitive is not 
-unique to this varaint. The \speculake model can be applied more broadly
-across the spectrum of speculative functionality to hide malicious computation.
 
-For example an attacker could construct a series of direct branches with 
-contradictory conditions such that the resulting code section can never 
-be on a real world execution path. This, however does not prevent such a path
-from occuring speculatively. An attacker could use such an impossible path to
-hide speculative logic that influences the malware, effectively obscuring the
-speculative entry point.
-Similarly, the speculative store bypass variant~\cite{spec-store-bypass} could be used to
-redirect control flow when the mis-speculated load is that of an indirect
-branch target or function pointer.
-
-
-% we demonstrated this, hopefully
-%Alternatively, recent variants of Spectre version 1 could be used to
-%redirect control flow in speculative overflow style attacks~\cite{kiriansky2018speculative}. 
-%Using this technique speculative gadgets could be executed
-%based on attacker controlled input. 
-
-
-%Again the speculative primitive could 
-%be employed to execute speculative gadgets. 
-
-%These alternatives create an even larger attack area for a potential 
-%reverse engineer as the attacker can pivot between them with minimal alterations. 
-
-\if0
-%Cutting this for now. We sort of cover it in the Turing section(s)
 \subsubsection{Gadget Location}
 The benefits of \speculake rely on the computation performed in the
 speculative world being well hidden. To this end we have verified 
@@ -67,19 +38,6 @@ as executable.
 %payload's data section, the payload will not be able to fetch the instructions
 %into the execution pipeline. 
 
-
-\subsubsection{Hypervisors}
-For virtual environments that provide guests significant periods of access to
-hardware resources, \speculake is viable in certain configurations. 
-This result is specific to Spectre 2 variant, as it relies on 
-the indirect branch predictor effecting the branches in either the host 
-or guest environment. We have found that the hypercall context switch from 
-guest to host is light enough that a trigger program running in a guest
-can effect the branch predictor in a host on the same CPU core. This is not
-true in the opposite direction (where the trigger runs on the host) as the 
-hypercall transition seems to be more substantial. This implies, and we have verified,
-that guest-to-guest indirect branch predictor interference, and the current
-\speculake implementation, will not work across disparate virtual environments.
 
 \subsection{Defenses}
 We now address possible defenses to detecting and reverse engineering malware
@@ -328,6 +286,20 @@ connecting out to any other resource.
 %used in approximate computing may be beneficial here, allowing computation to
 %run speculatively and have an outer process that is tolerant of errors or
 %mis-steps by the speculative world.
+
+\subsubsection{Hypervisors}
+For virtual environments that provide guests significant periods of access to
+hardware resources, \speculake is viable in certain configurations. 
+This result is specific to Spectre 2 variant, as it relies on 
+the indirect branch predictor effecting the branches in either the host 
+or guest environment. We have found that the hypercall context switch from 
+guest to host is light enough that a trigger program running in a guest
+can effect the branch predictor in a host on the same CPU core. This is not
+true in the opposite direction (where the trigger runs on the host) as the 
+hypercall transition seems to be more substantial. While this implies 
+that guest-to-guest indirect branch predictor interference, and the current
+\speculake implementation, will not work across disparate virtual environments,
+strict resource isolation gives a stronger guarantee of non-interference. 
 
 
 
