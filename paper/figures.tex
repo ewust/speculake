@@ -67,10 +67,13 @@
         \caption{\textbf{Speculative limits}\,---\, %
     To find the number of instructions we can execute speculatively, we placed a speculative load
     after an increasing number of instructions, and measured the fraction of times the load
-    was subsequently in cache. We find that we can execute up to 220 instructions speculatively,
-    which corresponds with the size of the CPU's reorder buffer (ROB). However, more complex instructions
+    was subsequently in cache. However, more complex instructions
     have stricter constraints, generally corresponding to the number of $\mu$-ops that an instruction
-    comprises.}
+    comprises. We find that we can execute up to 220 instructions 
+    speculatively, which corresponds with the size of the CPU's reorder buffer (ROB). We measure 
+    the ROB size by timing two cache accesses with a variable number of 
+    instructions between them. The step in cycles around 220 instructions indicates that the 
+    second cache access was pushed out of the ROB defining an upper limit on size.  }
     \label{fig:spec-capacity-np}
 \end{figure*}
 }
