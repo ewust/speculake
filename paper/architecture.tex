@@ -301,7 +301,7 @@ world via a cache side channel. These speculative instructions are able to read
 from any real-world memory or registers, but they cannot perform updates or
 writes directly. To update memory, the speculative instructions must communicate
 to the real world. We use a cache side channel to do so, but other side channels
-compatible with Spectre could also be used~\cite{spectre1-1}.
+compatible with Spectre could also be used~\cite{kiriansky2018speculative}.
 
 We note a performance tradeoff between the size of communication (e.g. 4 bits vs 8
 bits) and the time it takes the real world to recover the result from the side
