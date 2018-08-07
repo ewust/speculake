@@ -293,26 +293,26 @@ engineering.
 
 \subsection{Speculative Primitive}
 
-We summarize our findings into a \emph{speculative primitive}, which allows our payload program to
-speculatively (and covertly) perform on the order of 100 arbitrary
-instructions while an accompanying trigger program is running, and communicate
-a short (e.g. single byte) result to the real
-world via a cache side channel. These speculative instructions are able to read
-from any real-world memory or registers, but they cannot perform updates or
-writes directly. To update memory, the speculative instructions must communicate
-to the real world. We use a cache side channel to do so, but other side channels
-compatible with Spectre could also be used~\cite{kiriansky2018speculative}.
+We summarize our findings into a \emph{speculative primitive}, which allows our
+payload program to speculatively (and covertly) perform on the order of 100
+arbitrary instructions while an accompanying trigger program is running, and
+communicate a short (e.g. single byte) result to the real world via a cache side
+channel. These speculative instructions are able to read from any real-world
+memory or registers, but they cannot perform updates or writes directly. To
+update memory, the speculative instructions must communicate to the real world.
+We use a cache side channel to do so, but other side channels compatible with
+Spectre could also be used~\cite{kiriansky2018speculative}.
 
-We note a performance tradeoff between the size of communication (e.g. 4 bits vs 8
-bits) and the time it takes the real world to recover the result from the side
+We note a performance tradeoff between the size of communication (e.g. 4 bits vs
+8 bits) and the time it takes the real world to recover the result from the side
 channel. Using Flush+Reload~\cite{yarom2014flush+} as our cache side channel,
 recovering the result requires accessing all elements in an array exponential in
 the size of the result (e.g. $2^8$ array reads to recover an 8-bit result).
-Therefore, there is a
-performance advantage for keeping the size of the result small, and communicating
-out small pieces of information that are aggregated by the real world over multiple speculative executions.
-Meanwhile, smaller channels introduce more overhead in recovering information. We
-investigate this tradeoff in Section~\ref{subsec:impl-aes}, and find that 8~bits
-is near optimal in practice.
+Therefore, there is a performance advantage for keeping the size of the result
+small, and communicating out small pieces of information that are aggregated by
+the real world over multiple speculative executions. Meanwhile, smaller channels
+introduce more overhead in recovering information. We investigate this tradeoff
+in Section~\ref{subsec:impl-aes}, and find that 8~bits is near optimal in
+practice.
 
 %%%%%%%%%%%%%%
