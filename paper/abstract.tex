@@ -1,16 +1,17 @@
 
 \begin{abstract}
-Recently, the Spectre and Meltdown attacks have revealed serious vulnerabilities in modern CPU
-designs, allowing an attacker to exfiltrate data from sensitive programs. These
-vulnerabilities take advantage of speculative execution to coerce a processor to
-perform computation that would otherwise not occur, leaking the resulting
-information via side channels to an attacker.
+Recently, the Spectre and Meltdown attacks have revealed serious vulnerabilities
+in modern CPU designs, allowing an attacker to exfiltrate data from sensitive
+programs. These vulnerabilities take advantage of speculative execution to
+coerce a processor to perform computation that would otherwise not occur,
+leaking the resulting information via side channels to an attacker.
 
-In this paper, we extend these ideas in a different direction, and leverage speculative
-execution in order to \emph{hide malware} from both static and dynamic analysis. Using this
-technique, critical portions of a malicious program's computation can be shielded from view,
-such that even a debugger following an instruction-level trace of the
-program cannot tell how its results were computed.
+In this paper, we extend these ideas in a different direction, and leverage
+speculative execution in order to \emph{hide malware} from both static and
+dynamic analysis. Using this technique, critical portions of a malicious
+program's computation can be shielded from view, such that even a debugger
+following an instruction-level trace of the program cannot tell how its results
+were computed.
 
 We introduce \emph{\speculake}\footnote{Executable Spectre}, which compiles
 arbitrary malicious code into a seemingly-benign payload binary. When a separate
@@ -31,14 +32,11 @@ can be a pre-existing benign application already running on the system, and
 demonstrate this concept with OpenSSL driven remotely by the attacker as a
 trigger program.
 
-%Finally, we describe defenses, but in all honesty, you're probably not going to like
-%them.
-
 \speculake demonstrates a new kind of malware that evades existing reverse
 engineering and binary analysis techniques. Because its true functionality is
 contained in seemingly unreachable dead code, and its control flow driven
-externally by potentially any other program running at the same time, \speculake poses a
-novel threat to state-of-the-art malware analysis techniques.
+externally by potentially any other program running at the same time, \speculake
+poses a novel threat to state-of-the-art malware analysis techniques.
 
 
 
