@@ -294,11 +294,12 @@ could allow an adversary to use an obscure or uncommon cipher suite to trigger a
 malicious \speculake payload program on a remote server.
 
 
+%\FigSpectreOne
 
+\if0
 \subsection{Speculative Buffer Overflow Trigger}
-\label{subsec:openssl-impl}
+\label{subsec:sbo-impl}
 
-\FigSpectreOne
 
 To demonstrate the adaptability of this attack we have implemented the 
 Speculative Buffer Overflow alternative trigger and assembled an \speculake 
@@ -327,5 +328,5 @@ We note significant unpredictability in the branch predictor, though we
 show in Figure~\ref{fig:spectre-one} that a minimum around 200 safe input entries
 to each dishonest entry are required before a distinguishable signal is present 
 in the cache channel. 
-
+\fi
 %%%%%%%%%%%%%%

@@ -107,9 +107,15 @@ mistrain the branch predictor by repeatedly sending valid (in-bounds) values of
 The speculative entry point is also chosen by the 
 trigger in this scenario as \texttt{z} contains the address of the 
 speculative entry point, allowing the attacker to create a ROP-style speculative 
-execution path through the payload. We describe our implementation of this in
-Section~\ref{tk}.
+execution path through the payload.
+%We describe our implementation of this in Section~\ref{tk}.
 
+% If it gets implemented, remove this, add that ^^^
+\FigSpectreOne
+We implemented an experiment to determine the number of times a branch needs to
+be ``trained'' before it can be used as a speculative buffer overflow.
+Figure~\ref{fig:spectre-one} shows that several hundred benign inputs are needed
+to reliably be able to observe speculative buffer overflow behavior.
 
 \subsection{Speculative Store Bypass}
 
@@ -130,6 +136,8 @@ executes at this stale address in reality, the CPU will briefly speculatively
 execute there, enabling \speculake payloads. Like the speculative buffer
 overflow, this trigger also allows ROP style chains to execute a series of
 speculative gadgets.
+
+
 
 
 %The speculative primitive is shared by all versions of Spectre as an upper
