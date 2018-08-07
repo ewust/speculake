@@ -47,21 +47,19 @@ resolved, our speculative code reports results back to the real world before
 this resolution. In our Turing example, we observed this as incorrect state
 transitions.
 
-This error is particularly devious, as it is not an
-error of bit flips or noise, but rather the processor speculating what the
-speculative gadget will read from memory. Thus, error correcting codes on
-the reported result do not improve the situation.
+This error is particularly devious, as it is not an error of bit flips or noise,
+but rather the processor speculating what the speculative gadget will read from
+memory. Thus, error correcting codes on the reported result do not improve the
+situation.
 
 
-Instead, we
-repeat the execution several times and look for the modal value over all
-iterations. We measured the
-error rate of our implementation as a function of how many redundant iterations
-of the same step, and found that 10 redundant iterations resulted in 1 error every
-million Turing steps, with the error rate dropping exponentially as iterations
-increase. We choose 11 iterations as a conservative bound (error rate measured
-to be 0), and computed 1 million Turing steps at a rate of 1351
-steps per second.
+Instead, we repeat the execution several times and look for the modal value over
+all iterations. We measured the error rate of our implementation as a function
+of how many redundant iterations of the same step, and found that 10 redundant
+iterations resulted in 1 error every million Turing steps, with the error rate
+dropping exponentially as iterations increase. We choose 11 iterations as a
+conservative bound (error rate measured to be 0), and computed 1 million Turing
+steps at a rate of 1351 steps per second.
 
 % Was 324 steps per second, but was that at 10 iterations? But we just said
 % 10 wasn't perfect (1 error in a million steps), so it seems confusing to say
@@ -80,17 +78,14 @@ steps per second.
 \subsection{AES Decryption}
 \label{subsec:impl-aes}
 The speculative world is able to take advantage of the AES-NI instructions to
-decrypt messages. However, the speculative upper-limit of about 175 $\mu$~ops is not
-enough to allow us to compute the key expansion, even using the
+decrypt messages. However, the speculative upper-limit of about 175 $\mu$~ops is
+not enough to allow us to compute the key expansion, even using the
 \texttt{aeskeygenassist} instructions. To avoid this, we can either preload the
 expanded key schedule into the program (instead of the key), or use a cheaper
-(non-standard) key expansion algorithm.
-For the former, we note that an analyst
-could observe the structure of a normal key schedule,
-but we can avoid this by simply selecting 11 random round keys.
-We note that
-this should not weaken the security of AES, as we can ensure the round keys are
-not linearly related.
+(non-standard) key expansion algorithm. For the former, we note that an analyst
+could observe the structure of a normal key schedule, but we can avoid this by
+simply selecting 11 random round keys. We note that this should not weaken the
+security of AES, as we can ensure the round keys are not linearly related.
 
 
 %We discuss further methods for obfuscating
@@ -111,28 +106,27 @@ world, and we vary the channel width of the side channel from 1 to 12 bits to
 measure its performance. At low channel width, reading from the cache side
 channel requires timing reads from only 2 locations, while at 12-bits, the side
 channel requires reading $2^{12}$ locations. On the other hand, there is a fixed
-overhead per speculative iteration that favors increased channel width to maximize
-bandwidth. As shown in Figure~\ref{fig:spec_bandwidth}, 8 bits is the optimal
-side channel width, allowing us to decrypt over 5,000 bits per second (625
-Bytes/sec).
+overhead per speculative iteration that favors increased channel width to
+maximize bandwidth. As shown in Figure~\ref{fig:spec_bandwidth}, 8 bits is the
+optimal side channel width, allowing us to decrypt over 5,000 bits per second
+(625 Bytes/sec).
 % Iterations: 20
 
 
 \smallskip
 
 We also implemented our nested speculation technique for obfuscating keys,
-making 256 speculative landing spots that each
-shift 8 unique bits into the 128-bit register \texttt{\%xmm0}, and then
-performing an indirect jump. We then had a custom trigger program perform 16
-indirect jumps (after the initial 28) that corresponded with 16 randomly-chosen landing spots in the
-payload program, training the branch predictor. When the payload program reaches the
-first speculative jump, it follows the same pattern speculatively, 
-eventually filling
-\texttt{\%xmm0} with the corresponding $16*8$ bits. We then used
-the \texttt{aesenc} instruction to expand these 128-bits to a full
-key schedule, and performed decryption as described previously. Thus, without
-the trigger program, an analyst has no information about what key is used to
-decrypt the ciphertext in the payload.
+making 256 speculative landing spots that each shift 8 unique bits into the
+128-bit register \texttt{\%xmm0}, and then performing an indirect jump. We then
+had a custom trigger program perform 16 indirect jumps (after the initial 28)
+that corresponded with 16 randomly-chosen landing spots in the payload program,
+training the branch predictor. When the payload program reaches the first
+speculative jump, it follows the same pattern speculatively, eventually filling
+\texttt{\%xmm0} with the corresponding $16*8$ bits. We then used the
+\texttt{aesenc} instruction to expand these 128-bits to a full key schedule, and
+performed decryption as described previously. Thus, without the trigger program,
+an analyst has no information about what key is used to decrypt the ciphertext
+in the payload.
 
 
 
@@ -152,10 +146,9 @@ decrypt the ciphertext in the payload.
 %Constructing an emulator making use of the speculative primitive requires  
 %a trade off in expresive capability versus speed. 
 We have implemented our custom instruction set architecture---SPASM---as a model
-using two pseudo-registers, and
-6-bit instruction length which allows for a relatively direct programming model
-in which structured values can be entered into memory locations before making
-a systemcall.
+using two pseudo-registers, and 6-bit instruction length which allows for a
+relatively direct programming model in which structured values can be entered
+into memory locations before making a systemcall.
 
 
 %To achieve a balance with speed the number of bits in each instruction is both 
@@ -167,35 +160,33 @@ a systemcall.
 %instructions. 
 %
 
-In this model of computation there are effectively no instruction arguments, as we must
-return an entire instruction from the speculative world inside the limited-width
-cache side channel. Although other small
-instruction sets exist, they either allow variable instruction
-lengths, are too long even in reduced form, or did not have significant support
-to make them favorable for developers.
+In this model of computation there are effectively no instruction arguments, as
+we must return an entire instruction from the speculative world inside the
+limited-width cache side channel. Although other small instruction sets exist,
+they either allow variable instruction lengths, are too long even in reduced
+form, or did not have significant support to make them favorable for developers.
 
-We used 6 bits in the construction of this instruction set as our
-goal is to limit the length of each opcode as much as possible. Note that this
-is different from the goal in maximizing bandwidth, as our goal now is to
-maximize instruction throughput. Given our short instructions, loading values into registers
-requires shifting in 4-bits at a time. SPASM has two registers that act as a
-pointer and working register, that can be used to perform jumps, arbitrary
-memory reads and writes, and basic arithmatic. We also have a \texttt{syscall}
-instruction that makes a real system call to the underlying operating system
-with parameters loaded from the SPASM state, allowing us to interact with the
-real world. Details of
-the SPASM instruction set can be found in Appendix~\ref{appendix:spasm}. 
+We used 6 bits in the construction of this instruction set as our goal is to
+limit the length of each opcode as much as possible. Note that this is different
+from the goal in maximizing bandwidth, as our goal now is to maximize
+instruction throughput. Given our short instructions, loading values into
+registers requires shifting in 4-bits at a time. SPASM has two registers that
+act as a pointer and working register, that can be used to perform jumps,
+arbitrary memory reads and writes, and basic arithmetic. We also have a
+\texttt{syscall} instruction that makes a real system call to the underlying
+operating system with parameters loaded from the SPASM state, allowing us to
+interact with the real world. Details of the SPASM instruction set can be found
+in Appendix~\ref{appendix:spasm}. 
 
 In SPASM we have implemented multiple example programs that we encrypted and
 loaded into a \speculake payload, which decrypts and emulates SPASM instructions
-only when the corresponding trigger program is running.
-We have implemented a \textit{HelloWorld}
-program that prints to \texttt{stdout}, and a \texttt{FizzBuzz} program that
-demonstrates control flow and arithmetic operations while printing to stdout.
-Finally, we implemented a \textit{ReverseShell} program that opens and connects a TCP socket
-to an attacker-chosen location
-before executing a local shell and allowing the remote adversary
-to issue shell commands on the victim machine.
+only when the corresponding trigger program is running. We have implemented a
+\textit{HelloWorld} program that prints to \texttt{stdout}, and a
+\textit{FizzBuzz} program that demonstrates control flow and arithmetic
+operations while printing to stdout. Finally, we implemented a
+\textit{ReverseShell} program that opens and connects a TCP socket to an
+attacker-chosen location before executing a local shell and allowing the remote
+adversary to issue shell commands on the victim machine.
 Figure~\ref{fig:spasm_model} details the high-level flow of a SPASM payload.
 
 %Expected performance for a given SPASM binary will vary given multiple factors,
@@ -209,13 +200,11 @@ Figure~\ref{fig:spasm_model} details the high-level flow of a SPASM payload.
 %     Redundancy * Probe_Space * Num_Instr
 % \end{lstlisting}
 
-Our \textit{ReverseShell} program consists of 355 SPASM instructions, and
-makes six system calls to open a socket,
-connect to it, duplicate I/O file descriptors, and perform an \texttt{execve}
-system call to open a shell.
-In our tests using 5 iterations per decrypted instruction, the
-\textit{ReverseShell} program takes just over 2ms to launch a reverse shell
-once triggered.
+Our \textit{ReverseShell} program consists of 355 SPASM instructions, and makes
+six system calls to open a socket, connect to it, duplicate I/O file
+descriptors, and perform an \texttt{execve} system call to open a shell. In our
+tests using 5 iterations per decrypted instruction, the \textit{ReverseShell}
+program takes just over 2ms to launch a reverse shell once triggered.
 
 % TODO - REFERENCE APPENDIX for ISA
 
@@ -231,35 +220,32 @@ once triggered.
 %complicated code paths that can be easily selected by remote clients by their
 %choice of cipher suit
 
-To demonstrate a benign trigger application, we implemented an ExSpectre payload that
-would trigger when running concurrently with OpenSSL.
+To demonstrate a benign trigger application, we implemented an ExSpectre payload
+that would trigger when running concurrently with OpenSSL.
 % Could cut?
-We disable
-ASLR for simplification, but note that
-branch predictors can also be used to determine ASLR offsets of co-resident applications,
-and our attack adjusted accordingly~\cite{evtyushkin2016jump}.
+We disable ASLR for simplification, but note that branch predictors can also be
+used to determine ASLR offsets of co-resident applications, and our attack
+adjusted accordingly~\cite{evtyushkin2016jump}.
 
 We used \texttt{gdb} to run an instance of an OpenSSL server (version 1.0.1f),
 and printed out every instruction executed and its address after a breakpoint on
-the \texttt{SSL\_new} function. We then made a TLS connection to the
-server,
+the \texttt{SSL\_new} function. We then made a TLS connection to the server,
 which produced over 13~million instructions, including over 359,000 direct jumps
-and 28,000 indirect jumps. We then searched for the longest repeated set of more than
-28 indirect jumps that ends with a unique jump (i.e. source and destination do
-not occur in the previous 28+ indirect jumps).
+and 28,000 indirect jumps. We then searched for the longest repeated set of more
+than 28 indirect jumps that ends with a unique jump (i.e. source and destination
+do not occur in the previous 28+ indirect jumps).
 
 We discovered a candidate that corresponds to code in OpenSSL's
 \texttt{nistp256.c} that contained 31 indirect jumps repeated 254 times each
 handshake. This code is used during the TLS key exchange as the server computes
 the ECDHE shared secret. We made a list of 31 source-destination address pairs
-for these indirect jumps, and constructed a jump/ret chain to mimic the same
-jump pattern in
-our payload program. Our payload program mimicks the first 30 indirect jump
-source/destination pairs, with a final jump going to a cache timing function
-in our payload program. However, due to the prior pattern, this last jump is
-frequently mis-speculated (about 3.5\% of the time), and instead goes to the
-destination corresponding to the 31st jump in OpenSSL, which serves as our
-speculative entry point.
+for these indirect jumps, and constructed a \texttt{jump}/\texttt{ret} chain to
+mimic the same jump pattern in our payload program. Our payload program mimics
+the first 30 indirect jump source/destination pairs, with a final jump going to
+a cache timing function in our payload program. However, due to the prior
+pattern, this last jump is frequently mis-speculated (about 3.5\% of the time),
+and instead goes to the destination corresponding to the 31st jump in OpenSSL,
+which serves as our speculative entry point.
 
 %Our program jumps to the source address of a pair,
 %which has a single \texttt{retq} instruction that pops the next
@@ -273,25 +259,24 @@ speculative entry point.
 %payload program, which immediately times probing the cache to see if any value was
 %loaded.
 
-We ran experiments on an Intel Haswell
-i5-4590 CPU, with OpenSSL and our payload program pinned to the same core using
-\texttt{taskset}.
-We induced the jump pattern in OpenSSL by running Apache benchmark against it to
-generate thousands of TLS connections using the ECDHE key exchange with the
-secp256r1 curve (ECDHE-RSA-AES256-GCM-SHA384). When running Apache benchmark locally, our payload program
-reliably executes (speculatively) at the intended speculative entry point
-about 3.5\% of the time. When apache benchmark runs on a remote
+We ran experiments on an Intel Haswell i5-4590 CPU, with OpenSSL and our payload
+program pinned to the same core using \texttt{taskset}. We induced the jump
+pattern in OpenSSL by running Apache benchmark against it to generate thousands
+of TLS connections using the ECDHE key exchange with the secp256r1 curve
+(ECDHE-RSA-AES256-GCM-SHA384). When running Apache benchmark locally, our
+payload program reliably executes (speculatively) at the intended speculative
+entry point about 3.5\% of the time. When apache benchmark runs on a remote
 machine, this rate drops to approximately 2.0\%. Nonetheless, these are both
 sufficient to perform computation, as our payload can simply increase the amount
 of iterations needed to extract meaningful results from the speculative world.
 
 We verified that our payload program did not execute at the speculative entry
-point when we ran
-other programs that simply consumed CPU on the same core. In addition, when we used
-Apache benchmark to create thousands of connections with a different cipher
-suite (DHE-RSA-AES128-GCM-SHA256), we similarly saw no speculation at the entry point. This
-could allow an adversary to use an obscure or uncommon cipher suite to trigger a
-malicious \speculake payload program on a remote server.
+point when we ran other programs that simply consumed CPU on the same core. In
+addition, when we used Apache benchmark to create thousands of connections with
+a different cipher suite (DHE-RSA-AES128-GCM-SHA256), we similarly saw no
+speculation at the entry point. This could allow an adversary to use an obscure
+or uncommon cipher suite to trigger a malicious \speculake payload program on a
+remote server.
 
 
 %\FigSpectreOne

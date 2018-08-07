@@ -28,7 +28,7 @@
 \begin{figure}[t]
     \centering
     \includegraphics[width=0.9\linewidth]{figures/spectre_1_training.png}
-    \caption{\textbf{Speculative buffer overflow warm-up}\,---\, %
+    \caption{\textbf{Speculative buffer overflow warm-up}\,---\,%
     The direct branch predictor must
     be trained to expect that a branch will go a specific way before speculative
     buffer overflows can be used. We varied the number of times a branch was trained
@@ -45,7 +45,7 @@
 \begin{figure}[ht]
     \centering
     \includegraphics[width=0.9\linewidth]{figures/spectre_1_model.png}
-    \caption{\textbf{Speculative Buffer Overflow}\,---\, %
+    \caption{\textbf{Speculative Buffer Overflow}\,---\,%
     Safe input values are stored into a local array (Step 1),
     training the branch predictor to bypass the bounds check when given
     unsafe input (Step 2). This results in a speculative array store which
@@ -64,7 +64,7 @@
 \begin{figure*}[t]
      \centering
         \includegraphics[width=0.9\textwidth]{figures/Speculative_measurements_no-parity.png}
-        \caption{\textbf{Speculative limits}\,---\, %
+        \caption{\textbf{Speculative limits}\,---\,%
     To find the number of instructions we can execute speculatively, we placed a speculative load
     after an increasing number of instructions, and measured the fraction of times the load
     was subsequently in cache. However, more complex instructions
@@ -83,7 +83,7 @@
 \begin{figure}[b]
      \centering
         \includegraphics[width=1.05\linewidth]{figures/Speculative_measurements_parity.png}
-        \caption{\textbf{Hyperthreading}\,---\, %
+        \caption{\textbf{Hyperthreading}\,---\,%
         The trigger program influences the payload program via the indirect branch predictor
         when running on the same logical CPU core. Hyperthreads also share an indirect branch
         predictor despite running on different logical cores. We measured the impact of
@@ -133,7 +133,7 @@
 \begin{figure}[t]
     \centering
         \includegraphics[width=0.4\textwidth]{figures/general_model.pdf}
-        \caption{\textbf{ExSpectre model}\,---\, %
+        \caption{\textbf{ExSpectre model}\,---\,%
         General model of speculative computation within the payload 
         process when triggered. The \textit{Speculative Gadget} has read-only
         access to all memory within the process, but can return updates/results via a
@@ -150,7 +150,7 @@
 \begin{figure}[t]
     \centering
         \includegraphics[width=0.5\textwidth]{figures/Speculative_bandwidth}
-        \caption{\textbf{Speculative Bandwidth}\,---\, %
+        \caption{\textbf{Speculative Bandwidth}\,---\,%
         Using the speculative primitive, 1KB of data
         can be decrypted and exfiltrated at a speed between 5 and 6 kbps from
         the speculative world with 20 iterations per round for guaranteed
@@ -166,7 +166,7 @@
 \begin{figure}[b]
     \centering
         \includegraphics[width=0.46\textwidth]{figures/spasm_model.pdf}
-        \caption{\textbf{SPASM model}\,---\, %
+        \caption{\textbf{SPASM model}\,---\,%
         Our SPASM emulator speculatively decrypts intructions, and emulates
         them in the real world. The \textit{Speculative Computation} decrypts
         the encrypted SPASM binary, returning the result through the side channel
