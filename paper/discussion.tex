@@ -50,30 +50,30 @@ vulnerabilities, however, none of these entirely prevent \speculake malware from
 working, as they are generally not designed to protect programs that willingly
 use Spectre against themselves.
 
-\paragraph{Indirect Branch Predictor Barrier} - IBPB is used when transitioning to a new
-address space, allowing a
-program to ensure that earlier code's behavior does not effect its branch prediction.
-IBPB requires CPU and operating system support. However, we observe on Linux that
-processes running under the same user group do not receive IBPB protection,
-enabling \speculake when the trigger and payload run under the same group.
-Furthermore, IBPB does not prevent the speculative buffer overflow variant of
-\speculake described in Section~\ref{subsec:spec-buffer-overflow}.
+\paragraph{Indirect Branch Predictor Barrier}IBPB is used when transitioning to
+a new address space, allowing a program to ensure that earlier code's behavior
+does not effect its branch prediction. IBPB requires CPU and operating system
+support. However, we observe on Linux that processes running under the same user
+group do not receive IBPB protection, enabling \speculake when the trigger and
+payload run under the same group. Furthermore, IBPB does not prevent the
+speculative buffer overflow variant of \speculake described in
+Section~\ref{subsec:spec-buffer-overflow}.
 
 %However, this does not prevent a willing payload program from intentionally omitting
 %IBPB protections.
 
-\paragraph{Single Thread Indirect Branch Predictors} - STIBP prevents sibling
+\paragraph{Single Thread Indirect Branch Predictors}STIBP prevents sibling
 hyperthreads from interacting via the indirect branch predictor. However, this
-does not prevent co-resident processes from cooperating when they run on the same
-logical core.
+does not prevent co-resident processes from cooperating when they run on the
+same logical core.
 
-\paragraph{Indirect Branch Restricted Speculation} - IBRS prevents code in less
+\paragraph{Indirect Branch Restricted Speculation}IBRS prevents code in less
 privileged prediction modes from influencing indirect branch prediction in
 higher privileges (e.g. the kernel). This does not
 prevent speculative execution in a willing payload program in a less privileged
 speculation mode.
 
-\paragraph{Retpoline} is a software mitigation that replaces indirect jumps with
+\paragraph{Retpoline}is a software mitigation that replaces indirect jumps with
 a special call/overflow/return sequence, controlling where the CPU will
 speculate the indirect branch to a contained (and benign)
 section~\cite{retpoline}. However, this defense is opt-in which \speculake
@@ -85,24 +85,22 @@ speculative buffer overflow variant.
 While not a primary goal of \speculake, we consider the ability of \speculake
 malware to hide from detection.
 
-When using the cache side channel variant of \speculake, the payload
-program must at least occasionally watch this side channel, offering a
-potential method for detecting \speculake malware.
-Analysts could search for telltale signs of cache inference behavior, such as
-the use of \texttt{clflush} instructions or reading cycle timings. At the cost
-of performance, \speculake could choose to use a more subtle cache side channel
-that does not require this, such as \texttt{Prime+Probe}, or by exploiting race
-conditions between multiple threads to allow the speculative world to influence
-the behavior of the real world.
+When using the cache side channel variant of \speculake, the payload program
+must at least occasionally watch this side channel, offering a potential method
+for detecting \speculake malware. Analysts could search for telltale signs of
+cache inference behavior, such as the use of \texttt{clflush} instructions or
+reading cycle timings. At the cost of performance, \speculake could choose to
+use a more subtle cache side channel that does not require this, such as
+\texttt{Prime+Probe}, or by exploiting race conditions between multiple threads
+to allow the speculative world to influence the behavior of the real world.
 
-\speculake could also use another side channel method that
-avoids the cache
-to exfiltrate information from the speculative gadgets, such as the branch
+\speculake could also use another side channel method that avoids the cache to
+exfiltrate information from the speculative gadgets, such as the branch
 predictor itself~\cite{evtyushkin2018branchscope}, memory bandwidth, power
-utilization, or contention over other shared resources~\cite{kiriansky2018speculative}.
-While cache 
-channels tend to have the highest throughput, they are not the only 
-resource that must be monitored to detect or prevent these types of attacks. 
+utilization, or contention over other shared
+resources~\cite{kiriansky2018speculative}. While cache channels tend to have the
+highest throughput, they are not the only resource that must be monitored to
+detect or prevent these types of attacks. 
 
 %\paragraph{Red-Pills}
 %Hardware minutia have also been used to identify and fingerprint execution
@@ -125,14 +123,14 @@ Modern malware often uses hardware minutia to identify and fingerprint execution
 environments in order to detect when it is under debugging or
 inspection~\cite{lindorfer2011detecting,balzarotti2010efficient,paleari2009fistful}.
 To prevent such identification, analyzers often employ ``bare metal''
-execution~\cite{kirat2011barebox}, running the malware on
-dedicated hardware that allows introspection and observation of the system
-without interfering with its normal operation. This prevents malware from using
-so-called ``red pill'' checks to observe that it is under test (and hide its
-malicious behavior)~\cite{kirat2014barecloud}. However, to the best of our
-knowledge, no publicly available bare-metal environments allow introspection on
-the speculative state of the CPU, making it difficult to analyze \speculake
-malware. However, such environments could be useful for observing the behavior of
+execution~\cite{kirat2011barebox}, running the malware on dedicated hardware
+that allows introspection and observation of the system without interfering with
+its normal operation. This prevents malware from using so-called ``red pill''
+checks to observe that it is under test (and hide its malicious
+behavior)~\cite{kirat2014barecloud}. However, to the best of our knowledge, no
+publicly available bare-metal environments allow introspection on the
+speculative state of the CPU, making it difficult to analyze \speculake malware.
+However, such environments could be useful for observing the behavior of
 \speculake malware in the presence of its trigger if available, as modifications
 in the real world could be easily tracked.
 
@@ -175,15 +173,15 @@ about speculative paths and how they might influence a program.
 \subsubsection{Hardware-level defenses}
 Ultimately, speculative execution vulnerabilities stem from problems in
 hardware, and are best fixed there. However, we note that fixing problems in
-order to prevent Spectre may not necessarily prevent \speculake malware. In Spectre, an application is
-coerced against its will to mis-speculate branches, but in \speculake, the
-application willfully encourages the mis-speculation. Thus, some solutions may
-defend against Spectre, but not \speculake.
+order to prevent Spectre may not necessarily prevent \speculake malware. In
+Spectre, an application is coerced against its will to mis-speculate branches,
+but in \speculake, the application willfully encourages the mis-speculation.
+Thus, some solutions may defend against Spectre, but not \speculake.
 
 
 One such solution is a new \texttt{specfence} instruction, that prohibits the
-CPU from speculating past. This instruction would require that loads and stores after
-the instruction must wait (and cannot be pre-fetched) until the
+CPU from speculating past. This instruction would require that loads and stores
+after the instruction must wait (and cannot be pre-fetched) until the
 \texttt{specfence} instruction has retired. We note this is distinct from the
 \texttt{mfence} instruction that serializes memory transactions. Speculative
 reads and out-of-order execution can still occur past an \texttt{mfence}, and
@@ -192,9 +190,9 @@ stream~\cite{intel-software-guide}.
 
 One way to achieve a \texttt{specfence} pseudo-instruction is to fill the ROB
 with enough instructions that the CPU cannot speculate past it. We find that the
-\texttt{rep} prefix for string operations is able to do this if it is set to 
-repeat more than 96 times, presumably as it issues $2*96$ $\mu$-ops, and fills the
-ROB~\cite{intel-instruction-tables}.
+\texttt{rep} prefix for string operations is able to do this if it is set to
+repeat more than 96 times, presumably as it issues $2*96$ $\mu$-ops, and fills
+the ROB~\cite{intel-instruction-tables}.
 
 However effective such an instruction may be against Spectre, it is not a
 defense against \speculake. A malicious \speculake malware author would simply
@@ -209,9 +207,9 @@ not include such an instruction in either their payload or trigger programs.
 \subsubsection{Reverse-engineering triggers}
 For program-based triggers, an analyst could attempt to find the trigger program
 by examining the execution path of the payload program, and locating a common
-indirect jump pattern between payload and potential triggers. Since both programs must
-share a common indirect jump pattern to interact via the indirect branch
-predictor, there must be some overlap which is unlikely to occur randomly
+indirect jump pattern between payload and potential triggers. Since both
+programs must share a common indirect jump pattern to interact via the indirect
+branch predictor, there must be some overlap which is unlikely to occur randomly
 between two programs.
 
 We note that while the analyst may learn the execution path (and thus true
@@ -246,16 +244,16 @@ speculative branch prediction.
 \subsubsection{Multiple Triggers}
 To create further difficulties for an analyst, or to further target the
 execution environment, it is possible to have the payload program to combine
-multiple triggers. Instead of requiring only a single trigger program,
-the payload could require multiple trigger programs to be running
-simultaneously, or in a particular order. Alternatively, the payload could combine
-trigger programs with input triggers, forcing an analyst to understand multiple
-variants simulatenously.
+multiple triggers. Instead of requiring only a single trigger program, the
+payload could require multiple trigger programs to be running simultaneously, or
+in a particular order. Alternatively, the payload could combine trigger programs
+with input triggers, forcing an analyst to understand multiple variants
+simultaneously.
 
 This could allow fine-grained targeting of malware. For instance, the attacker
-could distribute trigger programs through different channels to target different sets
-of victims, and have the ultimate payload only operate at the intersection of
-these groups. As an example, one trigger program could be distributed to a
+could distribute trigger programs through different channels to target different
+sets of victims, and have the ultimate payload only operate at the intersection
+of these groups. As an example, one trigger program could be distributed to a
 particular country (e.g. Iran), and another to a particular device globally
 (centrifuge controllers), resulting in the malicious payload (Stuxnet) only
 being revealed and executed on the intersection of these two groups.
@@ -275,10 +273,9 @@ used to shift in data or an entire program for emulation.
 %data shifted into the state.
 %This could be a direct form of \speculake using emulation and
 %decryption or more traditional malicious behavior. 
-Using this method a payload
-program can be distributed without the encrypted data section at all,
-instead having the data written into the process indirectly at run-time without ever
-connecting out to any other resource.
+Using this method a payload program can be distributed without the encrypted
+data section at all, instead having the data written into the process indirectly
+at run-time without ever connecting out to any other resource.
 
 %\subsubsection{Benign Triggers}
 %We have demonstrated that a using \allowbreak OpenSSL as a benign trigger allows for
@@ -335,10 +332,10 @@ overcome, and if stronger isolation is needed in the virtual machine context.
 
 \subsubsection{Alternative Applications}
 We have proposed the \speculake model as a new malware threat, however, this
-model of hidden computation could be applied more broadly. As of now there are no ways of
-debugging speculative computation, meaning that the computation done there is
-effectively isolated and difficult to extract by third-parties, even with
-physical or root access to the machine it operates on. While not a true
+model of hidden computation could be applied more broadly. As of now there are
+no ways of debugging speculative computation, meaning that the computation done
+there is effectively isolated and difficult to extract by third-parties, even
+with physical or root access to the machine it operates on. While not a true
 trusted execution environment, it is possible that such an environment could be
 used as a limited trusted environment. This may have potential use in digital
 rights management (DRM), and whitebox cryptography applications.
