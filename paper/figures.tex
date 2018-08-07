@@ -8,20 +8,17 @@
     % \includegraphics[clip, trim=6cm 13.5cm 3.8cm 5cm, width=0.9\linewidth]{figures/exspectre-high-level.pdf}
     \includegraphics[width=0.9\linewidth]{figures/exspectre-high-level-trimmed.pdf}
     \caption{\textbf{\speculake}\,---\,%
-    Both the Trigger and Payload binaries exhibit the same initial series of
-    indirect jumps, shown in Step 1. The trigger program solely executes these
+    Both the trigger and payload binaries exhibit the same initial series of
+    indirect jumps (Step 1). The trigger program solely executes these
     jumps to (mis)train the branch predictor. In the Payload program
     \texttt{fn\_ptr} has been set to point to the \texttt{cache\_timing}
-    function and flushed from cache. Thus at Step 2 the branch predictor
+    function and flushed from cache. Thus the branch predictor
     mis-predicts the jump to \texttt{cache\_timing} and instead jumps to
-    \texttt{target\_fn} as trained by the Trigger program (green line). 
-    \texttt{target\_fn} then executes speculatively as shown in Step 3. 
-    Eventually \texttt{fn\_ptr} is loaded from memory and this mis-jump is 
-    recognized by the processor, directing computation to Step 4, the 
-    \texttt{cache\_timing} function, which then computes which value was loaded 
-    into cache speculatively.}
-
-
+    \texttt{target\_fn} (Step 2) as trained by the trigger program (green line). 
+    \texttt{target\_fn} then executes speculatively (Step 3), until
+    \texttt{fn\_ptr} is loaded from memory and the processor redirects
+    computation to the \texttt{cache\_timing} function (Step 4),
+    which measures which value was speculatively loaded into cache.}
     \label{fig:high-level}
 
 \end{figure}
@@ -31,17 +28,16 @@
 \begin{figure}[t]
     \centering
     \includegraphics[width=0.9\linewidth]{figures/spectre_1_training.png}
-    \caption{When using speculative buffer overflow the direct branch predictor
-    must be trained on input data before it can mis-speculate a branch. 
-    Over an independent number of training 
-    rounds we measure the resulting hit rate fraction of trials where the 
-    speculative gadget is able to perform the intended cache load. We find 
-    that around 200 benign training branches are required before a branch 
-    can be mis-speculated with discernable hit rate fraction. Note that a 
-    1\% signal is generally significant enough to discern as background cache noise 
-    is minimal in an ideal scenario.}
+    \caption{\textbf{Speculative buffer overflow warm-up}\,---\, %
+    The direct branch predictor must
+    be trained to expect that a branch will go a specific way before speculative
+    buffer overflows can be used. We varied the number of times a branch was trained
+    to be taken and observed the fraction of times we achieved a speculative buffer overflow
+    execution immediately after (measured by observing if a speculatively-loaded value was present
+    in cache avgeraged over 20,000 trials). We find that a branch must be trained in a
+    direction at least 200 times before it can start to be used in a speculative buffer overflow.}
     \label{fig:spectre-one}
-\end{figure}   
+\end{figure}
 }
 
 
@@ -49,11 +45,13 @@
 \begin{figure*}[t]
      \centering
         \includegraphics[width=0.9\textwidth]{figures/Speculative_measurements_no-parity.png}
-    \caption{The speculative primitive allows for a limited number of instructions
-    to be completed speculatively, dependent on multiple factors. The ROB 
-    capacity aligns directly with the upper bound of nop instructions 
-    that can be completed speculatively, while other constraints bound more 
-    complex instructions.}
+        \caption{\textbf{Speculative limits}\,---\, %
+    To find the number of instructions we can execute speculatively, we placed a speculative load
+    after an increasing number of instructions, and measured the fraction of times the load
+    was subsequently in cache. We find that we can execute up to 220 instructions speculatively,
+    which corresponds with the size of the CPU's reorder buffer (ROB). However, more complex instructions
+    have stricter constraints, generally corresponding to the number of $\mu$-ops that an instruction
+    comprises.}
     \label{fig:spec-capacity-np}
 \end{figure*}
 }
@@ -63,11 +61,15 @@
 \begin{figure}[b]
      \centering
         \includegraphics[width=1.05\linewidth]{figures/Speculative_measurements_parity.png}
-    \caption{Trigger and payload processes must share CPU resources as they 
-        must be performed on the same hyperthread or associated parity hyperthreads. 
-        Processes on the parity hyperthreads (cool colors) denoted by (P) accomplish a 
-        significantly lower number of instructions as compared with processes 
-        on the same hyperthread (warm colors).}
+        \caption{\textbf{Hyperthreading}\,---\, %
+        The trigger program influences the payload program via the indirect branch predictor
+        when running on the same logical CPU core. Hyperthreads also share an indirect branch
+        predictor despite running on different logical cores. We measured the impact of
+        same logical core (warm colors) vs paritiy hyperthreads (cool colors, denoted by (P))
+        on the size of the speculative execution window. As hyperthreads run concurrently, they do not
+        need to wait for an OS context switch between processes, but the two processes directly
+        contend for ROB entries. As a result, we find that hyperthreads generally have a smaller
+        speculative execution window.}
     \label{fig:spec-capacity-parity}
 \end{figure}
 }
@@ -93,9 +95,13 @@
 \begin{figure}[t]
     \centering
     \includegraphics[width=0.5\textwidth]{figures/cache_miss_dist}
-    \caption{The Cache Hit/Miss Latency Distribution of an Intel
-        Xeon-1270 and AMD Epyc 7251. Measured by timing accesses to cached/uncached memory. 
-        Typical cache miss resolution takes 6x longer than a cache hit.}
+    \caption{\textbf{Cache latency}\,---\,%
+        Cumulative distribution function of the cache hit and miss latency
+        for an Intel Xeon-1270 and AMD Epyc 7251. If a cache miss is used
+        to force CPU speculation, the CPU must wait at least 300-800 cycles
+        before the speculated branch can be resolved. However, we find the CPU
+        can execute far fewer instructions speculatively, suggesting another
+        limit is at play.}
     \label{fig:cache-miss}
 \end{figure}
 }
@@ -105,13 +111,14 @@
 \begin{figure}[t]
     \centering
         \includegraphics[width=0.4\textwidth]{figures/general_model.pdf}
-    \caption{General model of speculative computation within the Payload 
-        process when triggered. \textit{Speculative Computation} has read-only
-        access to all memory within the process, and returns a result via a
-        cache side channel (via the \texttt{probe\_array}).
+        \caption{\textbf{ExSpectre model}\,---\, %
+        General model of speculative computation within the payload 
+        process when triggered. The \textit{Speculative Gadget} has read-only
+        access to all memory within the process, but can return updates/results via a
+        cache side channel (via access to the \texttt{probe\_array}).
         The process can subsequently make
         \textit{Resultant Computations} based on the value returned from
-        the cache side channel to update the state of the process. }
+        the cache side channel to update the state of the \textit{Real World} process.}
     \label{fig:general_model}
 \end{figure}
 }
@@ -121,12 +128,12 @@
 \begin{figure}[t]
     \centering
         \includegraphics[width=0.5\textwidth]{figures/Speculative_bandwidth}
-    \caption{Speculative Bandwidth---Using the speculative primitive 1KB of data
+        \caption{\textbf{Speculative Bandwidth}\,---\, %
+        Using the speculative primitive, 1KB of data
         can be decrypted and exfiltrated at a speed between 5 and 6 kbps from
         the speculative world with 20 iterations per round for guaranteed
         correctness.  Varying the width of the channel results in competing
-        performance factors -- decreasing the number of loops vs decreased size
-        of the probe space.}
+        performance factors, with an optimal throughput achieved at 8~bits.}
     \label{fig:spec_bandwidth}
 \end{figure}
 }
@@ -137,13 +144,12 @@
 \begin{figure}[b]
     \centering
         \includegraphics[width=0.46\textwidth]{figures/spasm_model.pdf}
-    \caption{This diagram demonstrates the control flow of a \speculake
-        application making use of the decryption gadget and emulation. An
-        encrypted SPASM binary stored in dead code or data accessible to
-        \textit{Speculative Computation} is decrypted  and then returned through
-        the primitive. The \textit{Resultant Computation} performs the SPASM
-        emulation to update the process state before the next instruction is
-        decrypted.}
+        \caption{\textbf{SPASM model}\,---\, %
+        Our SPASM emulator speculatively decrypts intructions, and emulates
+        them in the real world. The \textit{Speculative Computation} decrypts
+        the encrypted SPASM binary, returning the result through the side channel
+        to allow the \textit{Resultant Computation} to update the emulated state
+        (or make system calls) on behalf of the speculative world.}
     \label{fig:spasm_model}
 \end{figure}
 }
