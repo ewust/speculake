@@ -4,10 +4,10 @@
 %Easy answer: custom program that mistrains branch predictor
 
 So far, we have described using a custom program as a trigger, which performs a
-pattern of indirect jumps to mistrain the indirect branch predictor, leading the payload program
-to its speculative entry point. In this
-section, we describe alternative triggers, including using benign programs
-already on the system, and recent Spectre variants.
+pattern of indirect jumps to mistrain the indirect branch predictor, leading the
+payload program to its speculative entry point. In this section, we describe
+alternative triggers, including using benign programs already on the system, and
+recent Spectre variants.
 
 \subsection{Benign Program Triggers}
 \label{subsec:openssl}
@@ -17,12 +17,12 @@ be easy for an analyst to pair up and analyze. As an alternative to trying to
 hide the trigger program from the analyst, ExSpectre can use \emph{benign}
 programs already installed on the system as a trigger.
 
-For example, if a benign application makes a series of indirect jumps---thus training
-the indirect branch predictor---an ExSpectre payload can make similar indirect
-jumps leading up to its speculative entry point. The payload's speculative entry
-point will be determined by the benign application, but may be even more
-difficult for an analyst to discover, as now the ExSpectre trigger could be
-\emph{any} application running concurrently on the system.
+For example, if a benign application makes a series of indirect jumps---thus
+training the indirect branch predictor---an ExSpectre payload can make similar
+indirect jumps leading up to its speculative entry point. The payload's
+speculative entry point will be determined by the benign application, but may be
+even more difficult for an analyst to discover, as now the ExSpectre trigger
+could be \emph{any} application running concurrently on the system.
 
 \paragraph{OpenSSL}
 We experimented using the OpenSSL library as a potential benign trigger
@@ -38,21 +38,22 @@ OpenSSL as a trigger in Section~\ref{subsec:openssl-impl}.
 
 In addition, an adversary could use a benign application (like OpenSSL) to
 \emph{communicate} information covertly to the malicious payload program. For
-example, with OpenSSL, the attacker could have a pair of uncommon cipher
-suites, where using one results in communicating a 1-bit, while use of the other
+example, with OpenSSL, the attacker could have a pair of uncommon cipher suites,
+where using one results in communicating a 1-bit, while use of the other
 communicates a 0-bit to the payload. To receive data, the payload would have to
-do indirect jump patterns corresponding to OpenSSL code for processing both cipher suites, with the
-corresponding speculative entry points shifting in the appropriate bit. Thus, an
-adversary can communicate remotely (over a network) to the payload program
-indirectly via a benign application.
+do indirect jump patterns corresponding to OpenSSL code for processing both
+cipher suites, with the corresponding speculative entry points shifting in the
+appropriate bit. Thus, an adversary can communicate remotely (over a network) to
+the payload program indirectly via a benign application.
 
-We observe that communication could also go in the other direction: from
-the payload program back to the remote adversary, also via the benign application
+We observe that communication could also go in the other direction: from the
+payload program back to the remote adversary, also via the benign application
 intermediary. The payload program could influence the performance of the benign
 application, and the adversary could time responses from the benign application
-to receive covert information from the malicious payload~\cite{netspectre}. This would allow the
-malicious payload to operate \emph{entirely speculatively}, without assistance
-from the real world for keeping state.
+to receive covert information from the malicious
+payload~\cite{schwarz2018netspectre}. This would allow the malicious payload to
+operate \emph{entirely speculatively}, without assistance from the real world
+for keeping state.
 
 %Could also be any program on the system, and potentially remote!
 
@@ -65,19 +66,20 @@ from the real world for keeping state.
 In addition to using separate trigger programs, ExSpectre can also use
 \emph{trigger inputs} to a payload program to initiate its malicious behavior.
 While existing fuzzers and symbolic execution tools can discover traditional
-input triggers, we can leverage other Spectre variants to obfuscate our triggers.
+input triggers, we can leverage other Spectre variants to obfuscate our
+triggers.
 
-To do this, we use Specualtive Buffer Overflows (SBO)~\cite{kiriansky2018speculative}
-to redirect control flow
-to a speculative entry point specified by user input.
-We design a payload program that takes arbitrary user input and performs appropriate
-bounds checks to ensure no traditional control flow violations could be exploited.
-However, using the Spectre~1.1 variant, control flow can still be violated speculatively,
-allowing the adversary to force a speculative entry point based entirely off the
-input provided. This allows the trigger to be an input, potentially even
-provided over a network if the payload program accepts network data. Traditional
-symbolic execution and code coverage fuzzers will be unable to discover this trigger input, as
-they do not model the speculative state of the CPU.
+To do this, we use Specualtive Buffer Overflows
+(SBO)~\cite{kiriansky2018speculative} to redirect control flow to a speculative
+entry point specified by user input. We design a payload program that takes
+arbitrary user input and performs appropriate bounds checks to ensure no
+traditional control flow violations could be exploited. However, using the
+Spectre~1.1 variant, control flow can still be violated speculatively, allowing
+the adversary to force a speculative entry point based entirely off the input
+provided. This allows the trigger to be an input, potentially even provided over
+a network if the payload program accepts network data. Traditional symbolic
+execution and code coverage fuzzers will be unable to discover this trigger
+input, as they do not model the speculative state of the CPU.
 
 %such that evaluated code is safe, however a direct branch can
 %be bypassed speculatively given significant lead up with consistent input 
@@ -101,14 +103,13 @@ nonetheless use this to influence a speculative entry point based on their
 choice of \texttt{y} and \texttt{z}.
 
 
-We make use of this pattern in a willing payload such that user input can intentionally
-mistrain the branch predictor by repeatedly sending valid (in-bounds) values of
-\texttt{y} before sending a value that would overflow the bounds of \texttt{c}.
-The speculative entry point is also chosen by the 
-trigger in this scenario as \texttt{z} contains the address of the 
-speculative entry point, allowing the attacker to create a ROP-style speculative 
-execution path through the payload. We describe our implementation of this in
-Section~\ref{tk}.
+We make use of this pattern in a willing payload such that user input can
+intentionally mistrain the branch predictor by repeatedly sending valid
+(in-bounds) values of \texttt{y} before sending a value that would overflow the
+bounds of \texttt{c}. The speculative entry point is also chosen by the trigger
+in this scenario as \texttt{z} contains the address of the speculative entry
+point, allowing the attacker to create a ROP-style speculative execution path
+through the payload. We describe our implementation of this in Section~\ref{tk}.
 
 
 \subsection{Speculative Store Bypass}
