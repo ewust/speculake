@@ -17,11 +17,11 @@ multiple threads sharing system resources and optimizations done across the
 process isolation boundary which lead to opportunities for ``weird
 machines''~\cite{d2015exploiting}. In particular, previous examples of ``weird
 machines'' include traditional vulnerabilities such as buffer overflows, format
-string exploits and return oriented
-programming~\cite{buffer_overflow, format_string_exploit, shacham2007geometry}.
-Weird machines have also been built using operating system page faults, enabling
-the computation of arithmetic and logic operations without the use of
-traditional instructions~\cite{bangert2013page}.
+string exploits and return oriented programming~\cite{buffer_overflow,
+format_string_exploit, shacham2007geometry}. Weird machines have also been built
+using operating system page faults, enabling the computation of arithmetic and
+logic operations without the use of traditional
+instructions~\cite{bangert2013page}.
 %Additionally, unexpected functionality such as instruction-less computing
 %enables the demonstration of a Turing complete ``weird machine'' by taking
 %advantage of memory translation tables, page-faults, and hardware exception
@@ -44,20 +44,20 @@ code.
 
 \subsection{Covert Channels}
 
-Spectre builds upon prior work on cache side channels, and similarly uses to to
-leak information from
+Spectre builds upon prior work on cache side channels, and similarly uses them
+to leak information from
 processes~\cite{percival2005cache,zhang2012cross,osvik2006cache}. In \speculake,
 we use the branch predictor as a \emph{covert channel}~\cite{lampson1973note}
 between the trigger program and malware payload, allowing the malware's
 (speculative) execution path to be influenced by the trigger.
 
-Previous work has examined how to share information over covert
-channels, such as across virtualized environments on cloud
-systems~\cite{wu2012whispers}, using L1 and L2 cache to share
-information~\cite{percival2005cache}, measuring temperature to create a thermal
-covert channel~\cite{masti2015thermal, bartolini2016capacity}, and taking
-advantage of processor architecture to leak information~\cite{wang2006covert}.
-This includes using the branch predictor itself as a covert
+Previous work has examined how to share information over covert channels, such
+as across virtualized environments on cloud systems~\cite{wu2012whispers}, using
+L1 and L2 cache to share information~\cite{percival2005cache}, measuring
+temperature to create a thermal covert channel~\cite{masti2015thermal,
+bartolini2016capacity}, and taking advantage of processor architecture to leak
+information~\cite{wang2006covert}. This includes using the branch predictor
+itself as a covert
 channel~\cite{evtyushkin2016understanding,evtyushkin2015covert}, which
 \speculake similarly uses.
 
