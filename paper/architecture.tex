@@ -1,18 +1,17 @@
 
 
 \section{Architecture}
+\speculake malware is comprised of two independent pieces: a payload program,
+and a trigger. The payload, and some variants of the trigger, must be  installed
+on the victim's computer(e.g. via trojan, remote exploit, or phishing). A running
+payload performs innocuous measurements while waiting for the trigger to
+become present. 
 
-\speculake malware is comprised of two independent programs: a payload program,
-and a trigger program. Both are installed on the victim's computer (e.g. via
-trojan, remote exploit, or phishing), and must run simultaneously on the same
-physical CPU. We note that the constraint of running programs on the same CPU is
-not a significant burden: \texttt{taskset} can be used to limit a process to a
-core, or if not available, the attacker can simply run multiple copies of the
-trigger or payload program to coerce the OS scheduler to assign a
-payload/trigger pair to the same core. We note that this is not a strict
-requirement for the attacker as most OS schedulers will use round robin
-algorithms to assign tasks to processors---eventually the trigger and payload
-will execute co-resident on a single core. 
+If the trigger is a local program interacting with the payload
+via the indirect branch predictor both programs must run on the same physical CPU. We 
+note that this constraint is not a significant burden as most OS schedulers
+will use round robin algorithms to assign tasks to processors---eventually 
+the trigger and payload will execute co-resident on a single core.
 
 At a high level, the trigger program performs a series of indirect jumps in a
 loop, training the branch predictor to this pattern. Meanwhile, the
@@ -21,6 +20,14 @@ speculate by stalling the resolution of an indirect branch via a slow memory
 read. The CPU will (mistakenly) predict the jump to follow the pattern performed
 by the trigger program, and speculatively execute that destination in the
 payload program.
+
+If the trigger is an input the program parses innocuous entries waiting 
+for a series of crafted entries to train the direct branch predictor 
+before a specially crafted trigger packet. The payload then forces the CPU
+to speculate by stalling a bounds check. A local array is then speculatively 
+overflowed redirecting program execution speculatively 
+to an address within the payload program specified by the specially 
+crafted trigger packet provided by the attacker.
 
 
 \subsection{Threat Model}
@@ -198,17 +205,17 @@ Meanwhile, we can execute up to 18 32-bit \texttt{idiv} instructions, which each
 take 9~$\mu$~ops~\cite{intel-instruction-tables}. These suggest we can execute
 on the order of 175~$\mu$~ops before the speculative world expires.
 
-We found that the processor can identify some operations that have no effect on
-output registers and allows them to use the entire size provided by the ROB, as
-determined in Section~\ref{sssec:ROB}. This includes idiomatic no-ops and zero
-idioms, which have no reliance on register values, for example the instruction
-\texttt{xchg \%rax, \%rax} and \texttt{xor \%rax, \%rax}. However, if an
-instruction is a potential data hazard, it must use an entry in the Physical 
-Register File (PRF) until it reaches the correct stage in the execution pipeline. 
-In this case, the number of instructions could be limited by the PRF
-entries available.
-
-%TODO: is this true? Or better explained by the micro-op story?
+% We found that the processor can identify some operations that have no effect on
+% output registers and allows them to use the entire size provided by the ROB, as
+% determined in Section~\ref{sssec:ROB}. This includes idiomatic no-ops and zero
+% idioms, which have no reliance on register values, for example the instruction
+% \texttt{xchg \%rax, \%rax} and \texttt{xor \%rax, \%rax}. However, if an
+% instruction is a potential data hazard, it must use an entry in the Physical 
+% Register File (PRF) until it reaches the correct stage in the execution pipeline. 
+% In this case, the number of instructions could be limited by the PRF
+% entries available.
+% 
+% %TODO: is this true? Or better explained by the micro-op story?
 
 Most notably instructions that use the extended x86 registers are still valid
 within the speculative context. Specifically, Intel's hardware accelerated

@@ -112,7 +112,7 @@ detect or prevent these types of attacks.
 \paragraph{Anti-Virus Detectors}
 We verified that modern Anti-Virus technologies were unable to detect
 and flag \speculake malware. We used ClamAV, BitDefender and rkhunter, which
-mainly rely on signature- and string-based detection. BitDefender does feature
+mainly rely on signature and string based detection. BitDefender does feature
 support for unpacking or extracting malware, though appears to simply try
 unpacking using several known packers and encoding formats~\cite{BitDefender}.
 Thus, it is not surprising that these tools cannot detect
@@ -233,7 +233,7 @@ program.
 Alternatively an analyst may attempt to identify sections of the program or dead 
 code that will be used to access the probe array and thereby find the speculative 
 gadgets. However, identifying sections of memory that will access the probe 
-array is equivalent to the "Must Alias" or "Points-To Problem" which has been 
+array is equivalent to the ``Must Alias'' or ``Points-To Problem'' which has been 
 proven undecidable without significant 
 restrictions~\cite{ramalingam1994undecidability,landi1992undecidability}.
 
@@ -347,16 +347,16 @@ overcome, and if stronger isolation is needed in the virtual machine context.
 
 
 
-\subsubsection{Alternative Applications}
-We have proposed the \speculake model as a new malware threat, however, this
-model of hidden computation could be applied more broadly. As of now there are
-no ways of debugging speculative computation, meaning that the computation done
-there is effectively isolated and difficult to extract by third-parties, even
-with physical or root access to the machine it operates on. While not a true
-trusted execution environment, it is possible that such an environment could be
-used as a limited trusted environment. This may have potential use in digital
-rights management (DRM), and whitebox cryptography applications.
-
+% \subsubsection{Alternative Applications}
+% We have proposed the \speculake model as a new malware threat, however, this
+% model of hidden computation could be applied more broadly. As of now there are
+% no ways of debugging speculative computation, meaning that the computation done
+% there is effectively isolated and difficult to extract by third-parties, even
+% with physical or root access to the machine it operates on. While not a true
+% trusted execution environment, it is possible that such an environment could be
+% used as a limited trusted environment. This may have potential use in digital
+% rights management (DRM), and whitebox cryptography applications.
+% 
 
 
 
