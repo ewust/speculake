@@ -10,16 +10,16 @@ applications. We have demonstrated the potential of using speculative execution
 in several applications, including a Turing machine, SPASM emulator,
 remotely-triggered payloads, and AES decryption. We have also examined Intel's
 responses to Spectre and Meltdown and noted how their defenses affect \speculake
-and how further variants of Spectre can be adapted to \speculake. Currently
+and how further variants of Spectre can be adapted to \speculake. Current
 analysis techniques for reverse engineering are insufficient to reason about the
 behavior of these programs.
 
-Given the benefits that speculative execution provides to an attacker and the
-ease of such an attack, the feasibility of an \speculake exploit is high and is
-not limited to data side-channels or process isolation violations, as was
-originally thought in the wake of Spectre. The speculative primitive developed
-in this work not only provides a guarded form of computation, but also enables
-cryptographic protection against current analysis and debugging techniques.
+%Given the benefits that speculative execution provides to an attacker and the
+%ease of such an attack, the feasibility of an \speculake exploit is high and is
+%not limited to data side-channels or process isolation violations, as was
+%originally thought in the wake of Spectre. The speculative primitive developed
+%in this work not only provides a guarded form of computation, but also enables
+%cryptographic protection against current analysis and debugging techniques.
 
 Ultimately, silicon and microarchitecture patches will be needed to secure CPUs
 against this kind of malware. Meanwhile, attackers may
