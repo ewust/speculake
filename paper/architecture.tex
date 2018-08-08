@@ -2,16 +2,17 @@
 
 \section{Architecture}
 \speculake malware is comprised of two independent pieces: a payload program,
-and a trigger. The payload, and some variants of the trigger, must be  installed
-on the victim's computer(e.g. via trojan, remote exploit, or phishing). A running
-payload performs innocuous measurements while waiting for the trigger to
-become present. 
+and a trigger. The payload, and some form of the trigger, must be installed
+on the victim's computer (e.g. via trojan, remote exploit, or phishing). A running
+payload performs innocuous operations while waiting for the trigger to
+become present.
 
-If the trigger is a local program interacting with the payload
-via the indirect branch predictor both programs must run on the same physical CPU. We 
-note that this constraint is not a significant burden as most OS schedulers
-will use round robin algorithms to assign tasks to processors---eventually 
-the trigger and payload will execute co-resident on a single core.
+One form the trigger can take is another local program that interacts with the
+payload via the indirect branch predictor. In this case, both programs must run
+on the same physical CPU. We note that this constraint is not a significant
+burden, as programs can either use \texttt{taskset}, or, if not available, run
+multiple instances or wait for the OS scheduler to execute both programs on
+the same core.
 
 At a high level, the trigger program performs a series of indirect jumps in a
 loop, training the branch predictor to this pattern. Meanwhile, the
@@ -21,13 +22,15 @@ read. The CPU will (mistakenly) predict the jump to follow the pattern performed
 by the trigger program, and speculatively execute that destination in the
 payload program.
 
-If the trigger is an input the program parses innocuous entries waiting 
-for a series of crafted entries to train the direct branch predictor 
-before a specially crafted trigger packet. The payload then forces the CPU
-to speculate by stalling a bounds check. A local array is then speculatively 
-overflowed redirecting program execution speculatively 
-to an address within the payload program specified by the specially 
-crafted trigger packet provided by the attacker.
+The trigger can also take the form of a special input to the payload program,
+rather than a separate program.
+In this case, the payload program parses input data and performs innocuous
+operations with it. Once the trigger input is provided, it causes the program to
+\emph{speculatively} overflow a buffer, despite correct bounds checks in the program.
+The speculative buffer overflow (described in
+Section~\ref{subsec:spec-buffer-overflow}) causes the program to speculatively
+execute at an address chosen by the trigger input and controlled by the
+attacker.
 
 
 \subsection{Threat Model}
@@ -63,12 +66,12 @@ this may also be true for existing trigger-based malware, analysts can often
 reverse engineer the trigger out of the malware, for example by observing
 control flow within the malware and using adaptive
 fuzzers~\cite{afl,stephens2016driller} to generate inputs that explore other
-execution paths of the binary. In contrast, \speculake malware's trigger depends
-on behavior in seemingly unrelated binaries, influencing malware behavior
-through channels that are effectively invisible to the analyst. As with typical
+execution paths of the binary. In contrast, \speculake malware's trigger
+influences behavior of the payload program speculatively, making it effectively
+invisible to the analyst. As with typical
 malware, the analyst may attempt to reverse engineer the trigger to reveal the
 malware's behavior, but we will show (in Section~\ref{subsec:nested-spec}) how
-to defeat this type of analysis.
+this type of analysis can be defeated.
 
 \subsection{Indirect jumps}
 
@@ -87,7 +90,9 @@ program, but rather the corresponding trigger program. This means that with only
 the payload program, an analyst does not posses enough information to find the
 speculative entry point.
 
-
+In this section, we will describe the trigger program variant, and discuss how
+input data can be used a speculative trigger in
+Section~\ref{sec:spec-buffer-overflow}.
 
 Indirect branch predictors allow the CPU to predict the destination address of a
 branch based solely off its source address and a brief history of previous
