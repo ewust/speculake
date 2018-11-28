@@ -2,7 +2,6 @@
 
 
 \newcommand{\FigHighLevel}{
-
 \begin{figure}[ht]
     \centering
     % \includegraphics[clip, trim=6cm 13.5cm 3.8cm 5cm, width=0.9\linewidth]{figures/exspectre-high-level.pdf}
@@ -23,6 +22,26 @@
 
 \end{figure}
 }
+
+
+\newcommand{\FigNestedSpec}{
+\begin{figure}[t]
+    \centering
+    % \includegraphics[clip, trim=6cm 13.5cm 3.8cm 5cm, width=0.9\linewidth]{figures/exspectre-high-level.pdf}
+    \includegraphics[width=0.95\linewidth]{figures/ExSpectre_CR_Nested.png}
+    \caption{\textbf{Nested Speculation}\,---\,%
+    Using nested speculation for obfuscated key derivation. The payload uses 
+    a sequence of indirect jumps controlled by the trigger to incrementally 
+    construct a key exclusively in the speculative environment. Without the 
+    trigger an analyst will need to evaluate every ordering of \textbf{all} indirect 
+    jumps to reconstruct the key. While the \textit{decryption gadget} may be trivial 
+    for an analyst to find, this allows for an encrypted blob in the payload 
+    to remain inaccessible in the absence of the trigger. }
+    \label{fig:nested-spec}    
+
+\end{figure}
+}
+
 
 \newcommand{\FigSpectreOne}{
 \begin{figure}[t]
@@ -134,6 +153,7 @@
 \begin{figure}[t]
     \centering
         \includegraphics[width=0.4\textwidth]{figures/general_model.pdf}
+        \includegraphics[width=0.4\textwidth]{figures/ExSpectre_CR_key.png}
         \caption{\textbf{ExSpectre model}\,---\,%
         General model of speculative computation within the payload 
         process when triggered. The \textit{Speculative Gadget} has read-only
@@ -149,7 +169,7 @@
 
 \newcommand{\FigSpecBandwidth}{
 \begin{figure}[t]
-    \centering
+    \centering  
         \includegraphics[width=0.5\textwidth]{figures/Speculative_bandwidth}
         \caption{\textbf{Speculative Bandwidth}\,---\,%
         Using the speculative primitive, 1KB of data
@@ -160,8 +180,6 @@
     \label{fig:spec_bandwidth}
 \end{figure}
 }
-
-
 
 \newcommand{\FigSpasmModel}{
 \begin{figure}[b]
