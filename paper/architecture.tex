@@ -284,13 +284,14 @@ payload will be coresident eventually, allowing progress to continue.
 
 We explore the ability for the CPU to ``double speculate'', where a second
 stalled indirect jump while the CPU is already speculating causes it to predict
-the target and
-speculate a second time. For instance, suppose a payload program truly jumps to
-target A, but the CPU is mistrained by a trigger program that jumps to B, thus
-causing the payload program to speculatively execute at B. At B, suppose there
-is a second indirect jump, perhaps using the same register as the first jump
-(which has still not resolved). If the trigger program jumps to C, the payload
-program may speculate a second time and continue speculative execution at~C.
+the target and speculate a second time. For instance, suppose a payload program
+truly jumps to target A, but the CPU is mistrained by a trigger program that
+jumps to B, thus causing the payload program to speculatively execute at B. At
+B, suppose there is a second indirect jump, perhaps using the same register as
+the first jump (which has still not resolved). If the trigger program jumps to
+C, the payload program may speculate a second time and continue speculative
+execution at~C. Figure~\ref{fig:nested-spec} demonstrates Nested Speculation in
+action.
 
 We find that not all Intel CPUs support nested speculation. For
 example, it appears Haswell chips do not speculate while already speculating,

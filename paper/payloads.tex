@@ -128,8 +128,11 @@ will predict the payload program will also perform the next 10 jumps. If each
 jump has the potential to land in up to 1024 possible locations, this would
 provide in total $1024^{10} = 2^{100}$ possible keys, or 100~bits of security.
 We describe our implementation of nested speculative execution in
-Section~\ref{subsec:impl-aes}, where we achieve 128~bits of security.
 %Section~\ref{subsec:nested-spec}.
+Section~\ref{subsec:impl-aes}, where we achieve 128~bits of security. We note
+that the security gained here is not a result of a single entry point
+remaining secret but rather multiple independent jumps by the (unknown) trigger
+program providing numerous landing points for each jump.
 
 \FigNestedSpec
 
