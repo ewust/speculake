@@ -1,5 +1,4 @@
-%%
-%% Repurposed for NDSS 2014 2013/12/1
+%% Modified for NDSS 2019 by DB on 2018/11/03
 %%
 %% IEEEtran.cls 2011/11/03 version V1.8 based on
 %% IEEEtran.cls 2007/03/05 version V1.7a
@@ -3034,7 +3033,7 @@ between column types.}%
            \def\@evenfoot{\hss\normalfont\scriptsize\raisebox{-1.5\@IEEEnormalsizeunitybaselineskip}[0ex][0ex]{\@IEEEpubid}\hss}%
          \else
            % LB 11/25/2013
-           \def\@oddfoot{\hss\normalfont\footnotesize\raisebox{11ex}[1.5ex]{ \@IEEEpubid}\hss}%
+           \def\@oddfoot{\hss\normalfont\footnotesize\raisebox{6.5ex}[1.5ex]{ \@IEEEpubid}\hss}%
            \def\@evenfoot{\hss\normalfont\footnotesize\raisebox{1.5ex}[1.5ex]{\@IEEEpubid}\hss}%
          \fi
       \fi
