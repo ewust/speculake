@@ -172,11 +172,12 @@
     \centering  
         \includegraphics[width=0.5\textwidth]{figures/Speculative_bandwidth}
         \caption{\textbf{Speculative Bandwidth}\,---\,%
-        Using the speculative primitive, 1KB of data
-        can be decrypted and exfiltrated at a speed between 5 and 6 kbps from
-        the speculative world with 20 iterations per round for guaranteed
-        correctness.  Varying the width of the channel results in competing
-        performance factors, with an optimal throughput achieved at 8~bits.}
+        Using our speculative primitive, 1KB of data
+        can be decrypted and exfiltrated at a speed between 5 and 6~Kbps from
+        the speculative world with 20 redundant iterations per round (to ensure
+        correctness). Increased channel width exfiltrates more data per round,
+        but takes longer to measure the cache side channel. Optimal throughput is
+        achieved with an 8-bit channel.}
     \label{fig:spec_bandwidth}
 \end{figure}
 }
