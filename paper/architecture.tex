@@ -309,11 +309,18 @@ We summarize our findings into a \emph{speculative primitive}, which allows our
 payload program to speculatively (and covertly) perform on the order of 100
 arbitrary instructions while an accompanying trigger program is running, and
 communicate a short (e.g. single byte) result to the real world via a cache side
-channel. These speculative instructions are able to read from any real-world
-memory or registers, but they cannot perform updates or writes directly. To
-update memory, the speculative instructions must communicate to the real world.
-We use a cache side channel to do so, but other side channels compatible with
-Spectre could also be used~\cite{kiriansky2018speculative}.
+channel. These speculative instructions are able to read from any cpu state 
+accessible to the process in the real world including memory and registers, 
+but they cannot perform updates 
+or writes directly. To read memory the \emph{speculative primitive} makes use
+of the ability to bring things into cache. If a load for an uncached memory 
+location is initiated speculatively it will not finish within the speculative 
+window (meaning no value can be exfiltrated to the real world). However, the 
+memory read is not canceled and the value will be available from cache when 
+the processor accesses it speculatively again. To update memory, the speculative 
+instructions must communicate to the real world.  We use a cache side channel 
+to do so, but other side channels compatible with Spectre could also 
+be used~\cite{kiriansky2018speculative}.
 
 We note a performance tradeoff between the size of communication (e.g. 4 bits vs
 8 bits) and the time it takes the real world to recover the result from the side
