@@ -214,3 +214,31 @@
     \label{fig:turing_success}
 \end{figure}
 }
+
+\newcommand{\processorTable}{
+\begin{table}
+    \centering
+    \resizebox{\linewidth}{!}{\begin{tabularx}{\linewidth}{l X X| Y Y Y}
+        Processor & Year\newline
+        released & Micro\newline
+        arch & Nested\newline 
+        Spec? & Num\newline
+        indirect jumps* & Max $\mu$~ops\newline
+        (nop)\\
+        \hline
+        Intel Xeon CPU E3-1270 v6 & 2017 & Skylake & \checkmark & 28 & 220\\
+        Intel Core i5-7200U       & 2016 & Skylake & \checkmark & 26 & 220\\
+        Intel Xeon CPU E3-1276 v3 & 2014 & Haswell &            & ?  & ?  \\
+        AMD EPYC 7251             & 2017 & Ryzen   &            & ?  & ?  \\
+    \end{tabularx}}
+    \caption{\textbf{Processor features}--- We analyzed the capability of
+    \speculake on three Intel and one AMD processor. Both Skylake processors
+    were capable of nested speculation (Section~\ref{sssec:nested-spec}) though
+    the older Haswell processor and the AMD processor were not. We found that
+    the Intel Xeon CPU E3-1270 v6 required 28 identical indirect jumps in the
+    trigger and payload programs to reliably enter the speculative world at the
+    desired address ($> 95\%$) while the Intel Core i5-7200U only required 26
+    jumps.}
+    \label{table:processors}
+\end{table}
+}

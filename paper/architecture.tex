@@ -126,6 +126,7 @@ the trigger program, which determines the speculative entry point for the
 payload. Even though the in-order execution of
 payload program never executes or even reads from this address, the CPU will
 briefly execute instructions there speculatively.
+\processorTable
 
 Eventually, the de-reference of the uncached function pointer in the payload
 program will be resolved, and the CPU will recognize it has incorrectly
