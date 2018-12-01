@@ -172,11 +172,12 @@
     \centering  
         \includegraphics[width=0.5\textwidth]{figures/Speculative_bandwidth}
         \caption{\textbf{Speculative Bandwidth}\,---\,%
-        Using the speculative primitive, 1KB of data
-        can be decrypted and exfiltrated at a speed between 5 and 6 kbps from
-        the speculative world with 20 iterations per round for guaranteed
-        correctness.  Varying the width of the channel results in competing
-        performance factors, with an optimal throughput achieved at 8~bits.}
+        Using our speculative primitive, 1KB of data
+        can be decrypted and exfiltrated at a speed between 5 and 6~Kbps from
+        the speculative world with 20 redundant iterations per round (to ensure
+        correctness). Increased channel width exfiltrates more data per round,
+        but takes longer to measure the cache side channel. Optimal throughput is
+        achieved with an 8-bit channel.}
     \label{fig:spec_bandwidth}
 \end{figure}
 }
@@ -212,4 +213,32 @@
 
     \label{fig:turing_success}
 \end{figure}
+}
+
+\newcommand{\processorTable}{
+\begin{table}
+    \centering
+    \resizebox{\linewidth}{!}{\begin{tabularx}{\linewidth}{l X X| Y Y Y}
+        Processor & Year\newline
+        released & Micro\newline
+        arch & Nested\newline 
+        Spec? & Num\newline
+        indirect jumps* & Max $\mu$~ops\newline
+        (nop)\\
+        \hline
+        Intel Xeon CPU E3-1270 v6 & 2017 & Skylake & \checkmark & 28 & 220\\
+        Intel Core i5-7200U       & 2016 & Skylake & \checkmark & 26 & 220\\
+        Intel Xeon CPU E3-1276 v3 & 2014 & Haswell &            & ?  & ?  \\
+        AMD EPYC 7251             & 2017 & Ryzen   &            & ?  & ?  \\
+    \end{tabularx}}
+    \caption{\textbf{Processor features}--- We analyzed the capability of
+    \speculake on three Intel and one AMD processor. Both Skylake processors
+    were capable of nested speculation (Section~\ref{sssec:nested-spec}) though
+    the older Haswell processor and the AMD processor were not. We found that
+    the Intel Xeon CPU E3-1270 v6 required 28 identical indirect jumps in the
+    trigger and payload programs to reliably enter the speculative world at the
+    desired address ($> 95\%$) while the Intel Core i5-7200U only required 26
+    jumps.}
+    \label{table:processors}
+\end{table}
 }
