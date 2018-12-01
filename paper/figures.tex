@@ -218,10 +218,16 @@
 \newcommand{\processorTable}{
 \begin{table}
     \centering
-    \resizebox{\linewidth}{!}{\begin{tabularx}{\linewidth}{l X X| Y Y Y}
-        Processor & Year\newline
-        released & Micro\newline
-        arch & Nested\newline 
+    % \resizebox{\linewidth}{!}{\begin{tabularx}{\linewidth}{X X X| Y Y Y}
+    \begin{tabularx}{\linewidth}{X b b| Y Y Y}
+        \ \newline
+        \ \newline
+        Processor & \ \newline
+        Year\newline
+        released & \ \newline
+        Micro\newline
+        arch & \ \newline
+        Nested\newline 
         Spec? & Num\newline
         indirect jumps* & Max $\mu$~ops\newline
         (nop)\\
@@ -230,7 +236,8 @@
         Intel Core i5-7200U       & 2016 & Skylake & \checkmark & 26 & 220\\
         Intel Xeon CPU E3-1276 v3 & 2014 & Haswell &            & ?  & ?  \\
         AMD EPYC 7251             & 2017 & Ryzen   &            & ?  & ?  \\
-    \end{tabularx}}
+        \\
+    \end{tabularx}%}
     \caption{\textbf{Processor features}--- We analyzed the capability of
     \speculake on three Intel and one AMD processor. Both Skylake processors
     were capable of nested speculation (Section~\ref{sssec:nested-spec}) though
