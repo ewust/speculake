@@ -12,7 +12,7 @@ simply discards the speculated results and continues executing along the true pa
 
 Previously, it was assumed that speculative execution results remain invisible
 if discarded, as careful CPU design maintains strict separation between
-speculative results and updates to architectual state. However, recent research
+speculative results and updates to architectural state. However, recent research
 has revealed side channels that violate this separation, and researchers have
 demonstrated ways to exfiltrate results from speculative computation. Most
 notably, the Spectre vulnerability allows attackers to leak information from
@@ -86,7 +86,7 @@ limited speculative window where it can perform arbitrary computation, and can
 communicate results back to the ``real world'' via a side
 channel. Figure~\ref{fig:high-level} shows the variant of \speculake that uses a
 trigger program to mis-train the CPU's indirect branch predictor, causing the
-payload program to briefly speculatively execute a hidden target function.
+payload program to briefly execute a hidden target function speculatively.
 
 
 %At a high level, \speculake consists of two parts: a payload program, and a
@@ -127,11 +127,11 @@ payload program to briefly speculatively execute a hidden target function.
 %harder job and must identify both.
 
 
-It is also possible that a trigger program be a
+It is also possible for a trigger program to be a
 \emph{benign} program already on the victim's computer. We
 show this using the OpenSSL library as a benign trigger
 program in Section~\ref{subsec:openssl}, activating a malicious payload program
-when an adversary connects to the infected OpenSSL server using a
+when an adversary repeatedly connects to the infected OpenSSL server using a
 TLS connection with a specific cipher suite.
 
 
@@ -171,7 +171,7 @@ In order to study the potential of \speculake, we implement several example
 payload programs and triggers variants, and evaluate their performance. We find
 that the payload program's speculative
 window is mainly limited by the CPU's reorder buffer, which
-allows us to execute between 100 and 200 instructions speculatively on modern
+allows us to execute up to 200 instructions speculatively on modern
 Intel CPUs. While brief, we show how to perform execution in short steps,
 communicating intermediate results back to the ``real world'' part of the
 payload program. Using this technique, we demonstrate implementing a universal
