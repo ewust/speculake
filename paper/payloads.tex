@@ -96,43 +96,58 @@ Section~\ref{subsec:impl-aes}.
 \subsubsection{Obfuscating keys with nested speculation}
 \label{subsec:nested-spec}
 
-
 As mentioned, even with encryption, an analyst that can locate the
 speculative entry point and discover the decryption key. For instance, the
 analyst could locate the speculative entry point by searching for AES-NI
 instructions in the payload program, ultimately discovering the keys it derives
 and uses.
 
-We can overcome
-this by having the trigger program communicate the decryption key to the payload
-program via the branch predictor. To accomplish this, we use multiple speculative
-entry points, each that derives a
-different decryption key before calling a common decryption routine. Since
-the exact speculative entry point is determined by the trigger program, an
-analyst cannot discover the decryption key directly from the payload program.
+We can overcome this by having the trigger program communicate the decryption
+key to the payload program via the branch predictor. Previous work has analyzed
+the capability of the branch predictor to distribute keys to other
+programs~\cite{evtyushkin2016jump, lee2017inferring, aciiccmez2007predicting}
+and demonstrated that this is not a secure method of key distribution. However,
+the goal of using the branch predictor is not share a single secret via entry
+point but rather to use multiple jumps to construct the decryption key
+speculatively. To accomplish this, we use multiple speculative entry points,
+each that derives a different decryption key before calling a common decryption
+routine. Since the exact speculative entry point is determined by the trigger
+program, an analyst cannot discover the decryption key directly from the payload
+program. 
 
 Still, an analyst could enumerate all potential entry points, testing each one
 until they find one that correctly decrypts the ciphertext. In a 1~MB binary,
 there are (at most) only 1~million entry points, providing just 20~bits of
 security, trivial for an analyst to brute force.
 
-To increase security, we instead use nested speculation to \emph{chain} entry points
-together. Rather than derive
-the key from a single entry point, we have each potential entry point perform
-another indirect jump that the CPU cannot immediately resolve, forcing it to
-speculate while already executing speculatively. The predicted target of that jump
-will also be determined by the trigger program. For example, if the trigger
-program makes 30 training jumps, followed by 10 additional indirect jumps, and
-the payload program performs the same 30 training jumps before a stall, the CPU
-will predict the payload program will also perform the next 10 jumps. If each
-jump has the potential to land in up to 1024 possible locations, this would
-provide in total $1024^{10} = 2^{100}$ possible keys, or 100~bits of security.
-We describe our implementation of nested speculative execution in
-%Section~\ref{subsec:nested-spec}.
-Section~\ref{subsec:impl-aes}, where we achieve 128~bits of security. We note
-that the security gained here is not a result of a single entry point
-remaining secret but rather multiple independent jumps by the (unknown) trigger
-program providing numerous landing points for each jump.
+To increase security, we instead use nested speculation to \emph{chain} entry
+points together. Rather than derive the key from a single entry point, we have
+each potential entry point perform another indirect jump that the CPU cannot
+immediately resolve, forcing it to speculate while already executing
+speculatively. The predicted target of that jump will also be determined by the
+trigger program. Meaning that an analyst that is (somehow, possibly via oracle,
+or attacks similar to~\cite{aciiccmez2007predicting}) able to determine the
+location of first speculative jump is still unable to reconstruct the whole key
+as future speculative jumps are determined solely by the trigger program which
+the analyst does not have access to.
+
+For example, if the trigger program makes 30 training jumps, followed by 10
+additional indirect jumps, and the payload program performs the same 30 training
+jumps before a stall, the CPU will predict the payload program will also perform
+the next 10 jumps. Speculatively the CPU will attempt to follow each of these
+jumps speculatively. 
+
+If each jump has the potential to land in up to 1024 possible locations, this
+would provide in total $1024^{10} = 2^{100}$ possible keys, or 100~bits of
+security. We describe our implementation of nested speculative execution in
+Section~\ref{subsec:impl-aes}, where we achieve 128~bits of security.
+Figure~\ref{fig:nested-spec} demonstrates this in practice, the trigger program
+running a series of training jumps followed by indirect jumps influences the
+payload program to follow the same path. Any analyst attempting to follow this
+path without the trigger program would need to correctly jump to each of the 10
+addresses to load the correct key. The security gained here is not a result of a
+single entry point remaining secret but rather multiple independent jumps by the
+unknown trigger program providing numerous landing points for each jump.
 
 \FigNestedSpec
 
