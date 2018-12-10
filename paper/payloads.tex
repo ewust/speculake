@@ -145,9 +145,10 @@ Figure~\ref{fig:nested-spec} demonstrates this in practice, the trigger program
 running a series of training jumps followed by indirect jumps influences the
 payload program to follow the same path. Any analyst attempting to follow this
 path without the trigger program would need to correctly jump to each of the 10
-addresses to load the correct key. The security gained here is not a result of a
-single entry point remaining secret but rather multiple independent jumps by the
-unknown trigger program providing numerous landing points for each jump.
+addresses to load the correct key. The secret key created here is not a result
+of a single entry point remaining secret (via the branch predictor) but rather
+multiple independent jumps by the unknown trigger program providing numerous
+landing points for each jump.
 
 \FigNestedSpec
 
