@@ -135,7 +135,7 @@ For example, if the trigger program makes 30 training jumps, followed by 10
 additional indirect jumps, and the payload program performs the same 30 training
 jumps before a stall, the CPU will predict the payload program will also perform
 the next 10 jumps. Speculatively the CPU will attempt to follow each of these
-jumps speculatively. 
+jumps. 
 
 If each jump has the potential to land in up to 1024 possible locations, this
 would provide in total $1024^{10} = 2^{100}$ possible keys, or 100~bits of
@@ -148,7 +148,7 @@ path without the trigger program would need to correctly jump to each of the 10
 addresses to load the correct key. The secret key created here is not a result
 of a single entry point remaining secret (via the branch predictor) but rather
 multiple independent jumps by the unknown trigger program providing numerous
-landing points for each jump.
+potential speculative entry points for each jump.
 
 \FigNestedSpec
 

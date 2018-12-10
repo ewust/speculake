@@ -75,8 +75,8 @@ this type of analysis can be defeated.
 
 \subsection{Indirect jumps}
 
-In this subsection, we will describe the trigger program variant, and defer discussion 
-on how input data can be used a speculative trigger to
+In this subsection, we will describe the trigger program variant, and defer
+discussion on how input data can be used as a speculative trigger to
 Section~\ref{subsec:spec-buffer-overflow}.
 
 In \speculake, we cause the CPU to mis-speculate the destination of an indirect
@@ -126,14 +126,16 @@ will (incorrectly) predict the destination to be the same as the one in the
 trigger program, which determines the speculative entry point for the payload.
 Even though the in-order execution of payload program never executes or even
 reads from this address, the CPU will briefly execute instructions there
-speculatively. \processorTable
+speculatively. 
+
+\processorTable
 
 In Table~\ref{table:processors} we analyze the number of necessary training
 indirect jumps various processors require to consistently ($> 95\%$) have the
-payload program enter the speculative world at the location primed in the
-trigger program. We found that 28 indirect jumps was sufficient for our trigger
-program on each of the test processors to reliably ensure the speculative
-execution began at the correct address.
+payload program enter the speculative world at the chosen speculative entry
+point in the trigger program. We found that 28 indirect jumps was sufficient for
+our trigger program on each of the test processors to reliably ensure the
+speculative execution began at the correct speculative entry point.
 
 Eventually, the de-reference of the uncached function pointer in the payload
 program will be resolved, and the CPU will recognize it has incorrectly
@@ -243,7 +245,7 @@ Sections~\ref{subsec:decryption}.
 
 We find that when executing speculatively, the number of instructions completed
 is rarely limited by cache miss duration. While data dependency and ROB size
-have an effect on the number of instructions that can be executed speculative
+have an effect on the number of instructions that can be executed speculatively
 Figure~\ref{fig:spec-capacity-np} demonstrates that the number of $\mu$-ops of
 the instructions is the major limiting factor that define an upper boundary of
 approximately 150 instructions\footnote{While \texttt{nop} is able to execute up

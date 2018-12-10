@@ -239,13 +239,15 @@
         \\
     \end{tabularx}%}
     \caption{\textbf{Processor features}--- We analyzed the capability of
-    \speculake on three Intel and one AMD processor. Both Skylake processors
+    \speculake on one AMD and three Intel processors. Both Skylake processors
     were capable of nested speculation (Section~\ref{sssec:nested-spec}) though
     the older Haswell processor and the AMD processor were not. We found that
     the Intel Xeon CPU E3-1270 v6 required 28 identical indirect jumps in the
     trigger and payload programs to reliably enter the speculative world at the
-    desired address ($> 95\%$) while the Intel Core i5-7200U only required 26
-    jumps.}
+    desired speculative entry point ($> 95\%$) while the Intel Core i5-7200U
+    and Intel Xeon CPU E3-1276 v3 only required 26 jumps. The AMD EPYC 7251
+    processor maintained a 85\% speculative hit rate with as low as 4 and as
+    high as 32 training jumps.}
     \label{table:processors}
 \end{table}
 }
