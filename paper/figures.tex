@@ -29,7 +29,7 @@
 \begin{figure}[t]
     \centering
     % \includegraphics[clip, trim=6cm 13.5cm 3.8cm 5cm, width=0.9\linewidth]{figures/exspectre-high-level.pdf}
-    \includegraphics[width=0.95\linewidth]{figures/ExSpectre_CR_Nested.png}
+    \includegraphics[width=0.95\linewidth]{figures/ExSpectre_CR_Nested.pdf}
     \caption{\textbf{Nested Speculation}\,---\,%
     Using nested speculation for obfuscated key derivation. The payload uses 
     a sequence of indirect jumps controlled by the trigger to incrementally 
@@ -173,7 +173,7 @@
         \includegraphics[width=0.5\textwidth]{figures/Speculative_bandwidth}
         \caption{\textbf{Speculative Bandwidth}\,---\,%
         Using our speculative primitive, 1KB of data
-        can be decrypted and exfiltrated at a speed between 5 and 6~Kbps from
+        can be decrypted and exfiltrated at a speed of 5.38~Kbps from
         the speculative world with 20 redundant iterations per round (to ensure
         correctness). Increased channel width exfiltrates more data per round,
         but takes longer to measure the cache side channel. Optimal throughput is
