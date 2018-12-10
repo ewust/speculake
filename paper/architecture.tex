@@ -213,10 +213,10 @@ number of instructions that can be completed. We find that data dependencies and
 instruction complexity both have an impact on the number of instructions that
 can be executed. Instruction complexity is determined by the number of $\mu$~ops
 that the instruction uses, which appears to be what is tracked in the ROB. For
-instance, on our architecture, the 64-bit \texttt{idiv} instruction takes 59~$\mu$~ops,
-and we can execute up to 3 of them in the speculative world.
-Meanwhile, we can execute up to 18 32-bit \texttt{idiv} instructions, which each
-take 9~$\mu$~ops~\cite{intel-instruction-tables}. These suggest we can execute
+instance, on our Skylake architecture, the 64-bit \texttt{idiv} instruction
+takes 57~$\mu$~ops, and we can execute up to 3 of them in the speculative world.
+Meanwhile, we can execute up to 12 32-bit \texttt{idiv} instructions, which each
+take 10~$\mu$~ops~\cite{intel-instruction-tables}. This suggest we can execute
 on the order of 175~$\mu$~ops before the speculative world expires.
 
 % We found that the processor can identify some operations that have no effect on
