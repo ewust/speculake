@@ -103,52 +103,72 @@ instructions in the payload program, ultimately discovering the keys it derives
 and uses.
 
 We can overcome this by having the trigger program communicate the decryption
-key to the payload program via the branch predictor. Previous work has analyzed
-the capability of the branch predictor to distribute keys to other
-programs~\cite{evtyushkin2016jump, lee2017inferring, aciiccmez2007predicting}
-and demonstrated that this is not a secure method of key distribution. However,
-the goal of using the branch predictor is not share a single secret via entry
-point but rather to use multiple jumps to construct the decryption key
-speculatively. To accomplish this, we use multiple speculative entry points,
-each that derives a different decryption key before calling a common decryption
+key to the payload program via the branch predictor. While prior work has used
+the branch predictor to exfiltrate keys from other sensitive
+processes~\cite{lee2017inferring}, we inject a key into the speculating payload program
+from the external trigger program. To do this, we use
+multiple speculative entry points, each that derives a unique decryption key
+before calling a common decryption
 routine. Since the exact speculative entry point is determined by the trigger
-program, an analyst cannot discover the decryption key directly from the payload
+program, an analyst cannot trivially discover the decryption key directly from the payload
 program. 
 
 Still, an analyst could enumerate all potential entry points, testing each one
 until they find one that correctly decrypts the ciphertext. In a 1~MB binary,
-there are (at most) only 1~million entry points, providing just 20~bits of
-security, trivial for an analyst to brute force.
+there are (at most) only 1~million possible entry points, providing just 20~bits of
+security, trivial for an analyst to brute force. An analyst simply needs to test
+each of the $2^{20}$ entry potential entry points to discover the correct key.
 
-To increase security, we instead use nested speculation to \emph{chain} entry
+To increase security,
+we instead use nested speculation to \emph{chain} entry
 points together. Rather than derive the key from a single entry point, we have
 each potential entry point perform another indirect jump that the CPU cannot
 immediately resolve, forcing it to speculate while already executing
-speculatively. The predicted target of that jump will also be determined by the
-trigger program. Meaning that an analyst that is (somehow, possibly via oracle,
-or attacks similar to~\cite{aciiccmez2007predicting}) able to determine the
-location of first speculative jump is still unable to reconstruct the whole key
-as future speculative jumps are determined solely by the trigger program which
-the analyst does not have access to.
+speculatively. In other words, in the speculative world, we make an
+indirect jump that depends on a cache-evicted variable, prompting the CPU to double-speculate.
+The predicted target of that jump will also be driven by the
+trigger program's (mis)training of the indirect branch predictor.
+On CPUs that support double (or arbitrarily nested)
+speculation, we can repeat this process, with each new subsequent entry point
+determined by the trigger program. At each entry point, we shift in additional
+bits to a register as the AES key. Without the trigger program, an analyst
+cannot determine the path the payload program will take speculatively.
 
-For example, if the trigger program makes 30 training jumps, followed by 10
+%Meaning that an analyst that is (somehow, possibly via oracle,
+%or attacks similar to~\cite{aciiccmez2007predicting}) able to determine the
+%location of first speculative jump is still unable to reconstruct the whole key
+%as future speculative jumps are determined solely by the trigger program which
+%the analyst does not have access to.
+%
+
+As an illustrating example,
+imagine a trigger program makes 30 training jumps, followed by 10
 additional indirect jumps, and the payload program performs the same 30 training
-jumps before a stall, the CPU will predict the payload program will also perform
-the next 10 jumps. Speculatively the CPU will attempt to follow each of these
-jumps. 
+jumps before a stall. At this point,
+the CPU will predict the payload program will also perform
+the next 10 jumps, speculatively following the pattern of the trigger program.
 
-If each jump has the potential to land in up to 1024 possible locations, this
-would provide in total $1024^{10} = 2^{100}$ possible keys, or 100~bits of
-security. We describe our implementation of nested speculative execution in
-Section~\ref{subsec:impl-aes}, where we achieve 128~bits of security.
+
+If each nested speculative jump has the potential to land in 4096 ($2^{12}$ possible locations,
+each
+entry point can shift in 12-bits to the key, for a total of 120-bits over the
+10 jumps before calling the common decryption routine. A key constructed in this
+way would be infeasible
+for an analyst to brute force, as the payload program yields no information
+about which of the potential $2^{120}$ keys will be derived.
+
+We describe our implementation of nested speculative execution in
+Section~\ref{subsec:impl-aes}, where we speculatively derive a 128~bit AES key.
 Figure~\ref{fig:nested-spec} demonstrates this in practice, the trigger program
 running a series of training jumps followed by indirect jumps influences the
-payload program to follow the same path. Any analyst attempting to follow this
-path without the trigger program would need to correctly jump to each of the 10
-addresses to load the correct key. The secret key created here is not a result
-of a single entry point remaining secret (via the branch predictor) but rather
-multiple independent jumps by the unknown trigger program providing numerous
-potential speculative entry points for each jump.
+payload program to follow the same path.
+% Could cut? Redundant with above now
+%An analyst attempting to follow this
+%path without the trigger program would need to correctly jump to each of the 10
+%addresses to load the correct key. The secret key created here is not a result
+%of a single entry point remaining secret (via the branch predictor) but rather
+%multiple independent jumps by the unknown trigger program providing numerous
+%potential speculative entry points for each jump.
 
 \FigNestedSpec
 

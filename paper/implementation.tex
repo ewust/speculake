@@ -109,15 +109,14 @@ channel requires reading $2^{12}$ locations. On the other hand, there is a fixed
 overhead per speculative iteration that favors increased channel width to
 maximize bandwidth. As shown in Figure~\ref{fig:spec_bandwidth}, 8 bits is the
 optimal side channel width, allowing us to decrypt over 5,000 bits per second
-(625 Bytes/sec). We have managed to improve upon this number by loading multiple 
-values into the probe array in any given round. For example, a probe array 
-of size 1024 can be split into four sections of 256 bits, each with their 
-own index -- providing a 32 bit channel overall. The drawback of this 
-method is that loading these values into the probe array is a non-zero 
-exspense on the limited $\mu$~operation budget. We have successfully 
-implemented a decrypt gadget that passes 32 bits per round using four indices 
-into a 1024 bit probe array, which is able to decrypt over 11,000 bits per second 
-(1,425 Bytes/sec). 
+(625 Bytes/sec). We note an improvement over this rate by loading multiple
+values into the probe array during speculation. Instead of a single
+probe array of 1024 entries communicating 10-bits, we can split the array into
+four sections of 256 entries each, and signal four times (one per section) during
+speculation. This provides a 32-bit channel overall, while only having to probe
+1024 entries. This method is limited by the limited $\mu$~operation budget,
+however, our implementation using these parameters (four sections of 256
+entries) is able to decrypt over 11~Kbps (1,425 Bytes/sec).
 
 % Iterations: 20
 
