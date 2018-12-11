@@ -44,6 +44,7 @@ code.
 
 \subsection{Covert Channels}
 
+%programs~\cite{evtyushkin2016jump, lee2017inferring, aciiccmez2007predicting}
 Spectre builds upon prior work on cache side channels, and similarly uses them
 to leak information from
 processes~\cite{percival2005cache,zhang2012cross,osvik2006cache}. In \speculake,
@@ -93,12 +94,17 @@ including speculative buffer overflows and speculative store
 bypass~\cite{kiriansky2018speculative,spec-store-bypass}, and has investigated
 additional ways to leak information using branch
 predictors as a side channel~\cite{evtyushkin2018branchscope}.
-Researchers have also leveraged Spectre to demonstrate web-based
+Researchers have also leveraged Spectre and speculative execution more generally
+to demonstrate web-based
 vulnerabilities~\cite{genkin2018drive,schwarz2018netspectre} as well as to leak
-keys and other information from the hardware isolation provided by Intel
-SGX~\cite{spectre_sgx,chen2018sgxpectre,foreshadow}.
+control flow, keys, and other information from the hardware isolation provided by Intel
+SGX~\cite{spectre_sgx,chen2018sgxpectre,foreshadow,lee2017inferring}.
+Spectre has additionally been proposed as a way to thwart taint tracking by using speculative
+execution to copy data between buffers~\cite{necessaryBlog}.
 \speculake likewise takes advantage of speculative execution, but with the goal
 of hiding arbitrary computation from reverse engineering, rather than extracting
-secrets from vulnerable programs. \speculake additionally benefits from
+secrets from vulnerable programs. \speculake also benefits from
 new Spectre variants: as we showed, speculative buffer overflows (``Spectre~1.1'')
 can be used as an alternative trigger for malware.
+
+
