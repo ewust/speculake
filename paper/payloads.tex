@@ -105,7 +105,7 @@ and uses.
 We can overcome this by having the trigger program communicate the decryption
 key to the payload program via the branch predictor. While prior work has used
 the branch predictor to exfiltrate keys from other sensitive
-processes~\cite{lee2017inferring}, we inject a key into the speculating payload program
+processes~\cite{aciiccmez2007predicting}, we inject a key into the speculating payload program
 from the external trigger program. To do this, we use
 multiple speculative entry points, each that derives a unique decryption key
 before calling a common decryption
