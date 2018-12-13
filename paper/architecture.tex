@@ -242,21 +242,21 @@ full block using simple AES modes (e.g. AES-CTR). We investigate the use of AES
 instructions in the speculative environment further in
 Sections~\ref{subsec:decryption}.
 
-\medskip
 
 We find that when executing speculatively, the number of instructions completed
-has a soft limit and a hard limit. The duration in cycles applies a soft limit, 
+has a soft limit and a hard limit. The duration in cycles applies a soft limit,
 as shown in Figure~\ref{fig:spec-capacity-np} with the \texttt{idiv (r32)},
 \texttt{mul}, and \texttt{aesdec} instructions which see a steep drop in in hit
-fraction, but continue to have a non-zero signal.  With all 
-instructions a hard limit is imposed by the number of CPU micro-operations ($\mu$-ops)
-that compose the individual instruction. Figure~\ref{fig:spec-capacity-np} demonstrates that the number of $\mu$-ops of
-the instructions is the major limiting factor that define an upper boundary of
-approximately 150 instructions\footnote{While \texttt{nop} is able to execute up
-to the full 220 ROB capacity, instructions that do useful work (and/or use
-multiple $\mu$-ops) cannot reach this limit. On top of this data dependency and 
-execution unit availability add noise further complicating the exact number of instructions
-that can be executed speculatively.}
+fraction, but continue to have a non-zero signal.  With all instructions a hard
+limit is imposed by the number of CPU micro-operations ($\mu$-ops) that compose
+the individual instruction. Figure~\ref{fig:spec-capacity-np} demonstrates that
+the number of $\mu$-ops of the instructions is the major limiting factor that
+define an upper boundary of approximately 150 instructions\footnote{While
+\texttt{nop} is able to execute up to the full 220 ROB capacity, instructions
+that do useful work (and/or use multiple $\mu$-ops) cannot reach this limit. On
+top of this data dependency and execution unit availability add noise further
+complicating the exact number of instructions that can be executed
+speculatively.}
 
 
 % TODO: 
