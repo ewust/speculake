@@ -87,19 +87,18 @@
     \caption{\textbf{Speculative limits}\,---\,%
     To find the number of instructions we can execute speculatively we placed a signal gadget
     after an increasing number of instructions and measured the fraction of times the 
-    loaded value was subsequently in cache. However more complex instructions have stricter 
-    constraints applied at two limits that we have identified, cache latency cycle limitation, and 
-    the CPU's reorder buffer~(ROB) size as measured by instruction $\mu$-ops. We find that the
+    loaded value was subsequently in cache. We identify two limitation on the number of instructions
+    accomplishable speculatively -- cache latency, and the CPU's reorder buffer~(ROB) size. We find that the
     hit fraction for instructions with a ratio of cycle latency to $\mu$~ops greater than 1 undergo a
     steep drop to \~0.1 hit fraction before falling definitively to 0. The drop in hit fraction 
     indicates that the duration of the test in cycles is beyond the fist step in cache latency as shown in 
-    Figure~\ref{fig:cache-miss} (approx. 200 cycles). If the instruction sequence does not reach the 
+    Figure~\ref{fig:cache-miss} (approx. 200 cycles). Whether or not the instruction sequence reaches the 
     cycle count limit we see only a sharp drop in hit fraction to 0 indicating the limiting factor 
-    is ROB size.  For example, the \texttt{idiv (r32)} instruction we identify 18 as the maximum number of 
-    instruction limited by ROB (with ~15 instructions for signal gadget), with a soft limit of 
-    12 instructions enforced by the cache latency cycle limitation. 
-    We measure the ROB size by timing two cache accesses with a variable number of 
-    instructions between them and note that this aligns with the measured maximum \texttt{nop} instrustions.
+    is ROB size. For example, the \texttt{idiv (r32)} instruction we identify 18 as the maximum number of 
+    instruction limited by ROB (not including ~15 instructions for signal gadget), with a soft limit at 
+    12 instructions enforced by the cache latency. We measure the ROB size by timing two cache 
+    accesses with a variable number of instructions between them and note that this aligns with 
+    the measured maximum \texttt{nop} instrustions.
     }
     \label{fig:spec-capacity-np}
 \end{figure*}

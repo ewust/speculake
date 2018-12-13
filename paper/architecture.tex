@@ -168,15 +168,16 @@ as well as an AMD EPYC 7251. % envy
 
 \subsubsection{Cache Miss Duration}
 When executing instructions speculatively we rely on a memory load of a function
-pointer from uncached memory. Thus, one potential limit on our computation comes
+pointer from uncached memory. Thus, one limit on our computation comes
 in the form of the time it takes for the memory read to return with a result
 (and for the CPU to determine the result was mis-predicted).
 We measured the number of cycles a
 cache miss takes to return by artificially evicting an item from cache and
 timing reads from its address.
 Figure~\ref{fig:cache-miss} shows the CDF of cycles taken. In the typical case,
-an evicted item takes approximately 300 clock cycles to load from the Level 3 cache (L3), which
-would allow a limit of roughly 200 speculative instructions to be
+an evicted item takes approximately 200 clock cycles to load from the Level 3 cache (L3), which
+would allow a limit of roughly 200 speculative instructions depending on
+specific cycles per instruction (CPI), to be
 executed during that time. We note that when an item is not in L3, it takes
 considerably longer to load, in theory allowing for thousands of speculative
 instructions in a significant fraction of runs.
@@ -215,7 +216,7 @@ can be executed. Instruction complexity is determined by the number of $\mu$~ops
 that the instruction uses, which appears to be what is tracked in the ROB. For
 instance, on our Skylake architecture, the 64-bit \texttt{idiv} instruction
 takes 57~$\mu$~ops, and we can execute up to 3 of them in the speculative world.
-Meanwhile, we can execute up to 12 32-bit \texttt{idiv} instructions, which each
+Meanwhile, we can execute up to 18 32-bit \texttt{idiv} instructions, which each
 take 10~$\mu$~ops~\cite{intel-instruction-tables}. This suggest we can execute
 on the order of 175~$\mu$~ops before the speculative world expires.
 
@@ -244,13 +245,19 @@ Sections~\ref{subsec:decryption}.
 \medskip
 
 We find that when executing speculatively, the number of instructions completed
-is rarely limited by cache miss duration. While data dependency and ROB size
-have an effect on the number of instructions that can be executed speculatively
-Figure~\ref{fig:spec-capacity-np} demonstrates that the number of $\mu$-ops of
+has a soft limit and a hard limit. The duration in cycles applies a soft limit, 
+as shown in Figure~\ref{fig:spec-capacity-np} with the \texttt{idiv (r32)},
+\texttt{mul}, and \texttt{aesdec} instructions which see a steep drop in in hit
+fraction, but continue to have a non-zero signal.  With all 
+instructions a hard limit is imposed by the number of CPU micro-operations ($\mu$-ops)
+that compose the individual instruction. Figure~\ref{fig:spec-capacity-np} demonstrates that the number of $\mu$-ops of
 the instructions is the major limiting factor that define an upper boundary of
 approximately 150 instructions\footnote{While \texttt{nop} is able to execute up
 to the full 220 ROB capacity, instructions that do useful work (and/or use
-multiple $\mu$ ops) cannot reach this limit}.
+multiple $\mu$-ops) cannot reach this limit. On top of this data dependency and 
+execution unit availability add noise further complicating the exact number of instructions
+that can be executed speculatively.}
+
 
 % TODO: 
 % - Highlist instruction signal variablity (add v mul v aesdec v nop)?
