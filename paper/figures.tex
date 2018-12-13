@@ -220,34 +220,33 @@
     \centering
     % \resizebox{\linewidth}{!}{\begin{tabularx}{\linewidth}{X X X| Y Y Y}
     \begin{tabularx}{\linewidth}{X b b| Y Y Y}
+        \toprule
         \ \newline
+        Processor &
+        %Year\newline
         \ \newline
-        Processor & \ \newline
-        Year\newline
-        released & \ \newline
-        Micro\newline
-        arch & \ \newline
-        Nested\newline 
-        Spec? & Num\newline
-        indirect jumps* & Max $\mu$~ops\newline
+        Released &
+        Micro- %\newline
+        arch. & Nested\newline 
+        Spec. &
+        Indirect jumps & $\mu$~ops\newline
         (nop)\\
         \hline
-        Intel Xeon CPU E3-1270 v6 & 2017 & Skylake & \checkmark & 28 & 220\\
-        Intel Core i5-7200U       & 2016 & Skylake & \checkmark & 26 & 220\\
         Intel Xeon CPU E3-1276 v3 & 2014 & Haswell &            & 26 & 178\\
+        Intel Core i5-7200U       & 2016 & Skylake & \checkmark & 26 & 220\\
+        Intel Xeon CPU E3-1270 v6 & 2017 & Skylake & \checkmark & 28 & 220\\
         AMD EPYC 7251             & 2017 & Ryzen   &            & 4  & 178\\
-        \\
+        \toprule
     \end{tabularx}%}
     \caption{\textbf{Processor features}--- We analyzed the capability of
-    \speculake on one AMD and three Intel processors. Both Skylake processors
-    were capable of nested speculation (Section~\ref{sssec:nested-spec}) though
-    the older Haswell processor and the AMD processor were not. We found that
-    the Intel Xeon CPU E3-1270 v6 required 28 identical indirect jumps in the
-    trigger and payload programs to reliably enter the speculative world at the
-    desired speculative entry point ($> 95\%$) while the Intel Core i5-7200U
-    and Intel Xeon CPU E3-1276 v3 only required 26 jumps. The AMD EPYC 7251
-    processor maintained a 85\% speculative hit rate with as low as 4 and as
-    high as 32 training jumps.}
+    \speculake on three Intel processors and one AMD. Both Skylake processors
+    were capable of nested speculation (Section~\ref{sssec:nested-spec}).
+    Indirect jumps is the number of common training indirect jumps needed
+    in the trigger program to reliably ($ > 95\%$ of the time) coerce the
+    payload program to follow the pattern and jump to the speculative entry
+    point specified in the trigger program. $\mu$~ops is the upper bound
+    of $\mu$~ops that can be performed speculatively.}
+
     \label{table:processors}
 \end{table}
 }
