@@ -13,7 +13,7 @@ program's computation can be shielded from view, such that even a debugger
 following an instruction-level trace of the program cannot tell how its results
 were computed.
 
-We introduce \emph{\speculake}\footnote{Executable Spectre}, which compiles
+We introduce \emph{\speculake}, which compiles
 arbitrary malicious code into a seemingly-benign payload binary. When a separate
 trigger program runs on the same machine, it mistrains the CPU's branch
 predictor, causing the payload program to \emph{speculatively} execute its malicious
