@@ -175,9 +175,9 @@ We measured the number of cycles a
 cache miss takes to return by artificially evicting an item from cache and
 timing reads from its address.
 Figure~\ref{fig:cache-miss} shows the CDF of cycles taken. In the typical case,
-an evicted item takes approximately 200 clock cycles to load from the Level 3 cache (L3), which
-would allow a limit of roughly 200 speculative instructions depending on
-specific cycles per instruction (CPI), to be
+an evicted item takes approximately 300 clock cycles to load from the Level 3 cache (L3), which
+would allow a limit of roughly 300 speculative instructions (depending on
+specific cycles per instruction (CPI)) to be
 executed during that time. We note that when an item is not in L3, it takes
 considerably longer to load, in theory allowing for thousands of speculative
 instructions in a significant fraction of runs.
