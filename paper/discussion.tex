@@ -276,23 +276,23 @@ particular country (e.g. Iran), and another to a particular device globally
 being revealed and executed on the intersection of these two groups.
 
 
-\smallskip
+%\smallskip
 
-Alternatively multiple triggers could be used make individual state changes in
-the payload program, and write in data from a local, or (as described in
-Section~\ref{subsec:openssl}) remote processes. For instance, triggers could be
-used to shift in data or an entire program for emulation.
-%For example, a payload program
-%can check a series of three distinct jump patterns corresponding to three
-%different triggers. If the first trigger is detected the payload shifts in a 1
-%to the state; if the second is detected it shifts in a 0. If the third trigger
-%is detected it discontinues listening to the three triggers and executes the
-%data shifted into the state.
-%This could be a direct form of \speculake using emulation and
-%decryption or more traditional malicious behavior. 
-Using this method a payload program can be distributed without the encrypted
-data section at all, instead having the data written into the process indirectly
-at run-time without ever connecting out to any other resource.
+%Alternatively multiple triggers could be used make individual state changes in
+%the payload program, and write in data from a local, or (as described in
+%Section~\ref{subsec:openssl}) remote processes. For instance, triggers could be
+%used to shift in data or an entire program for emulation.
+%%For example, a payload program
+%%can check a series of three distinct jump patterns corresponding to three
+%%different triggers. If the first trigger is detected the payload shifts in a 1
+%%to the state; if the second is detected it shifts in a 0. If the third trigger
+%%is detected it discontinues listening to the three triggers and executes the
+%%data shifted into the state.
+%%This could be a direct form of \speculake using emulation and
+%%decryption or more traditional malicious behavior. 
+%Using this method a payload program can be distributed without the encrypted
+%data section at all, instead having the data written into the process indirectly
+%at run-time without ever connecting out to any other resource.
 
 %\subsubsection{Benign Triggers}
 %We have demonstrated that a using \allowbreak OpenSSL as a benign trigger allows for
