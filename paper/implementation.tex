@@ -78,7 +78,7 @@ steps at a rate of 1351 steps per second.
 \subsection{AES Decryption}
 \label{subsec:impl-aes}
 The speculative world is able to take advantage of the AES-NI instructions to
-decrypt messages. However, the speculative upper-limit of about 175 $\mu$~ops is
+decrypt messages. However, the speculative upper-limit of about 175 $\mu$-ops is
 not enough to allow us to compute the key expansion, even using the
 \texttt{aeskeygenassist} instructions. To avoid this, we can either preload the
 expanded key schedule into the program (instead of the key), or use a cheaper
@@ -113,9 +113,9 @@ optimal side channel width, allowing us to decrypt over 5,000 bits per second
 values into the probe array during speculation. Instead of a single
 probe array of 1024 entries communicating 10-bits, we can split the array into
 four sections of 256 entries each, and signal four times (one per section) during
-speculation. This provides a 32-bit channel overall, while only having to probe
-1024 entries. This method is limited by the limited $\mu$~operation budget,
-however, our implementation using these parameters (four sections of 256
+speculation. This provides a 32-bit channel overall, while still only having to probe
+1024 entries. This method is capped by the limited $\mu$-operation budget,
+however our implementation using these parameters (four sections of 256
 entries) is able to decrypt over 11~Kbps (1,425 Bytes/sec).
 
 % Iterations: 20
@@ -253,7 +253,7 @@ mimic the same jump pattern in our payload program. Our payload program mimics
 the first 30 indirect jump source/destination pairs, with a final jump going to
 a cache timing function in our payload program. However, due to the prior
 pattern, this last jump is frequently mis-speculated (about 3.5\% of the time),
-and instead goes to the destination corresponding to the 31st jump in OpenSSL,
+and instead goes to the destination corresponding to the 31\textsuperscript{st} jump in OpenSSL,
 which serves as our speculative entry point.
 
 %Our program jumps to the source address of a pair,

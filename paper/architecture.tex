@@ -100,16 +100,16 @@ branch predictors are proprietary, it is possible to reverse engineer parts of
 their behavior, which we do for \speculake.
 
 We observe that Intel CPUs consider three types of x86\_64 indirect branches:
-\texttt{retq}, \texttt{callq *\%rax}, and \texttt{jmpq *\%rax}\footnote{other
+\texttt{retq}, \texttt{callq~*\%rax}, and \texttt{jmpq~*\%rax}\footnote{other
 general purpose registers besides \texttt{\%rax} can be used as well}. We
 created a simple trigger program that performs a series of indirect branches
-using \texttt{jmpq *\%rax} instructions.
+using \texttt{jmpq~*\%rax} instructions.
 %, as we found that 28 jumps was the
 %minimum needed to reliably train the indirect branch predictor. 
 Between each
 jump, we incremented \texttt{\%rax} accordingly to continue on to the next jump.
 After these jumps, we load a function pointer into \texttt{\%rax} and do a
-final indirect branch using \texttt{callq *\%rax}. In our trigger, we perform
+final indirect branch using \texttt{callq~*\%rax}. In our trigger, we perform
 these jumps repeatedly in a loop.
 
 
@@ -212,13 +212,13 @@ branch was resolved.
 We also tested whether instruction complexity or data dependencies impact the
 number of instructions that can be completed. We find that data dependencies and
 instruction complexity both have an impact on the number of instructions that
-can be executed. Instruction complexity is determined by the number of $\mu$~ops
+can be executed. Instruction complexity is determined by the number of $\mu$-ops
 that the instruction uses, which appears to be what is tracked in the ROB. For
 instance, on our Skylake architecture, the 64-bit \texttt{idiv} instruction
-takes 57~$\mu$~ops, and we can execute up to 3 of them in the speculative world.
+takes 57~$\mu$-ops, and we can execute up to 3 of them in the speculative world.
 Meanwhile, we can execute up to 18 32-bit \texttt{idiv} instructions, which each
-take 10~$\mu$~ops~\cite{intel-instruction-tables}. This suggest we can execute
-on the order of 175~$\mu$~ops before the speculative world expires.
+take 10~$\mu$-ops~\cite{intel-instruction-tables}. This suggest we can execute
+on the order of 175~$\mu$-ops before the speculative world expires.
 
 % We found that the processor can identify some operations that have no effect on
 % output registers and allows them to use the entire size provided by the ROB, as
